@@ -13,10 +13,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        // Sync legacy global flag (used elsewhere in the project)
+        isLoggedIn = UserDefaults.standard.bool(forKey: AppDefaultsKeys.isLoggedIn)
+        
+        let window = UIWindow(windowScene: windowScene)
+        let route = AppRouter.currentRoute()
+        let root = AppRouter.makeRootViewController(for: route)
+        AppRouter.setRootViewController(window: window, root: root, animated: false)
+        self.window = window
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -46,7 +52,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
-
 }
-

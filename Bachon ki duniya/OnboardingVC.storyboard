@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y6W-OH-hqX">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="Kiddosy Regular.otf">
+            <string>KiddosyFree-Regular</string>
+        </array>
+    </customFonts>
+    <scenes>
+        <!--On Boarding View Controller-->
+        <scene sceneID="s0d-6b-0kx">
+            <objects>
+                <viewController storyboardIdentifier="OnBoardingViewController" id="Y6W-OH-hqX" customClass="OnBoardingViewController" customModule="Bachon_ki_duniya" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="5EZ-qb-Rvc">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="C8s-Rz-mCd">
+                                <rect key="frame" x="22" y="746" width="349" height="60"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SignInBtn" translatesAutoresizingMaskIntoConstraints="NO" id="wAb-T8-uca">
+                                        <rect key="frame" x="0.0" y="5" width="349" height="50"/>
+                                    </imageView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="950-Vh-wLx"/>
+                                    <constraint firstAttribute="trailing" secondItem="wAb-T8-uca" secondAttribute="trailing" id="QVG-ir-ipA"/>
+                                    <constraint firstAttribute="bottom" secondItem="wAb-T8-uca" secondAttribute="bottom" constant="5" id="fgo-O8-Gnf"/>
+                                    <constraint firstItem="wAb-T8-uca" firstAttribute="top" secondItem="C8s-Rz-mCd" secondAttribute="top" constant="5" id="rmp-fY-PqR"/>
+                                    <constraint firstItem="wAb-T8-uca" firstAttribute="leading" secondItem="C8s-Rz-mCd" secondAttribute="leading" id="x3L-yc-4VL"/>
+                                </constraints>
+                            </view>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillProportionally" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="rLT-zG-fvh">
+                                <rect key="frame" x="50" y="168" width="293" height="528"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Image" translatesAutoresizingMaskIntoConstraints="NO" id="zNu-Ut-lRf">
+                                        <rect key="frame" x="0.0" y="0.0" width="293" height="452.33333333333331"/>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Innovative learning Modern Lerner" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c0t-Im-nug">
+                                        <rect key="frame" x="0.0" y="464.33333333333337" width="293" height="36.666666666666686"/>
+                                        <fontDescription key="fontDescription" name="KiddosyFree-Regular" family="Kiddosy Free" pointSize="33"/>
+                                        <color key="textColor" red="0.82745098039215681" green="0.18431372549019609" blue="0.18431372549019609" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="It is a long established fact that a reader wil by the readable content of a page when." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pXV-rt-WPl">
+                                        <rect key="frame" x="0.0" y="513" width="293" height="15"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <color key="textColor" red="0.14509803921568626" green="0.082352941176470587" blue="0.015686274509803921" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
+                        <color key="backgroundColor" name="appBackground"/>
+                        <constraints>
+                            <constraint firstItem="C8s-Rz-mCd" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="22" id="5ig-Wv-Fyq"/>
+                            <constraint firstItem="rLT-zG-fvh" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" constant="50" id="IZD-eT-EFH"/>
+                            <constraint firstItem="C8s-Rz-mCd" firstAttribute="bottom" secondItem="vDu-zF-Fre" secondAttribute="bottom" constant="22" id="ORy-Ni-kse"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="C8s-Rz-mCd" secondAttribute="trailing" constant="22" id="UAz-xd-WQr"/>
+                            <constraint firstItem="rLT-zG-fvh" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="50" id="cmG-W4-IyS"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="rLT-zG-fvh" secondAttribute="trailing" constant="50" id="eIG-2P-VTV"/>
+                            <constraint firstItem="C8s-Rz-mCd" firstAttribute="top" secondItem="rLT-zG-fvh" secondAttribute="bottom" constant="50" id="tJ7-8f-wmv"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="140" y="92"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="Image" width="357" height="446.33334350585938"/>
+        <image name="SignInBtn" width="310.33334350585938" height="50"/>
+        <namedColor name="appBackground">
+            <color red="0.96862745098039216" green="0.94509803921568625" blue="0.89803921568627454" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

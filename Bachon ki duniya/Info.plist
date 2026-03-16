@@ -21,5 +21,13 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Acme-Regular.ttf</string>
+		<string>Kiddosy Regular.otf</string>
+		<string>Comic Kids.ttf</string>
+	</array>
+	<key>UIDesignRequiresCompatibility</key>
+	<true/>
 </dict>
 </plist>
