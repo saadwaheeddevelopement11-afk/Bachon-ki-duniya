@@ -86,10 +86,21 @@
                                                     <constraint firstAttribute="height" constant="60" id="G85-MJ-UkY"/>
                                                 </constraints>
                                             </imageView>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="291-UU-wFe">
+                                                <rect key="frame" x="0.0" y="0.0" width="349" height="80"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <connections>
+                                                    <action selector="getOTPBtn:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="au4-OY-ihX"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstItem="rhQ-4e-kzz" firstAttribute="leading" secondItem="l1q-RJ-gzq" secondAttribute="leading" constant="12" id="1DB-55-s4z"/>
+                                            <constraint firstAttribute="trailing" secondItem="291-UU-wFe" secondAttribute="trailing" id="8Ao-7K-QI8"/>
+                                            <constraint firstAttribute="bottom" secondItem="291-UU-wFe" secondAttribute="bottom" id="DUB-iz-Sw2"/>
+                                            <constraint firstItem="291-UU-wFe" firstAttribute="leading" secondItem="l1q-RJ-gzq" secondAttribute="leading" id="XI7-aj-7wQ"/>
+                                            <constraint firstItem="291-UU-wFe" firstAttribute="top" secondItem="l1q-RJ-gzq" secondAttribute="top" id="Yiu-Jt-trC"/>
                                             <constraint firstAttribute="trailing" secondItem="rhQ-4e-kzz" secondAttribute="trailing" constant="12" id="gZk-Nb-Mgb"/>
                                             <constraint firstAttribute="height" constant="80" id="mXF-IU-HMH"/>
                                             <constraint firstItem="rhQ-4e-kzz" firstAttribute="centerY" secondItem="l1q-RJ-gzq" secondAttribute="centerY" id="vAU-NJ-Zfk"/>
@@ -174,13 +185,24 @@
                                                     <constraint firstAttribute="height" constant="60" id="stv-Ah-BTO"/>
                                                 </constraints>
                                             </imageView>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DLj-ve-Qf5">
+                                                <rect key="frame" x="0.0" y="0.0" width="349" height="80"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <connections>
+                                                    <action selector="continueBtn:" destination="Odc-Rn-ijd" eventType="touchUpInside" id="K2j-Xs-6oI"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
+                                            <constraint firstItem="DLj-ve-Qf5" firstAttribute="leading" secondItem="Ker-kE-gbZ" secondAttribute="leading" id="0iU-S1-JW2"/>
                                             <constraint firstAttribute="trailing" secondItem="nM8-By-pne" secondAttribute="trailing" constant="12" id="1Ud-U5-I1q"/>
+                                            <constraint firstAttribute="trailing" secondItem="DLj-ve-Qf5" secondAttribute="trailing" id="ZWr-2M-9bi"/>
                                             <constraint firstItem="nM8-By-pne" firstAttribute="centerY" secondItem="Ker-kE-gbZ" secondAttribute="centerY" id="Zm8-Py-CGb"/>
                                             <constraint firstItem="nM8-By-pne" firstAttribute="leading" secondItem="Ker-kE-gbZ" secondAttribute="leading" constant="12" id="o8K-Pv-dKa"/>
                                             <constraint firstAttribute="height" constant="80" id="qZ2-lz-DPd"/>
+                                            <constraint firstAttribute="bottom" secondItem="DLj-ve-Qf5" secondAttribute="bottom" id="quA-uu-gOb"/>
+                                            <constraint firstItem="DLj-ve-Qf5" firstAttribute="top" secondItem="Ker-kE-gbZ" secondAttribute="top" id="vcb-gW-er3"/>
                                         </constraints>
                                     </view>
                                 </subviews>

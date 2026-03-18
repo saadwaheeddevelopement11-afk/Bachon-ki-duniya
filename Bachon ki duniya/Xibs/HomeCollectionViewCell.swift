@@ -13,30 +13,41 @@ class HomeCollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var imageView: UIImageView!
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        loadContentViewFromNib()
+    // Remove the manual nib loading - it's causing the crash
+    // The XIB loading is handled by the collection view registration
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        setupCell()
     }
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        loadContentViewFromNib()
-    }
-    
-    private func loadContentViewFromNib() {
-        let nib = UINib(nibName: "HomeCollectionViewCell", bundle: nil)
-        guard let view = nib.instantiate(withOwner: self, options: nil).first as? UIView else { return }
-        view.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(view)
-        NSLayoutConstraint.activate([
-            view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            view.topAnchor.constraint(equalTo: contentView.topAnchor),
-            view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-        ])
+    private func setupCell() {
+        // Ensure imageView content mode is set correctly
+//        imageView?.contentMode = .scaleAspectFill
+        imageView?.clipsToBounds = true
+        
+        // Optional: Add a subtle shadow to the cell
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOpacity = 0.1
+        self.layer.shadowRadius = 4
+        self.layer.shadowOffset = CGSize(width: 0, height: 2)
+        self.layer.masksToBounds = false
+        self.backgroundColor = .clear
     }
     
     func configure(with imageName: String) {
         imageView?.image = UIImage(named: imageName)
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // Update shadow path for better performance
+        let shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: 0)
+        self.layer.shadowPath = shadowPath.cgPath
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageView?.image = nil
     }
 }

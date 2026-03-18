@@ -26,6 +26,9 @@
 		<string>Acme-Regular.ttf</string>
 		<string>Kiddosy Regular.otf</string>
 		<string>Comic Kids.ttf</string>
+		<string>Poppins-Bold.ttf</string>
+		<string>Poppins-Medium.ttf</string>
+		<string>Poppins-Regular.ttf</string>
 	</array>
 	<key>UIDesignRequiresCompatibility</key>
 	<true/>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="Kiddosy Regular.otf">
+            <string>KiddosyFree-Regular</string>
+        </array>
+        <array key="Poppins-Regular.ttf">
+            <string>Poppins-Regular</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="HomeListingColvCell" id="gTV-IL-0wX" customClass="HomeListingColvCell" customModule="Bachon_ki_duniya" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="390" height="353"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="390" height="353"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ox9-MR-uHV" userLabel="containerView">
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="353"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="9pr-QC-oKz">
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="229.33333333333334"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="rck-aq-L3B">
+                                <rect key="frame" x="6" y="229.33333333333334" width="378" height="119.66666666666666"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumFontSize="13" translatesAutoresizingMaskIntoConstraints="NO" id="xCA-Uw-xOb">
+                                        <rect key="frame" x="0.0" y="0.0" width="378" height="102.66666666666667"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" name="KiddosyFree-Regular" family="Kiddosy Free" pointSize="18"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eZb-KQ-unZ">
+                                        <rect key="frame" x="0.0" y="102.66666666666666" width="378" height="17"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" name="Poppins-Regular" family="Poppins" pointSize="12"/>
+                                        <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="9pr-QC-oKz" firstAttribute="top" secondItem="ox9-MR-uHV" secondAttribute="top" id="42o-0a-fFC"/>
+                            <constraint firstItem="9pr-QC-oKz" firstAttribute="height" secondItem="ox9-MR-uHV" secondAttribute="height" multiplier="0.65" id="8Br-4B-1IC"/>
+                            <constraint firstItem="9pr-QC-oKz" firstAttribute="leading" secondItem="ox9-MR-uHV" secondAttribute="leading" id="CXD-qm-yaP"/>
+                            <constraint firstAttribute="trailing" secondItem="9pr-QC-oKz" secondAttribute="trailing" id="Iz4-zh-Rx9"/>
+                            <constraint firstItem="rck-aq-L3B" firstAttribute="top" secondItem="9pr-QC-oKz" secondAttribute="bottom" id="KLA-3s-gl7"/>
+                            <constraint firstItem="rck-aq-L3B" firstAttribute="leading" secondItem="ox9-MR-uHV" secondAttribute="leading" constant="6" id="XHK-kE-7iq"/>
+                            <constraint firstAttribute="bottom" secondItem="rck-aq-L3B" secondAttribute="bottom" constant="4" id="XtB-bv-g3b"/>
+                            <constraint firstAttribute="trailing" secondItem="rck-aq-L3B" secondAttribute="trailing" constant="6" id="ypz-1R-Yw6"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                <integer key="value" value="12"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="ox9-MR-uHV" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="GkC-Eh-63c"/>
+                <constraint firstAttribute="trailing" secondItem="ox9-MR-uHV" secondAttribute="trailing" id="I6k-JI-ZIw"/>
+                <constraint firstAttribute="bottom" secondItem="ox9-MR-uHV" secondAttribute="bottom" id="WoE-bK-jdT"/>
+                <constraint firstItem="ox9-MR-uHV" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="uoP-8R-0Wl"/>
+            </constraints>
+            <size key="customSize" width="390" height="353"/>
+            <connections>
+                <outlet property="bannerImageView" destination="9pr-QC-oKz" id="5vp-Eo-VHP"/>
+                <outlet property="bgView" destination="ox9-MR-uHV" id="i6c-g4-XaD"/>
+                <outlet property="descriptionLbl" destination="eZb-KQ-unZ" id="hRp-bN-RsJ"/>
+                <outlet property="titleLbl" destination="xCA-Uw-xOb" id="WwI-8S-cQa"/>
+            </connections>
+            <point key="canvasLocation" x="340.45801526717554" y="259.50704225352115"/>
+        </collectionViewCell>
+    </objects>
+</document>

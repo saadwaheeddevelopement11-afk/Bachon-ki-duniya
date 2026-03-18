@@ -220,7 +220,7 @@
             </objects>
             <point key="canvasLocation" x="-1854" y="1135"/>
         </scene>
-        <!--Tab Bar Controller-->
+        <!--Main Tab Bar Controller-->
         <scene sceneID="bae-vS-qO5">
             <objects>
                 <tabBarController id="hcb-Li-ie9" customClass="MainTabBarController" customModule="Bachon_ki_duniya" customModuleProvider="target" sceneMemberID="viewController">
