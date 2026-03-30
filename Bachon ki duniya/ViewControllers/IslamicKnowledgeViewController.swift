@@ -12,7 +12,10 @@ class IslamicKnowledgeViewController: UIViewController {
     @IBOutlet weak var tableview: UITableView!
     
     private let items = Array(repeating: "Item", count: 10)
-
+    
+    var categoryId = 0
+    var categoryTitle = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
