@@ -6,8 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1F530AC0A161E04C3AEFA982 /* Pods_Bachon_ki_duniya.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2914F3AA4FFD8C8FADDBC580 /* Pods_Bachon_ki_duniya.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		2914F3AA4FFD8C8FADDBC580 /* Pods_Bachon_ki_duniya.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Bachon_ki_duniya.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5206E40F2F6004E7009E17C3 /* Bachon ki duniya.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bachon ki duniya.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		555B033AF72C5842AFCAC68F /* Pods-Bachon ki duniya.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bachon ki duniya.release.xcconfig"; path = "Target Support Files/Pods-Bachon ki duniya/Pods-Bachon ki duniya.release.xcconfig"; sourceTree = "<group>"; };
+		5961A54864ACA33161A54273 /* Pods-Bachon ki duniya.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bachon ki duniya.debug.xcconfig"; path = "Target Support Files/Pods-Bachon ki duniya/Pods-Bachon ki duniya.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F530AC0A161E04C3AEFA982 /* Pods_Bachon_ki_duniya.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +55,8 @@
 			children = (
 				5206E4112F6004E7009E17C3 /* Bachon ki duniya */,
 				5206E4102F6004E7009E17C3 /* Products */,
+				907A1FF4C0709C55C0A68569 /* Pods */,
+				6DAC32EE36B2181912ACF68A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,6 +68,24 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		6DAC32EE36B2181912ACF68A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2914F3AA4FFD8C8FADDBC580 /* Pods_Bachon_ki_duniya.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		907A1FF4C0709C55C0A68569 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				5961A54864ACA33161A54273 /* Pods-Bachon ki duniya.debug.xcconfig */,
+				555B033AF72C5842AFCAC68F /* Pods-Bachon ki duniya.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -65,9 +93,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5206E4222F6004E9009E17C3 /* Build configuration list for PBXNativeTarget "Bachon ki duniya" */;
 			buildPhases = (
+				5E1C83F5801D0539F0D4EFD1 /* [CP] Check Pods Manifest.lock */,
 				5206E40B2F6004E7009E17C3 /* Sources */,
 				5206E40C2F6004E7009E17C3 /* Frameworks */,
 				5206E40D2F6004E7009E17C3 /* Resources */,
+				6221599BE3A149ECFD232B73 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -77,8 +107,6 @@
 				5206E4112F6004E7009E17C3 /* Bachon ki duniya */,
 			);
 			name = "Bachon ki duniya";
-			packageProductDependencies = (
-			);
 			productName = "Bachon ki duniya";
 			productReference = 5206E40F2F6004E7009E17C3 /* Bachon ki duniya.app */;
 			productType = "com.apple.product-type.application";
@@ -127,6 +155,48 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		5E1C83F5801D0539F0D4EFD1 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Bachon ki duniya-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6221599BE3A149ECFD232B73 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Bachon ki duniya/Pods-Bachon ki duniya-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Bachon ki duniya/Pods-Bachon ki duniya-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Bachon ki duniya/Pods-Bachon ki duniya-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		5206E40B2F6004E7009E17C3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -140,6 +210,7 @@
 /* Begin XCBuildConfiguration section */
 		5206E4232F6004E9009E17C3 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5961A54864ACA33161A54273 /* Pods-Bachon ki duniya.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -172,6 +243,7 @@
 		};
 		5206E4242F6004E9009E17C3 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 555B033AF72C5842AFCAC68F /* Pods-Bachon ki duniya.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

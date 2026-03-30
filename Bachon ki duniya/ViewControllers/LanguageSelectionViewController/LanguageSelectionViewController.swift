@@ -9,36 +9,182 @@ import UIKit
 
 class LanguageSelectionViewController: UIViewController {
     
+    // MARK: - IBOutlets
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var confirmButton: UIButton!
+    @IBOutlet weak var crossButton: UIButton!
+    @IBOutlet weak var containerView: UIView!
     
+    // MARK: - Properties
     private var languages: [Language] = []
     private var isLoading = false
+    private var selectedLanguage: Language?
+    private var originalLanguageCode: String
     
+    // MARK: - Initialization
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        self.originalLanguageCode = LanguageManager.shared.currentLanguageCode
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+    }
+    
+    required init?(coder: NSCoder) {
+        self.originalLanguageCode = LanguageManager.shared.currentLanguageCode
+        super.init(coder: coder)
+    }
+    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
         setupTableView()
+        setupGestures()
         fetchLanguages()
+    }
+    
+    // MARK: - Setup Methods
+    private func setupUI() {
+        // Set initial selected language
+        selectedLanguage = languages.first(where: { $0.languageCode == originalLanguageCode })
+        
+        // Style the confirm button
+        confirmButton.layer.cornerRadius = 8
+        confirmButton.clipsToBounds = true
+        
+        // Style the cross button
+        crossButton.tintColor = .darkGray
+        
+        // Make container view rounded corners
+        containerView.layer.cornerRadius = 12
+        containerView.clipsToBounds = true
     }
     
     private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "LanguageCell")
+        tableView.allowsSelection = true
     }
     
+    private func setupGestures() {
+        // Add tap gesture to dismiss when tapping outside container
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+        
+        // Add cross button action
+        crossButton.addTarget(self, action: #selector(crossButtonTapped), for: .touchUpInside)
+        
+        // Add confirm button action
+        confirmButton.addTarget(self, action: #selector(confirmButtonTapped), for: .touchUpInside)
+    }
+    
+    // MARK: - Actions
+    @objc private func handleOutsideTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: view)
+        if !containerView.frame.contains(location) {
+            handleDismissal()
+        }
+    }
+    
+    @objc private func crossButtonTapped() {
+        handleDismissal()
+    }
+    
+    @objc private func confirmButtonTapped() {
+        changeLanguage()
+    }
+    
+    private func handleDismissal() {
+        // Check if language was changed
+        if let selected = selectedLanguage,
+           selected.languageCode != originalLanguageCode {
+            
+            // Show confirmation alert
+            let alertTitle = LanguageManager.shared.isRTL() ? "تغيير اللغة" : "Change Language"
+            let alertMessage = LanguageManager.shared.isRTL() ?
+                "هل تريد تغيير اللغة إلى \(selected.nativeName)؟" :
+                "Do you want to change the language to \(selected.nativeName)?"
+            
+            let alert = UIAlertController(
+                title: alertTitle,
+                message: alertMessage,
+                preferredStyle: .alert
+            )
+            
+            let changeTitle = LanguageManager.shared.isRTL() ? "تغيير" : "Change"
+            let cancelTitle = LanguageManager.shared.isRTL() ? "إلغاء" : "Cancel"
+            
+            alert.addAction(UIAlertAction(title: changeTitle, style: .default) { [weak self] _ in
+                self?.changeLanguage()
+            })
+            
+            alert.addAction(UIAlertAction(title: cancelTitle, style: .cancel) { [weak self] _ in
+                self?.dismissScreen()
+            })
+            
+            present(alert, animated: true)
+        } else {
+            dismissScreen()
+        }
+    }
+    
+    private func changeLanguage() {
+        guard let selected = selectedLanguage,
+              selected.languageCode != originalLanguageCode else {
+            dismissScreen()
+            return
+        }
+        
+        // Save the selected language
+        LanguageManager.shared.saveLanguage(selected)
+        
+        // Notify to reload home screen
+        NotificationCenter.default.post(name: NSNotification.Name("LanguageChanged"), object: nil)
+        
+        // Show success message before dismissing
+        let successMessage = LanguageManager.shared.isRTL() ?
+            "تم تغيير اللغة إلى \(selected.nativeName)" :
+            "Language changed to \(selected.nativeName)"
+        
+        let alert = UIAlertController(
+            title: LanguageManager.shared.isRTL() ? "نجاح" : "Success",
+            message: successMessage,
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            self?.dismissScreen()
+        })
+        
+        present(alert, animated: true)
+    }
+    
+    private func dismissScreen() {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    // MARK: - API Calls
     private func fetchLanguages() {
         isLoading = true
-        loadingIndicator.startAnimating()
+//        loadingIndicator.startAnimating()
+        confirmButton.isEnabled = false
         
         APIManager.shared.fetchLanguages { [weak self] result in
             DispatchQueue.main.async {
                 self?.isLoading = false
-                self?.loadingIndicator.stopAnimating()
+//                self?.loadingIndicator.stopAnimating()
+                self?.confirmButton.isEnabled = true
                 
                 switch result {
                 case .success(let languages):
                     self?.languages = languages
+                    // Set initial selected language
+                    if let currentLanguage = languages.first(where: { $0.languageCode == self?.originalLanguageCode }) {
+                        self?.selectedLanguage = currentLanguage
+                    } else if let firstLanguage = languages.first {
+                        self?.selectedLanguage = firstLanguage
+                    }
                     self?.tableView.reloadData()
                 case .failure(let error):
                     self?.showError(error)
@@ -56,7 +202,9 @@ class LanguageSelectionViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "Retry", style: .default) { [weak self] _ in
             self?.fetchLanguages()
         })
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
+            self?.dismissScreen()
+        })
         present(alert, animated: true)
     }
 }
@@ -77,8 +225,8 @@ extension LanguageSelectionViewController: UITableViewDataSource {
         cell.detailTextLabel?.text = language.name
         
         // Checkmark for selected language
-        let currentLanguageCode = LanguageManager.shared.currentLanguageCode
-        if language.languageCode == currentLanguageCode {
+        if let selected = selectedLanguage,
+           selected.languageCode == language.languageCode {
             cell.accessoryType = .checkmark
         } else {
             cell.accessoryType = .none
@@ -103,26 +251,12 @@ extension LanguageSelectionViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        let selectedLanguage = languages[indexPath.row]
-        let currentLanguageCode = LanguageManager.shared.currentLanguageCode
+        let selected = languages[indexPath.row]
         
-        // Only reload if language actually changed
-        if selectedLanguage.languageCode != currentLanguageCode {
-            // Save the selected language
-            LanguageManager.shared.saveLanguage(selectedLanguage)
-            
-            // Show confirmation
-            let alert = UIAlertController(
-                title: "Language Changed",
-                message: "The app language has been changed to \(selectedLanguage.nativeName). The content will reload.",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-                // Notify to reload home screen
-                NotificationCenter.default.post(name: NSNotification.Name("LanguageChanged"), object: nil)
-                self?.navigationController?.popViewController(animated: true)
-            })
-            present(alert, animated: true)
-        }
+        // Update selected language
+        selectedLanguage = selected
+        
+        // Reload table to update checkmark positions
+        tableView.reloadData()
     }
 }

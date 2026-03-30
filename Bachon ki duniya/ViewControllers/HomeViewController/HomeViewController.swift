@@ -214,6 +214,12 @@ class HomeViewController: UIViewController {
             }
         }.resume()
     }
+    
+    @IBAction func languageSelectionBtn(_ sender: UIButton) {
+        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LanguageSelectionViewController") as? LanguageSelectionViewController {
+            self.present(vc, animated: true)
+        }
+    }
 }
 
 // MARK: - Image Cache Helper

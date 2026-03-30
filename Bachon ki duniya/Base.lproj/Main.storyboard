@@ -161,7 +161,7 @@
                                                         </constraints>
                                                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                         <connections>
-                                                            <action selector="languageSelectionBtn:" destination="Lnt-C0-y6A" eventType="touchUpInside" id="y2l-k5-pIW"/>
+                                                            <action selector="languageSelectionBtn:" destination="Lnt-C0-y6A" eventType="touchUpInside" id="9ez-LU-r10"/>
                                                         </connections>
                                                     </button>
                                                 </subviews>
@@ -762,6 +762,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="svk-xD-t19">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QlL-uj-m9b">
                                 <rect key="frame" x="0.0" y="352" width="393" height="500"/>
                                 <subviews>
@@ -868,11 +872,18 @@
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="QlL-uj-m9b" secondAttribute="bottom" id="7gc-81-MZ5"/>
+                            <constraint firstItem="l0I-Nw-uBV" firstAttribute="trailing" secondItem="svk-xD-t19" secondAttribute="trailing" id="TVA-6c-MLl"/>
                             <constraint firstItem="l0I-Nw-uBV" firstAttribute="trailing" secondItem="QlL-uj-m9b" secondAttribute="trailing" id="Te0-1V-5LA"/>
                             <constraint firstItem="QlL-uj-m9b" firstAttribute="leading" secondItem="l0I-Nw-uBV" secondAttribute="leading" id="XoH-6O-EK7"/>
+                            <constraint firstItem="svk-xD-t19" firstAttribute="top" secondItem="uh6-lV-eVq" secondAttribute="top" id="fL3-dp-5AY"/>
+                            <constraint firstItem="svk-xD-t19" firstAttribute="leading" secondItem="l0I-Nw-uBV" secondAttribute="leading" id="sjA-4A-6FC"/>
+                            <constraint firstAttribute="bottom" secondItem="svk-xD-t19" secondAttribute="bottom" id="vW7-lq-cd6"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="confirmButton" destination="eKM-2g-KUv" id="ieI-ux-OKW"/>
+                        <outlet property="containerView" destination="svk-xD-t19" id="4hx-hC-Jmq"/>
+                        <outlet property="crossButton" destination="Juq-rF-ff5" id="wl7-wm-LWk"/>
                         <outlet property="tableView" destination="9Hb-ri-EKT" id="0zO-4c-nm2"/>
                     </connections>
                 </viewController>

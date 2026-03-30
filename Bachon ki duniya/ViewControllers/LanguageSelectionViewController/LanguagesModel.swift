@@ -26,9 +26,9 @@ struct Language: Codable {
         case code
         case code3
         case name
-        case nativeName
+        case nativeName = "native_name"
         case direction
-        case isActive
+        case isActive = "is_active"
     }
     
     // Helper computed property to get the language code
