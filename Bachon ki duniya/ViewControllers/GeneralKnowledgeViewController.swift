@@ -9,6 +9,10 @@ import UIKit
 
 class GeneralKnowledgeViewController: UIViewController {
     
+    var categoryId = 0
+    var categoryTitle = ""
+    var hasSubcategories = false
+    
     @IBOutlet weak var tableview: UITableView!
     
     private let items = Array(repeating: "Item", count: 10)

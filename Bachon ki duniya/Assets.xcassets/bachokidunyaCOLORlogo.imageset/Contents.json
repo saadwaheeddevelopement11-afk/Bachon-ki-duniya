@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "bacho ki dunya COLOR logo.png",
+      "filename" : "Object.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "bacho ki dunya COLOR logo@2x.png",
+      "filename" : "Object@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "bacho ki dunya COLOR logo@3x.png",
+      "filename" : "Object@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

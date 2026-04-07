@@ -13,8 +13,9 @@ class IslamicKnowledgeViewController: UIViewController {
     
     private let items = Array(repeating: "Item", count: 10)
     
-    var categoryId = 0
-    var categoryTitle = ""
+    var categoryId: Int = 0
+    var categoryTitle: String = ""
+    var hasSubcategories: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()

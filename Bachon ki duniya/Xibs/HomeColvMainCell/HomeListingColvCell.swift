@@ -13,46 +13,26 @@ class HomeListingColvCell: UICollectionViewCell {
     @IBOutlet weak var titleLbl: UILabel!
     @IBOutlet weak var descriptionLbl: UILabel!
     @IBOutlet weak var bgView: UIView!
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        setupCell()
-    }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        // Update shadow path when bounds change
-        updateShadow()
-    }
-    
-    private func setupCell() {
-        // Make sure bgView has a background color and corner radius
-//        bgView.backgroundColor = .white
-        bgView.layer.cornerRadius = 12
-        bgView.layer.masksToBounds = true // This clips the content but NOT the shadow
+    // Add this method
+    func configureForBanner() {
+        // Configure cell to look like a banner
+        bannerImageView.image = UIImage(named: "banner_placeholder") // Set your banner image
+        titleLbl.text = LanguageManager.shared.isRTL() ? "عرض خاص" : "Special Offer"
+        descriptionLbl.text = LanguageManager.shared.isRTL() ? "اكتشف المزيد" : "Discover More"
         
-        // Configure shadow on the cell itself (not bgView)
-//        self.layer.shadowColor = UIColor.black.cgColor
-//        self.layer.shadowOpacity = 0.1
-//        self.layer.shadowRadius = 8
-//        self.layer.shadowOffset = CGSize(width: 0, height: 2)
-//        self.layer.masksToBounds = false // Important: allows shadow to show
+        // Optional: Style the banner differently
+        contentView.layer.cornerRadius = 12
+        contentView.layer.masksToBounds = true
+        bannerImageView.contentMode = .scaleAspectFill
+        bannerImageView.layer.cornerRadius = 14
         
-        // Add a slight background to the cell to prevent shadow from showing through
-        self.backgroundColor = .clear
-    }
-    
-    private func updateShadow() {
-        // Create a shadow path that matches the bgView's rounded rect
-        // This improves performance and gives a cleaner shadow
-        let shadowRect = bounds.insetBy(dx: 2, dy: 2) // Slight inset to prevent shadow merging
-        let shadowPath = UIBezierPath(roundedRect: shadowRect, cornerRadius: bgView.layer.cornerRadius)
-        self.layer.shadowPath = shadowPath.cgPath
-    }
-    
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        // Reset any image to prevent flickering
-        bannerImageView.image = nil
+        bgView.layer.borderColor = UIColor.black.cgColor//(named: "homeCellborderColor")?.cgColor
+        bgView.layer.borderWidth = 1
+        bgView.backgroundColor = .clear
+        
+        self.contentView.layer.cornerRadius = 12
+        self.contentView.layer.borderWidth = 1
+        self.contentView.layer.borderColor = UIColor(named: "homeCellborderColor")?.cgColor
     }
 }

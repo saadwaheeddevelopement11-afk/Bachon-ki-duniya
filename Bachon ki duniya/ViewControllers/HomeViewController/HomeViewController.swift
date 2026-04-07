@@ -15,7 +15,7 @@ class HomeViewController: UIViewController {
     
     private let itemsPerRow: CGFloat = 2
     private let spacing: CGFloat = 16
-    private let sectionInset: CGFloat = 6
+    private let sectionInset: CGFloat = 16
     
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView?
@@ -38,15 +38,10 @@ class HomeViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         
-        // Register both cell types
+        // Register only one cell type
         collectionView.register(
             UINib(nibName: "HomeListingColvCell", bundle: nil),
             forCellWithReuseIdentifier: "HomeListingColvCell"
-        )
-        
-        collectionView.register(
-            UINib(nibName: "HomeCollectionViewCell", bundle: nil),
-            forCellWithReuseIdentifier: HomeCollectionViewCell.reuseIdentifier
         )
         
         if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
@@ -115,6 +110,8 @@ class HomeViewController: UIViewController {
                 self?.isLoading = false
                 self?.loadingIndicator?.stopAnimating()
                 
+                print(result)
+                
                 switch result {
                 case .success(let categories):
                     self?.processCategories(categories)
@@ -133,22 +130,24 @@ class HomeViewController: UIViewController {
             if let translation = category.getTranslation(for: currentLanguage) {
                 let homeItem = HomeItem(
                     id: category.id,
-                    imageUrl: category.img,
+                    imageUrl: category.img ?? "",
                     title: translation.name,
                     description: translation.description,
                     color: category.color,
-                    order: category.order
+                    order: category.order,
+                    hasSubcategories: category.hasSubcategories  // Pass this information
                 )
                 processedItems.append(homeItem)
             } else if let defaultTranslation = category.getTranslation(for: "en") {
                 // Fallback to English if current language translation not available
                 let homeItem = HomeItem(
                     id: category.id,
-                    imageUrl: category.img,
+                    imageUrl: category.img ?? "",
                     title: defaultTranslation.name,
                     description: defaultTranslation.description,
                     color: category.color,
-                    order: category.order
+                    order: category.order,
+                    hasSubcategories: category.hasSubcategories  // Pass this information
                 )
                 processedItems.append(homeItem)
             }
@@ -156,17 +155,6 @@ class HomeViewController: UIViewController {
         
         // Sort by order
         processedItems.sort(by: { $0.order < $1.order })
-        
-        // Add banner item at the end
-        let bannerItem = HomeItem(
-            id: -1, // Special ID for banner
-            imageUrl: "",
-            title: "",
-            description: "",
-            color: "",
-            order: processedItems.count
-        )
-        processedItems.append(bannerItem)
         
         self.homeItems = processedItems
         collectionView.reloadData()
@@ -194,7 +182,11 @@ class HomeViewController: UIViewController {
     
     // Helper method to load image from URL with caching
     private func loadImage(from urlString: String, into imageView: UIImageView) {
-        guard let url = URL(string: urlString) else { return }
+        guard !urlString.isEmpty, let url = URL(string: urlString) else {
+            // Set a placeholder image if URL is empty
+            imageView.image = UIImage(named: "placeholder")
+            return
+        }
         
         // Simple caching mechanism
         let cacheKey = urlString as NSString
@@ -204,7 +196,12 @@ class HomeViewController: UIViewController {
         }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
-            guard let data = data, error == nil, let image = UIImage(data: data) else { return }
+            guard let data = data, error == nil, let image = UIImage(data: data) else {
+                DispatchQueue.main.async {
+                    imageView.image = UIImage(named: "placeholder")
+                }
+                return
+            }
             
             // Cache the image
             ImageCache.shared.setImage(image, forKey: cacheKey)
@@ -247,62 +244,168 @@ extension HomeViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let item = homeItems[indexPath.item]
-        let isLastItem = indexPath.item == homeItems.count - 1
         
-        if isLastItem {
-            // Banner cell
-            guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: HomeCollectionViewCell.reuseIdentifier,
-                for: indexPath
-            ) as? HomeCollectionViewCell else {
-                return UICollectionViewCell()
-            }
-            
-            cell.configure(with: "Banner")
-            return cell
-        } else {
-            // Regular category cell
-            guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: "HomeListingColvCell",
-                for: indexPath
-            ) as? HomeListingColvCell else {
-                return UICollectionViewCell()
-            }
-            
-            loadImage(from: item.imageUrl, into: cell.bannerImageView)
-            cell.titleLbl.text = item.title
-            cell.descriptionLbl.text = item.description
-            
-            // Handle RTL text alignment
-            if LanguageManager.shared.isRTL() {
-                cell.titleLbl.textAlignment = .right
-                cell.descriptionLbl.textAlignment = .right
-            } else {
-                cell.titleLbl.textAlignment = .left
-                cell.descriptionLbl.textAlignment = .left
-            }
-            
-            return cell
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "HomeListingColvCell",
+            for: indexPath
+        ) as? HomeListingColvCell else {
+            return UICollectionViewCell()
         }
+        
+        // Load image for all cells
+        loadImage(from: item.imageUrl, into: cell.bannerImageView)
+        cell.titleLbl.text = item.title
+        cell.descriptionLbl.text = item.description
+        
+        // Apply background color if available
+//        if !item.color.isEmpty {
+//            cell.contentView.backgroundColor = UIColor(hex: item.color)
+//        }
+        
+        // Handle RTL text alignment
+        if LanguageManager.shared.isRTL() {
+            cell.titleLbl.textAlignment = .right
+            cell.descriptionLbl.textAlignment = .right
+        } else {
+            cell.titleLbl.textAlignment = .left
+            cell.descriptionLbl.textAlignment = .left
+        }
+        
+        return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let item = homeItems[indexPath.item]
-        let isLastItem = indexPath.item == homeItems.count - 1
+        navigateToAppropriateViewController(item: item)
+    }
+
+    private func navigateToAppropriateViewController(item: HomeItem) {
+        // Determine which view controller to push based on category title or ID
         
-        if isLastItem {
-            print("Banner tapped")
-        } else {
-            navigateToCategory(with: item.id, title: item.title)
+        switch item.title {
+        case CategoryType.kidsStories.rawValue:
+            navigateToKidsStories(with: item)
+            
+        case CategoryType.islamicKnowledge.rawValue:
+            navigateToIslamicKnowledge(with: item)
+            
+        case CategoryType.generalKnowledge.rawValue:
+            navigateToGeneralKnowledge(with: item)
+            
+        case CategoryType.kidsShows.rawValue:
+            navigateToKidsShows(with: item)
+            
+        case CategoryType.bedtimeStories.rawValue:
+            navigateToBedtimeStories(with: item)
+            
+        case CategoryType.growWell.rawValue:
+            navigateToGrowWell(with: item)
+            
+        case CategoryType.poems.rawValue:
+            navigateToPoems(with: item)
+            
+        case CategoryType.letsLearn.rawValue:
+            navigateToLetsLearn(with: item)
+            
+        case CategoryType.riddles.rawValue:
+            navigateToRiddles(with: item)
+            
+        default:
+            // Fallback to generic IslamicKnowledgeViewController
+            navigateToGenericCategory(with: item)
         }
     }
-    
-    private func navigateToCategory(with id: Int, title: String) {
-        if let vc = storyboard?.instantiateViewController(withIdentifier: "IslamicKnowledgeViewController") as? IslamicKnowledgeViewController {
-            vc.categoryId = id
-            vc.categoryTitle = title
+
+    // MARK: - Navigation Methods
+    private func navigateToKidsStories(with item: HomeItem) {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
+            vc.categoryId = item.id
+            vc.categoryTitle = item.title
+            vc.hasSubcategories = item.hasSubcategories
             navigationController?.pushViewController(vc, animated: true)
         }
+    }
+
+    private func navigateToIslamicKnowledge(with item: HomeItem) {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "IslamicKnowledgeViewController") as? IslamicKnowledgeViewController {
+            vc.categoryId = item.id
+            vc.categoryTitle = item.title
+            vc.hasSubcategories = item.hasSubcategories
+            navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+
+    private func navigateToGeneralKnowledge(with item: HomeItem) {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "GeneralKnowledgeViewController") as? GeneralKnowledgeViewController {
+            vc.categoryId = item.id
+            vc.categoryTitle = item.title
+            vc.hasSubcategories = item.hasSubcategories
+            navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+
+    private func navigateToKidsShows(with item: HomeItem) {
+//        if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsShowsViewController") as? KidsShowsViewController {
+//            vc.categoryId = item.id
+//            vc.categoryTitle = item.title
+//            vc.hasSubcategories = item.hasSubcategories
+//            navigationController?.pushViewController(vc, animated: true)
+//        }
+    }
+
+    private func navigateToBedtimeStories(with item: HomeItem) {
+//        if let vc = storyboard?.instantiateViewController(withIdentifier: "BedtimeStoriesViewController") as? BedtimeStoriesViewController {
+//            vc.categoryId = item.id
+//            vc.categoryTitle = item.title
+//            vc.hasSubcategories = item.hasSubcategories
+//            navigationController?.pushViewController(vc, animated: true)
+//        }
+    }
+
+    private func navigateToGrowWell(with item: HomeItem) {
+//        if let vc = storyboard?.instantiateViewController(withIdentifier: "GrowWellViewController") as? GrowWellViewController {
+//            vc.categoryId = item.id
+//            vc.categoryTitle = item.title
+//            vc.hasSubcategories = item.hasSubcategories
+//            navigationController?.pushViewController(vc, animated: true)
+//        }
+    }
+
+    private func navigateToPoems(with item: HomeItem) {
+//        if let vc = storyboard?.instantiateViewController(withIdentifier: "PoemsViewController") as? PoemsViewController {
+//            vc.categoryId = item.id
+//            vc.categoryTitle = item.title
+//            vc.hasSubcategories = item.hasSubcategories
+//            navigationController?.pushViewController(vc, animated: true)
+//        }
+    }
+
+    private func navigateToLetsLearn(with item: HomeItem) {
+//        if let vc = storyboard?.instantiateViewController(withIdentifier: "LetsLearnViewController") as? LetsLearnViewController {
+//            vc.categoryId = item.id
+//            vc.categoryTitle = item.title
+//            vc.hasSubcategories = item.hasSubcategories
+//            navigationController?.pushViewController(vc, animated: true)
+//        }
+    }
+
+    private func navigateToRiddles(with item: HomeItem) {
+//        if let vc = storyboard?.instantiateViewController(withIdentifier: "RiddlesViewController") as? RiddlesViewController {
+//            vc.categoryId = item.id
+//            vc.categoryTitle = item.title
+//            vc.hasSubcategories = item.hasSubcategories
+//            navigationController?.pushViewController(vc, animated: true)
+//        }
+    }
+
+    private func navigateToGenericCategory(with item: HomeItem) {
+        // Fallback to generic view controller
+//        if let vc = storyboard?.instantiateViewController(withIdentifier: "IslamicKnowledgeViewController") as? IslamicKnowledgeViewController {
+//            vc.categoryId = item.id
+//            vc.categoryTitle = item.title
+//            vc.hasSubcategories = item.hasSubcategories
+//            navigationController?.pushViewController(vc, animated: true)
+//        }
     }
 }
 
@@ -311,17 +414,39 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let totalWidth = collectionView.bounds.width
-        let isLastItem = indexPath.item == homeItems.count - 1
+        let availableWidth = totalWidth - (sectionInset * 2)
         
-        if isLastItem {
-            let contentWidth = totalWidth - (sectionInset * 2)
-            let bannerHeight: CGFloat = 200
-            return CGSize(width: contentWidth, height: bannerHeight)
+        if indexPath.item == 0 {
+            // First item (banner) takes full width
+            let bannerHeight: CGFloat = 170
+            return CGSize(width: availableWidth, height: bannerHeight)
+        } else {
+            // All other items: 2 per row
+            let itemWidth = (availableWidth - spacing) / itemsPerRow
+            let itemHeight = itemWidth * 1.1 // Aspect ratio for category cells
+            return CGSize(width: itemWidth, height: itemHeight)
         }
-        
-        let availableWidth = (totalWidth - (sectionInset * 2)) - (spacing * (itemsPerRow - 1))
-        let itemWidth = availableWidth / itemsPerRow
-        let itemHeight = itemWidth * 1.35
-        return CGSize(width: itemWidth, height: itemHeight)
     }
 }
+
+// MARK: - UIColor Extension
+extension UIColor {
+    convenience init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(red: CGFloat(r) / 255, green: CGFloat(g) / 255, blue: CGFloat(b) / 255, alpha: CGFloat(a) / 255)
+    }
+}
+
