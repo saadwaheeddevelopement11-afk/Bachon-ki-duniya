@@ -12,12 +12,14 @@ class StoriesViewController: UIViewController {
     var seriesId = 0
     var seriesTitle = "Stories"
     
+    @IBOutlet weak var seriesTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     private var episodes: [StoryEpisode] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
         title = seriesTitle
+        seriesTitleLabel.text = seriesTitle
         setupTableView()
         fetchEpisodes()
     }
@@ -64,6 +66,10 @@ class StoriesViewController: UIViewController {
                 cell.mainImageView.image = image
             }
         }.resume()
+    }
+    
+    @IBAction func backBtn(_ sender: UIButton) {
+        self.navigationController?.popViewController(animated: true)
     }
 }
 

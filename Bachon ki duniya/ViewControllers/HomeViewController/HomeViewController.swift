@@ -327,7 +327,7 @@ extension HomeViewController: UICollectionViewDataSource {
     }
 
     private func navigateToIslamicKnowledge(with item: HomeItem) {
-        if let vc = storyboard?.instantiateViewController(withIdentifier: "IslamicKnowledgeViewController") as? IslamicKnowledgeViewController {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
             vc.categoryId = item.id
             vc.categoryTitle = item.title
             vc.hasSubcategories = item.hasSubcategories
@@ -336,7 +336,7 @@ extension HomeViewController: UICollectionViewDataSource {
     }
 
     private func navigateToGeneralKnowledge(with item: HomeItem) {
-        if let vc = storyboard?.instantiateViewController(withIdentifier: "GeneralKnowledgeViewController") as? GeneralKnowledgeViewController {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
             vc.categoryId = item.id
             vc.categoryTitle = item.title
             vc.hasSubcategories = item.hasSubcategories

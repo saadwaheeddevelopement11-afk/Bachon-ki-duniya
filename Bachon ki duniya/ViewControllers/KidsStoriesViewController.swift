@@ -309,9 +309,9 @@ extension KidsStoriesViewController: UITableViewDelegate {
         return sectionType == .subcategories ? CGFloat.leastNormalMagnitude : 50
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let sectionType = getSectionType(for: indexPath.section)
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {        
         
+        let sectionType = getSectionType(for: indexPath.section)
         switch sectionType {
         case .subcategories:
             return UITableView.automaticDimension
@@ -322,27 +322,12 @@ extension KidsStoriesViewController: UITableViewDelegate {
     
     // MARK: - Navigation Methods
     private func navigateToEpisodes(for subcategory: Subcategory, title: String) {
-        let currentLanguage = LanguageManager.shared.currentLanguageCode
-        let subcategoryName = (subcategory.getTranslation(for: currentLanguage)?.name ??
-                               subcategory.getTranslation(for: "en")?.name ??
-                               title).lowercased()
-        
-        if subcategoryName == "series" {
-            if let seriesVC = storyboard?.instantiateViewController(withIdentifier: "SeriesViewController") as? SeriesViewController {
-                seriesVC.categoryId = subcategory.id
-                seriesVC.categoryTitle = title
-                navigationController?.pushViewController(seriesVC, animated: true)
-            }
-            return
+        if let seriesVC = storyboard?.instantiateViewController(withIdentifier: "SeriesViewController") as? SeriesViewController {
+            // Pass tapped subcategory id as category_id for /series API
+            seriesVC.categoryId = subcategory.id
+            seriesVC.categoryTitle = title
+            navigationController?.pushViewController(seriesVC, animated: true)
         }
-        
-//        // Navigate to episodes list view controller for other subcategories
-//        if let episodesVC = storyboard?.instantiateViewController(withIdentifier: "EpisodesViewController") as? EpisodesViewController {
-//            episodesVC.subcategoryId = subcategory.id
-//            episodesVC.subcategoryTitle = title
-//            episodesVC.categoryId = categoryId
-//            navigationController?.pushViewController(episodesVC, animated: true)
-//        }
     }
     
     private func navigateToEpisodeDetail(_ episode: Episode) {

@@ -288,6 +288,48 @@ extension APIManager {
             }
         }.resume()
     }
+    
+    func searchEpisodes(query: String, completion: @escaping (Result<[SearchEpisode], Error>) -> Void) {
+        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid query"])))
+            return
+        }
+        
+        let urlString = "https://kidskahani.ideationtec.live/search?q=\(encodedQuery)"
+        
+        guard let url = URL(string: urlString) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+        
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                return
+            }
+            
+            do {
+                let response = try JSONDecoder().decode(SearchResponse.self, from: data)
+                if response.status == "success" {
+                    completion(.success(response.data))
+                } else {
+                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "API returned error status"])))
+                }
+            } catch {
+                print("Decoding error: \(error)")
+                completion(.failure(error))
+            }
+        }.resume()
+    }
 }
 
 // Response wrapper for subcategories

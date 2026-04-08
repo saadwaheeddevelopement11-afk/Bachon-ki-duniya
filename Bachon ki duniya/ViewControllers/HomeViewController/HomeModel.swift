@@ -138,7 +138,7 @@ struct StorySeason: Codable {
 struct StoryEpisode: Codable {
     let id: Int
     let episodeNumber: Int
-    let durationSecs: Int
+    let durationSecs: Int?
     let thumbnailURL: String?
     let videoURL: String?
     let videoStatus: String?
@@ -154,6 +154,38 @@ struct StoryEpisode: Codable {
         case videoURL = "video_url"
         case videoStatus = "video_status"
         case isPremium = "is_premium"
+    }
+}
+
+struct SearchResponse: Codable {
+    let status: String
+    let code: String
+    let total: Int
+    let data: [SearchEpisode]
+}
+
+struct SearchEpisode: Codable {
+    let id: Int
+    let episodeNumber: Int?
+    let durationSecs: Int?
+    let thumbnailURL: String?
+    let videoURL: String?
+    let videoStatus: String?
+    let isPremium: Bool?
+    let translations: [Translation]
+    
+    enum CodingKeys: String, CodingKey {
+        case id, translations
+        case episodeNumber = "episode_number"
+        case durationSecs = "duration_secs"
+        case thumbnailURL = "thumbnail_url"
+        case videoURL = "video_url"
+        case videoStatus = "video_status"
+        case isPremium = "is_premium"
+    }
+    
+    func getTranslation(for languageCode: String) -> Translation? {
+        return translations.first(where: { $0.langCode == languageCode })
     }
 }
 

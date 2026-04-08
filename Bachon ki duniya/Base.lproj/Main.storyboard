@@ -20,10 +20,10 @@
         </array>
     </customFonts>
     <scenes>
-        <!--View Controller-->
+        <!--Search View Controller-->
         <scene sceneID="MIv-z2-ymY">
             <objects>
-                <viewController id="pdl-eY-dmx" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SearchViewController" id="pdl-eY-dmx" customClass="SearchViewController" customModule="Bachon_ki_duniya" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="jpp-RG-DH8">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -87,6 +87,10 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="YTR-Z0-sPd"/>
+                    <connections>
+                        <outlet property="searchContView" destination="FbY-aH-yie" id="Uu8-Un-AOY"/>
+                        <outlet property="searchTextfield" destination="ffz-Uw-VN5" id="lrf-wj-hGD"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Jm5-jH-T9g" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -671,20 +675,20 @@
                                                         <rect key="frame" x="184.66666666666663" y="0.0" width="184.33333333333337" height="20"/>
                                                         <subviews>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Privacy Policy" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="R9S-4B-dyM">
-                                                                <rect key="frame" x="0.0" y="0.0" width="63.333333333333336" height="20"/>
+                                                                <rect key="frame" x="0.0" y="0.0" width="65.333333333333329" height="20"/>
                                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="11"/>
                                                                 <color key="textColor" red="0.062745098040000002" green="0.062745098040000002" blue="0.062745098040000002" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hik-tk-Dd9">
-                                                                <rect key="frame" x="68.333333333333343" y="0.0" width="0.0" height="20"/>
+                                                                <rect key="frame" x="70.333333333333343" y="0.0" width="55.333333333333343" height="20"/>
                                                                 <color key="backgroundColor" red="0.14509803921568626" green="0.082352941176470587" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                                 <constraints>
                                                                     <constraint firstAttribute="width" constant="1" id="uOX-2z-eEG"/>
                                                                 </constraints>
                                                             </view>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Contact Us" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="STC-6t-Gib">
-                                                                <rect key="frame" x="73.333333333333343" y="0.0" width="111" height="20"/>
+                                                                <rect key="frame" x="130.66666666666666" y="0.0" width="53.666666666666657" height="20"/>
                                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="11"/>
                                                                 <color key="textColor" red="0.062745098040000002" green="0.062745098040000002" blue="0.062745098040000002" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
                                                                 <nil key="highlightedColor"/>
@@ -1772,6 +1776,9 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="70" height="70"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <connections>
+                                                    <action selector="backBtn:" destination="GHJ-9A-6bk" eventType="touchUpInside" id="NMb-QH-xfc"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1817,6 +1824,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="rwM-Vh-bPd"/>
                     <connections>
+                        <outlet property="seriesTitleLabel" destination="0BX-OP-YlT" id="mha-9d-fCX"/>
                         <outlet property="tableView" destination="KSc-Ha-fvO" id="kWD-LO-Wtr"/>
                     </connections>
                 </viewController>
@@ -1863,6 +1871,9 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="70" height="70"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <connections>
+                                                    <action selector="backBtn:" destination="NOB-6u-vTv" eventType="touchUpInside" id="B6L-IZ-85R"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
