@@ -24,10 +24,10 @@
                 <rect key="frame" x="0.0" y="0.0" width="390" height="353"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
-                    <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ox9-MR-uHV" userLabel="containerView">
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ox9-MR-uHV" userLabel="containerView">
                         <rect key="frame" x="0.0" y="0.0" width="390" height="353"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="9pr-QC-oKz">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="9pr-QC-oKz">
                                 <rect key="frame" x="5" y="5" width="380" height="194"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <userDefinedRuntimeAttributes>
@@ -40,17 +40,20 @@
                                 <rect key="frame" x="0.0" y="199" width="390" height="154"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="rck-aq-L3B">
-                                        <rect key="frame" x="6" y="0.0" width="378" height="150"/>
+                                        <rect key="frame" x="6" y="0.0" width="378" height="148"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumFontSize="13" translatesAutoresizingMaskIntoConstraints="NO" id="xCA-Uw-xOb">
-                                                <rect key="frame" x="0.0" y="0.0" width="378" height="133"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="378" height="30"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="30" id="E9z-EL-i6A"/>
+                                                </constraints>
                                                 <fontDescription key="fontDescription" name="Poppins-Bold" family="Poppins" pointSize="13"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eZb-KQ-unZ">
-                                                <rect key="frame" x="0.0" y="133" width="378" height="17"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eZb-KQ-unZ">
+                                                <rect key="frame" x="0.0" y="30" width="378" height="118"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <fontDescription key="fontDescription" name="Poppins-Regular" family="Poppins" pointSize="12"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
@@ -60,10 +63,10 @@
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </stackView>
                                 </subviews>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="rck-aq-L3B" secondAttribute="trailing" constant="6" id="9vN-C6-lES"/>
-                                    <constraint firstAttribute="bottom" secondItem="rck-aq-L3B" secondAttribute="bottom" constant="4" id="FCj-RE-MfI"/>
+                                    <constraint firstAttribute="bottom" secondItem="rck-aq-L3B" secondAttribute="bottom" constant="6" id="FCj-RE-MfI"/>
                                     <constraint firstItem="rck-aq-L3B" firstAttribute="leading" secondItem="nS4-fS-j84" secondAttribute="leading" constant="6" id="mRe-Rk-GyS"/>
                                     <constraint firstItem="rck-aq-L3B" firstAttribute="top" secondItem="nS4-fS-j84" secondAttribute="top" id="t6E-H4-iOw"/>
                                 </constraints>

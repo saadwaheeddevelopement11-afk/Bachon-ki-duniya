@@ -22,17 +22,11 @@ class HomeListingColvCell: UICollectionViewCell {
         descriptionLbl.text = LanguageManager.shared.isRTL() ? "اكتشف المزيد" : "Discover More"
         
         // Optional: Style the banner differently
-        contentView.layer.cornerRadius = 12
-        contentView.layer.masksToBounds = true
         bannerImageView.contentMode = .scaleAspectFill
         bannerImageView.layer.cornerRadius = 14
         
         bgView.layer.borderColor = UIColor.black.cgColor//(named: "homeCellborderColor")?.cgColor
         bgView.layer.borderWidth = 1
-        bgView.backgroundColor = .clear
-        
-        self.contentView.layer.cornerRadius = 12
-        self.contentView.layer.borderWidth = 1
-        self.contentView.layer.borderColor = UIColor(named: "homeCellborderColor")?.cgColor
+        bgView.backgroundColor = .white
     }
 }

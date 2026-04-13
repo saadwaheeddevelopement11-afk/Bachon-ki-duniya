@@ -7,6 +7,7 @@ target 'Bachon ki duniya' do
   pod 'Wormholy', :configurations => ['Debug']
   pod 'IQKeyboardManagerSwift'
   pod 'Alamofire'
+  pod 'SDWebImage'
 
   # Pods for Bachon ki duniya
 

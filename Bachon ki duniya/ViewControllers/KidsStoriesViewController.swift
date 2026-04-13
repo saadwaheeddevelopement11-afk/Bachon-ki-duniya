@@ -20,6 +20,7 @@ class KidsStoriesViewController: UIViewController {
     private var subcategories: [Subcategory] = []
     private var recentEpisodes: [Episode] = [] // Replace with your actual episode model
     private var isLoading = false
+    private let loadingAnimationKey = "kids.loading.wiggle"
     
     // Section enum
     private enum Section: Int, CaseIterable {
@@ -80,7 +81,8 @@ class KidsStoriesViewController: UIViewController {
     
     private func fetchData() {
         isLoading = true
-        loadingIndicator?.startAnimating()
+        startPlayfulLoadingAnimation()
+        tableView.alpha = 0.7
         // Always fetch subcategories first using categoryId from Home.
         fetchSubcategories()
     }
@@ -115,17 +117,19 @@ class KidsStoriesViewController: UIViewController {
         APIManager.shared.fetchEpisodes(categoryId: categoryId, languageCode: currentLanguage) { [weak self] result in
             DispatchQueue.main.async {
                 self?.isLoading = false
-                self?.loadingIndicator?.stopAnimating()
+                self?.stopPlayfulLoadingAnimation()
                 
                 switch result {
                 case .success(let episodes):
                     self?.recentEpisodes = episodes
                     self?.tableView.reloadData()
+                    self?.animateContentEntrance()
                     
                 case .failure(let error):
                     print("Error fetching episodes: \(error)")
                     // Still reload table to show subcategories if available
                     self?.tableView.reloadData()
+                    self?.animateContentEntrance()
                     if self?.subcategories.isEmpty == true {
                         self?.showError(error)
                     }
@@ -154,6 +158,57 @@ class KidsStoriesViewController: UIViewController {
     
     @IBAction func backButton(_ sender: UIButton) {
         self.navigationController?.popViewController(animated: true)
+    }
+    
+    private func startPlayfulLoadingAnimation() {
+        guard let loadingIndicator else { return }
+        loadingIndicator.startAnimating()
+        
+        UIView.animate(withDuration: 0.35, delay: 0, options: [.autoreverse, .repeat, .allowUserInteraction]) {
+            loadingIndicator.transform = CGAffineTransform(scaleX: 1.18, y: 1.18)
+            loadingIndicator.alpha = 0.8
+        }
+        
+        let wiggle = CAKeyframeAnimation(keyPath: "transform.rotation")
+        wiggle.values = [-0.06, 0.06, -0.04, 0.04, 0]
+        wiggle.duration = 0.8
+        wiggle.repeatCount = .infinity
+        wiggle.isAdditive = true
+        loadingIndicator.layer.add(wiggle, forKey: loadingAnimationKey)
+    }
+    
+    private func stopPlayfulLoadingAnimation() {
+        guard let loadingIndicator else { return }
+        loadingIndicator.layer.removeAnimation(forKey: loadingAnimationKey)
+        loadingIndicator.layer.removeAllAnimations()
+        loadingIndicator.stopAnimating()
+        loadingIndicator.transform = .identity
+        loadingIndicator.alpha = 1
+    }
+    
+    private func animateContentEntrance() {
+        tableView.transform = CGAffineTransform(scaleX: 0.97, y: 0.97)
+        UIView.animate(
+            withDuration: 0.42,
+            delay: 0,
+            usingSpringWithDamping: 0.78,
+            initialSpringVelocity: 0.5,
+            options: [.curveEaseOut]
+        ) { [weak self] in
+            self?.tableView.alpha = 1
+            self?.tableView.transform = .identity
+        }
+    }
+    
+    private func performPlayfulPush(_ viewController: UIViewController) {
+        guard let navigationController else { return }
+        let transition = CATransition()
+        transition.duration = 0.38
+        transition.type = .push
+        transition.subtype = .fromRight
+        transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        navigationController.view.layer.add(transition, forKey: kCATransition)
+        navigationController.pushViewController(viewController, animated: false)
     }
 }
 
@@ -255,6 +310,8 @@ extension KidsStoriesViewController: UITableViewDataSource {
 
 // MARK: - UITableViewDelegate
 extension KidsStoriesViewController: UITableViewDelegate {
+    private var subcategoryCellSpacing: CGFloat { 12 }
+    private var subcategoryItemHeight: CGFloat { 190 }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
@@ -314,10 +371,21 @@ extension KidsStoriesViewController: UITableViewDelegate {
         let sectionType = getSectionType(for: indexPath.section)
         switch sectionType {
         case .subcategories:
-            return UITableView.automaticDimension
+            return subcategoryItemHeight + subcategoryCellSpacing
         case .recentEpisodes:
             return 120 // Fixed height for episodes
         }
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let sectionType = getSectionType(for: indexPath.section)
+        guard sectionType == .subcategories else {
+            cell.contentView.frame = cell.bounds
+            return
+        }
+
+        let verticalInset = subcategoryCellSpacing / 2
+        cell.contentView.frame = cell.bounds.inset(by: UIEdgeInsets(top: verticalInset, left: 0, bottom: verticalInset, right: 0))
     }
     
     // MARK: - Navigation Methods
@@ -326,7 +394,7 @@ extension KidsStoriesViewController: UITableViewDelegate {
             // Pass tapped subcategory id as category_id for /series API
             seriesVC.categoryId = subcategory.id
             seriesVC.categoryTitle = title
-            navigationController?.pushViewController(seriesVC, animated: true)
+            performPlayfulPush(seriesVC)
         }
     }
     
@@ -362,57 +430,3 @@ extension KidsStoriesViewController: UITableViewDelegate {
         }.resume()
     }
 }
-
-
-//import UIKit
-//
-//class KidsStoriesViewController: UIViewController {
-//    
-//    var categoryId = 0
-//    var categoryTitle = ""
-//    var hasSubcategories = false
-//    
-//    @IBOutlet weak var tableview: UITableView!
-//    
-//    // Temporary dummy data so the table shows some rows
-//    private let stories = Array(repeating: "Story", count: 10)
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        
-//        setupTableView()
-//    }
-//    
-//    private func setupTableView() {
-//        tableview.delegate = self
-//        tableview.dataSource = self
-//        tableview.rowHeight = 120
-//        
-//        let nib = UINib(nibName: "KidsStoriesTableViewCell", bundle: nil)
-//        tableview.register(nib, forCellReuseIdentifier: KidsStoriesTableViewCell.reuseIdentifier)
-//        tableview.tableFooterView = UIView()
-//    }
-//    
-//    @IBAction func backButton(_ sender: UIButton) {
-//        self.navigationController?.popViewController(animated: true)
-//    }
-//}
-//
-//extension KidsStoriesViewController: UITableViewDataSource {
-//    
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        stories.count
-//    }
-//    
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        guard let cell = tableView.dequeueReusableCell(
-//            withIdentifier: KidsStoriesTableViewCell.reuseIdentifier,
-//            for: indexPath
-//        ) as? KidsStoriesTableViewCell else {
-//            return UITableViewCell()
-//        }
-//        return cell
-//    }
-//}
-//
-//extension KidsStoriesViewController: UITableViewDelegate {}

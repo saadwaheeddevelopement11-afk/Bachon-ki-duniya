@@ -16,6 +16,7 @@ class HomeViewController: UIViewController {
     private let itemsPerRow: CGFloat = 2
     private let spacing: CGFloat = 16
     private let sectionInset: CGFloat = 16
+    private let loadingAnimationKey = "kids.loading.wiggle"
     
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView?
@@ -38,10 +39,16 @@ class HomeViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         
-        // Register only one cell type
+        // Register default grid cell
         collectionView.register(
             UINib(nibName: "HomeListingColvCell", bundle: nil),
             forCellWithReuseIdentifier: "HomeListingColvCell"
+        )
+        
+        // Register first banner cell (only index 0)
+        collectionView.register(
+            UINib(nibName: "HomeFirstCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: "HomeFirstCollectionViewCell"
         )
         
         if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
@@ -95,7 +102,7 @@ class HomeViewController: UIViewController {
     
     @objc private func languageButtonTapped() {
         if let languageVC = storyboard?.instantiateViewController(withIdentifier: "LanguageSelectionViewController") {
-            navigationController?.pushViewController(languageVC, animated: true)
+            performPlayfulPush(languageVC)
         }
     }
     
@@ -103,12 +110,13 @@ class HomeViewController: UIViewController {
     private func fetchCategories() {
         let currentLanguage = LanguageManager.shared.currentLanguageCode
         isLoading = true
-        loadingIndicator?.startAnimating()
+        startPlayfulLoadingAnimation()
+        collectionView.alpha = 0.7
         
         APIManager.shared.fetchCategories(languageCode: currentLanguage) { [weak self] result in
             DispatchQueue.main.async {
                 self?.isLoading = false
-                self?.loadingIndicator?.stopAnimating()
+                self?.stopPlayfulLoadingAnimation()
                 
                 print(result)
                 
@@ -158,6 +166,7 @@ class HomeViewController: UIViewController {
         
         self.homeItems = processedItems
         collectionView.reloadData()
+        animateContentEntrance()
     }
     
     private func showError(_ error: Error) {
@@ -217,6 +226,57 @@ class HomeViewController: UIViewController {
             self.present(vc, animated: true)
         }
     }
+    
+    private func startPlayfulLoadingAnimation() {
+        guard let loadingIndicator else { return }
+        loadingIndicator.startAnimating()
+        
+        UIView.animate(withDuration: 0.35, delay: 0, options: [.autoreverse, .repeat, .allowUserInteraction]) {
+            loadingIndicator.transform = CGAffineTransform(scaleX: 1.18, y: 1.18)
+            loadingIndicator.alpha = 0.8
+        }
+        
+        let wiggle = CAKeyframeAnimation(keyPath: "transform.rotation")
+        wiggle.values = [-0.06, 0.06, -0.04, 0.04, 0]
+        wiggle.duration = 0.8
+        wiggle.repeatCount = .infinity
+        wiggle.isAdditive = true
+        loadingIndicator.layer.add(wiggle, forKey: loadingAnimationKey)
+    }
+    
+    private func stopPlayfulLoadingAnimation() {
+        guard let loadingIndicator else { return }
+        loadingIndicator.layer.removeAnimation(forKey: loadingAnimationKey)
+        loadingIndicator.layer.removeAllAnimations()
+        loadingIndicator.stopAnimating()
+        loadingIndicator.transform = .identity
+        loadingIndicator.alpha = 1
+    }
+    
+    private func animateContentEntrance() {
+        collectionView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
+        UIView.animate(
+            withDuration: 0.45,
+            delay: 0,
+            usingSpringWithDamping: 0.75,
+            initialSpringVelocity: 0.4,
+            options: [.curveEaseOut]
+        ) { [weak self] in
+            self?.collectionView.alpha = 1
+            self?.collectionView.transform = .identity
+        }
+    }
+    
+    private func performPlayfulPush(_ viewController: UIViewController) {
+        guard let navigationController else { return }
+        let transition = CATransition()
+        transition.duration = 0.38
+        transition.type = .push
+        transition.subtype = .fromRight
+        transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        navigationController.view.layer.add(transition, forKey: kCATransition)
+        navigationController.pushViewController(viewController, animated: false)
+    }
 }
 
 // MARK: - Image Cache Helper
@@ -244,6 +304,24 @@ extension HomeViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let item = homeItems[indexPath.item]
+        let isRTL = LanguageManager.shared.isRTL()
+        
+        if indexPath.item == 0 {
+            guard let firstCell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "HomeFirstCollectionViewCell",
+                for: indexPath
+            ) as? HomeFirstCollectionViewCell else {
+                return UICollectionViewCell()
+            }
+            
+            loadImage(from: item.imageUrl, into: firstCell.bannerImageView)
+            firstCell.titleLbl.text = item.title
+            firstCell.descriptionLbl.text = item.description
+            firstCell.titleLbl.textAlignment = .center //isRTL ? .right : .left
+            firstCell.descriptionLbl.textAlignment = isRTL ? .right : .left
+            
+            return firstCell
+        }
         
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: "HomeListingColvCell",
@@ -252,7 +330,6 @@ extension HomeViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        // Load image for all cells
         loadImage(from: item.imageUrl, into: cell.bannerImageView)
         cell.titleLbl.text = item.title
         cell.descriptionLbl.text = item.description
@@ -263,7 +340,7 @@ extension HomeViewController: UICollectionViewDataSource {
 //        }
         
         // Handle RTL text alignment
-        if LanguageManager.shared.isRTL() {
+        if isRTL {
             cell.titleLbl.textAlignment = .right
             cell.descriptionLbl.textAlignment = .right
         } else {
@@ -322,7 +399,7 @@ extension HomeViewController: UICollectionViewDataSource {
             vc.categoryId = item.id
             vc.categoryTitle = item.title
             vc.hasSubcategories = item.hasSubcategories
-            navigationController?.pushViewController(vc, animated: true)
+            performPlayfulPush(vc)
         }
     }
 
@@ -331,7 +408,7 @@ extension HomeViewController: UICollectionViewDataSource {
             vc.categoryId = item.id
             vc.categoryTitle = item.title
             vc.hasSubcategories = item.hasSubcategories
-            navigationController?.pushViewController(vc, animated: true)
+            performPlayfulPush(vc)
         }
     }
 
@@ -340,7 +417,7 @@ extension HomeViewController: UICollectionViewDataSource {
             vc.categoryId = item.id
             vc.categoryTitle = item.title
             vc.hasSubcategories = item.hasSubcategories
-            navigationController?.pushViewController(vc, animated: true)
+            performPlayfulPush(vc)
         }
     }
 
@@ -418,7 +495,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
         
         if indexPath.item == 0 {
             // First item (banner) takes full width
-            let bannerHeight: CGFloat = 170
+            let bannerHeight: CGFloat = 200
             return CGSize(width: availableWidth, height: bannerHeight)
         } else {
             // All other items: 2 per row

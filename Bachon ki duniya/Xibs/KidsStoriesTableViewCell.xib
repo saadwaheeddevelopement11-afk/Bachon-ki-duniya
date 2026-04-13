@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <customFonts key="customFonts">
-        <array key="Comic Kids.ttf">
-            <string>ComicKids</string>
+        <array key="Poppins-Medium.ttf">
+            <string>Poppins-Medium</string>
+        </array>
+        <array key="Poppins-Regular.ttf">
+            <string>Poppins-Regular</string>
         </array>
     </customFonts>
     <objects>
@@ -31,10 +34,11 @@
                             </userDefinedRuntimeAttribute>
                         </userDefinedRuntimeAttributes>
                     </view>
-                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="image" translatesAutoresizingMaskIntoConstraints="NO" id="fry-25-YqW">
-                        <rect key="frame" x="15" y="12" width="89" height="99"/>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fry-25-YqW">
+                        <rect key="frame" x="15" y="12" width="158.33333333333334" height="99"/>
+                        <color key="backgroundColor" systemColor="systemGray4Color"/>
                         <constraints>
-                            <constraint firstAttribute="width" secondItem="fry-25-YqW" secondAttribute="height" multiplier="0.9:1" id="dlF-5Q-USF"/>
+                            <constraint firstAttribute="width" secondItem="fry-25-YqW" secondAttribute="height" multiplier="1.6:1" id="dlF-5Q-USF"/>
                         </constraints>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -43,33 +47,33 @@
                         </userDefinedRuntimeAttributes>
                     </imageView>
                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="28J-4r-Fk8">
-                        <rect key="frame" x="112" y="26.666666666666671" width="204" height="70"/>
+                        <rect key="frame" x="181.33333333333337" y="27.666666666666664" width="134.66666666666663" height="67.666666666666686"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="AGc-5g-Ua9">
-                                <rect key="frame" x="0.0" y="0.0" width="154" height="70"/>
+                                <rect key="frame" x="0.0" y="0.0" width="84.666666666666671" height="67.666666666666671"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Sachi Khushi" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="W2s-IU-rZ3">
-                                        <rect key="frame" x="0.0" y="0.0" width="154" height="56"/>
-                                        <fontDescription key="fontDescription" name="ComicKids" family="Comic Kids" pointSize="17"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="84.666666666666671" height="18.333333333333332"/>
+                                        <fontDescription key="fontDescription" name="Poppins-Medium" family="Poppins" pointSize="13"/>
                                         <color key="textColor" red="0.14509803921568626" green="0.082352941176470587" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Long established fact that a reader" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sNr-E0-dyf">
-                                        <rect key="frame" x="0.0" y="56" width="154" height="14"/>
-                                        <fontDescription key="fontDescription" name="ComicKids" family="Comic Kids" pointSize="12"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Long established fact that a reader" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sNr-E0-dyf">
+                                        <rect key="frame" x="0.0" y="18.333333333333332" width="84.666666666666671" height="49.333333333333343"/>
+                                        <fontDescription key="fontDescription" name="Poppins-Regular" family="Poppins" pointSize="11"/>
                                         <color key="textColor" red="0.14509803921568626" green="0.082352941176470587" blue="0.015686274509803921" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="FZf-2K-YwI">
-                                <rect key="frame" x="154" y="0.0" width="50" height="70"/>
+                                <rect key="frame" x="84.666666666666657" y="0.0" width="50" height="67.666666666666671"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="addIcon" translatesAutoresizingMaskIntoConstraints="NO" id="Zzx-Md-8xY">
-                                        <rect key="frame" x="0.0" y="0.0" width="50" height="23"/>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="addIcon" translatesAutoresizingMaskIntoConstraints="NO" id="Zzx-Md-8xY">
+                                        <rect key="frame" x="0.0" y="0.0" width="50" height="20.666666666666668"/>
                                     </imageView>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="playButton" translatesAutoresizingMaskIntoConstraints="NO" id="dGj-8T-xkU">
-                                        <rect key="frame" x="0.0" y="31" width="50" height="39"/>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="playButton" translatesAutoresizingMaskIntoConstraints="NO" id="dGj-8T-xkU">
+                                        <rect key="frame" x="0.0" y="28.666666666666671" width="50" height="39"/>
                                     </imageView>
                                 </subviews>
                                 <constraints>
@@ -83,15 +87,13 @@
                                 </variation>
                             </stackView>
                         </subviews>
-                        <constraints>
-                            <constraint firstAttribute="height" constant="70" id="roe-Xb-plN"/>
-                        </constraints>
                     </stackView>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
                     <constraint firstItem="iYG-Ou-jzb" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="4" id="2Di-9S-64T"/>
                     <constraint firstItem="iYG-Ou-jzb" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="4" id="2eI-tb-8Mq"/>
+                    <constraint firstItem="28J-4r-Fk8" firstAttribute="height" secondItem="fry-25-YqW" secondAttribute="height" multiplier="0.683502" id="2xZ-Y6-sFx"/>
                     <constraint firstAttribute="trailing" secondItem="28J-4r-Fk8" secondAttribute="trailing" constant="8" id="7Cy-Or-Ac9"/>
                     <constraint firstItem="fry-25-YqW" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="12" id="7d3-ci-s5Y"/>
                     <constraint firstItem="fry-25-YqW" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="15" id="HAJ-E7-Qw7"/>
@@ -119,10 +121,12 @@
     </objects>
     <resources>
         <image name="addIcon" width="19.333333969116211" height="20.666666030883789"/>
-        <image name="image" width="72.666664123535156" height="83"/>
         <image name="playButton" width="34.333332061767578" height="39"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray4Color">
+            <color red="0.81960784310000001" green="0.81960784310000001" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
