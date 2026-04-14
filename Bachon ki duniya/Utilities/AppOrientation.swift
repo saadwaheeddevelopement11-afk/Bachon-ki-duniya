@@ -20,7 +20,7 @@ final class AppOrientation {
     }
 
     var supportedMask: UIInterfaceOrientationMask {
-        isVideoFullscreenActive ? [.portrait, .landscapeLeft, .landscapeRight] : .portrait
+        isVideoFullscreenActive ? .landscape : .portrait
     }
 
     private init() {}

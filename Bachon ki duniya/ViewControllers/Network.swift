@@ -325,39 +325,52 @@ extension APIManager {
     
     private func decodeEpisodes(from data: Data) throws -> [Episode] {
         let decoder = JSONDecoder()
-        let payload = firstJSONObjectDataIfConcatenated(from: data) ?? data
+        let payloads = splitTopLevelJSONObjects(from: data)
+        var allEpisodes: [Episode] = []
         
-        if let wrapped = try? decoder.decode(EpisodeResponse.self, from: payload) {
-            // Some endpoints omit `status` entirely; trust decoded data when present.
-            return wrapped.data
+        for payload in payloads {
+            if let wrapped = try? decoder.decode(EpisodeResponse.self, from: payload) {
+                allEpisodes.append(contentsOf: wrapped.data)
+                continue
+            }
+            
+            if let rawEpisodes = try? decoder.decode([Episode].self, from: payload) {
+                allEpisodes.append(contentsOf: rawEpisodes)
+                continue
+            }
+            
+            // Some category endpoints return story-like wrapped payload:
+            // { status, code, data: { seasons: [{ episodes: [...] }] } }
+            if let storyWrapped = try? decoder.decode(StoryEpisodesResponse.self, from: payload) {
+                let mapped = storyWrapped.data.seasons
+                    .sorted(by: { $0.seasonNumber < $1.seasonNumber })
+                    .flatMap { season in
+                        season.episodes.sorted(by: { $0.episodeNumber < $1.episodeNumber })
+                    }
+                    .map { storyEpisode in
+                        Episode(
+                            id: storyEpisode.id,
+                            title: storyEpisode.title,
+                            description: storyEpisode.description,
+                            thumbnail: storyEpisode.thumbnailURL,
+                            audioUrl: nil,
+                            duration: storyEpisode.durationSecs.map(String.init),
+                            categoryId: 0,
+                            subcategoryId: nil,
+                            order: storyEpisode.episodeNumber,
+                            createdAt: nil
+                        )
+                    }
+                allEpisodes.append(contentsOf: mapped)
+                continue
+            }
         }
         
-        if let rawEpisodes = try? decoder.decode([Episode].self, from: payload) {
-            return rawEpisodes
-        }
-
-        // Some category endpoints return story-like wrapped payload:
-        // { status, code, data: { seasons: [{ episodes: [...] }] } }
-        if let storyWrapped = try? decoder.decode(StoryEpisodesResponse.self, from: payload) {
-            return storyWrapped.data.seasons
-                .sorted(by: { $0.seasonNumber < $1.seasonNumber })
-                .flatMap { season in
-                    season.episodes.sorted(by: { $0.episodeNumber < $1.episodeNumber })
-                }
-                .map { storyEpisode in
-                    Episode(
-                        id: storyEpisode.id,
-                        title: storyEpisode.title,
-                        description: storyEpisode.description,
-                        thumbnail: storyEpisode.thumbnailURL,
-                        audioUrl: nil,
-                        duration: storyEpisode.durationSecs.map(String.init),
-                        categoryId: 0,
-                        subcategoryId: nil,
-                        order: storyEpisode.episodeNumber,
-                        createdAt: nil
-                    )
-                }
+        if !allEpisodes.isEmpty {
+            // Keep backend ordering intent while removing duplicated episodes if payload repeats.
+            let sorted = allEpisodes.sorted(by: { $0.order < $1.order })
+            var seenIds = Set<Int>()
+            return sorted.filter { seenIds.insert($0.id).inserted }
         }
         
         throw NSError(
@@ -367,16 +380,19 @@ extension APIManager {
         )
     }
     
-    private func firstJSONObjectDataIfConcatenated(from data: Data) -> Data? {
-        guard let text = String(data: data, encoding: .utf8) else { return nil }
+    private func splitTopLevelJSONObjects(from data: Data) -> [Data] {
+        guard let text = String(data: data, encoding: .utf8) else { return [data] }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.first == "{" else { return nil }
+        guard trimmed.first == "{" else { return [data] }
         
         var depth = 0
         var inString = false
         var isEscaped = false
+        var startIndex: String.Index?
+        var chunks: [Data] = []
         
-        for (index, char) in trimmed.enumerated() {
+        for charIndex in trimmed.indices {
+            let char = trimmed[charIndex]
             if inString {
                 if isEscaped {
                     isEscaped = false
@@ -391,18 +407,23 @@ extension APIManager {
             if char == "\"" {
                 inString = true
             } else if char == "{" {
+                if depth == 0 {
+                    startIndex = charIndex
+                }
                 depth += 1
             } else if char == "}" {
                 depth -= 1
-                if depth == 0 {
-                    let endIndex = trimmed.index(trimmed.startIndex, offsetBy: index)
-                    let firstObject = String(trimmed[...endIndex])
-                    return firstObject.data(using: .utf8)
+                if depth == 0, let start = startIndex {
+                    let objectString = String(trimmed[start...charIndex])
+                    if let objectData = objectString.data(using: .utf8) {
+                        chunks.append(objectData)
+                    }
+                    startIndex = nil
                 }
             }
         }
         
-        return nil
+        return chunks.isEmpty ? [data] : chunks
     }
 }
 

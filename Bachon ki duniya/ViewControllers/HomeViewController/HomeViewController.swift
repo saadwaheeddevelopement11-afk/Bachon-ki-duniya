@@ -340,7 +340,8 @@ extension HomeViewController: UICollectionViewDataSource {
             navigateToBedtimeStories(with: item)
             
         case CategoryType.growWell.rawValue:
-            navigateToGrowWell(with: item)
+            navigateToGeneralKnowledge(with: item)
+//            navigateToGrowWell(with: item)
             
         case CategoryType.poems.rawValue:
             navigateToPoems(with: item)
@@ -459,7 +460,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
         
         if indexPath.item == 0 {
             // First item (banner) takes full width
-            let bannerHeight: CGFloat = 200
+            let bannerHeight: CGFloat = 210
             return CGSize(width: availableWidth, height: bannerHeight)
         } else {
             // All other items: 2 per row

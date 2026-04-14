@@ -33,6 +33,14 @@
                             </userDefinedRuntimeAttribute>
                         </userDefinedRuntimeAttributes>
                     </imageView>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="leftShadow" translatesAutoresizingMaskIntoConstraints="NO" id="WWc-EG-EjD">
+                        <rect key="frame" x="0.0" y="5" width="436" height="184"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                <integer key="value" value="15"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </imageView>
                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="hbZ-Gg-rYS">
                         <rect key="frame" x="15" y="3" width="305.33333333333331" height="176"/>
                         <subviews>
@@ -112,13 +120,17 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
+                    <constraint firstAttribute="trailing" secondItem="WWc-EG-EjD" secondAttribute="trailing" id="HQM-wU-V0o"/>
                     <constraint firstAttribute="trailing" secondItem="ZOs-sf-n9I" secondAttribute="trailing" id="NS3-iu-VSf"/>
                     <constraint firstItem="ZOs-sf-n9I" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="5" id="OY9-aC-jsh"/>
                     <constraint firstItem="ZOs-sf-n9I" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="PNI-Pu-br4"/>
                     <constraint firstItem="hbZ-Gg-rYS" firstAttribute="width" secondItem="H2p-sc-9uM" secondAttribute="width" multiplier="0.7" id="aqm-PG-LQw"/>
+                    <constraint firstAttribute="bottom" secondItem="WWc-EG-EjD" secondAttribute="bottom" constant="5" id="cld-dC-qxq"/>
+                    <constraint firstItem="WWc-EG-EjD" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="hor-D9-9eV"/>
                     <constraint firstAttribute="bottom" secondItem="hbZ-Gg-rYS" secondAttribute="bottom" constant="15" id="i96-jV-cMM"/>
                     <constraint firstAttribute="bottom" secondItem="ZOs-sf-n9I" secondAttribute="bottom" constant="5" id="oKe-oQ-2ZL"/>
                     <constraint firstItem="hbZ-Gg-rYS" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="15" id="yPg-O9-Ugx"/>
+                    <constraint firstItem="WWc-EG-EjD" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="5" id="z3R-N7-LN4"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -131,4 +143,7 @@
             <point key="canvasLocation" x="96.18320610687023" y="184.50704225352115"/>
         </tableViewCell>
     </objects>
+    <resources>
+        <image name="leftShadow" width="230.66667175292969" height="129"/>
+    </resources>
 </document>
