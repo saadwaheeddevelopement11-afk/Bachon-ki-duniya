@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 class KidsStoriesViewController: UIViewController {
     
@@ -417,16 +418,12 @@ extension KidsStoriesViewController: UITableViewDelegate {
         cell.titleLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         cell.descriptionLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         
+        let placeholder = UIImage(named: "placeholder")
         guard let imageUrl, !imageUrl.isEmpty, let url = URL(string: imageUrl) else {
-            cell.bgImage.image = UIImage(named: "placeholder")
+            cell.bgImage.image = placeholder
             return
         }
         
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data, let image = UIImage(data: data) else { return }
-            DispatchQueue.main.async {
-                cell.bgImage.image = image
-            }
-        }.resume()
+        cell.bgImage.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
     }
 }

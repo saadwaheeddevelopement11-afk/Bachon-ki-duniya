@@ -157,12 +157,8 @@ extension APIManager {
             }
             
             do {
-                let response = try JSONDecoder().decode(EpisodeResponse.self, from: data)
-                if response.status == "success" {
-                    completion(.success(response.data))
-                } else {
-                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "API returned error status"])))
-                }
+                let episodes = try self.decodeEpisodes(from: data)
+                completion(.success(episodes))
             } catch {
                 print("Decoding error: \(error)")
                 completion(.failure(error))
@@ -195,12 +191,8 @@ extension APIManager {
             }
             
             do {
-                let response = try JSONDecoder().decode(EpisodeResponse.self, from: data)
-                if response.status == "success" {
-                    completion(.success(response.data))
-                } else {
-                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "API returned error status"])))
-                }
+                let episodes = try self.decodeEpisodes(from: data)
+                completion(.success(episodes))
             } catch {
                 print("Decoding error: \(error)")
                 completion(.failure(error))
@@ -329,6 +321,88 @@ extension APIManager {
                 completion(.failure(error))
             }
         }.resume()
+    }
+    
+    private func decodeEpisodes(from data: Data) throws -> [Episode] {
+        let decoder = JSONDecoder()
+        let payload = firstJSONObjectDataIfConcatenated(from: data) ?? data
+        
+        if let wrapped = try? decoder.decode(EpisodeResponse.self, from: payload) {
+            // Some endpoints omit `status` entirely; trust decoded data when present.
+            return wrapped.data
+        }
+        
+        if let rawEpisodes = try? decoder.decode([Episode].self, from: payload) {
+            return rawEpisodes
+        }
+
+        // Some category endpoints return story-like wrapped payload:
+        // { status, code, data: { seasons: [{ episodes: [...] }] } }
+        if let storyWrapped = try? decoder.decode(StoryEpisodesResponse.self, from: payload) {
+            return storyWrapped.data.seasons
+                .sorted(by: { $0.seasonNumber < $1.seasonNumber })
+                .flatMap { season in
+                    season.episodes.sorted(by: { $0.episodeNumber < $1.episodeNumber })
+                }
+                .map { storyEpisode in
+                    Episode(
+                        id: storyEpisode.id,
+                        title: storyEpisode.title,
+                        description: storyEpisode.description,
+                        thumbnail: storyEpisode.thumbnailURL,
+                        audioUrl: nil,
+                        duration: storyEpisode.durationSecs.map(String.init),
+                        categoryId: 0,
+                        subcategoryId: nil,
+                        order: storyEpisode.episodeNumber,
+                        createdAt: nil
+                    )
+                }
+        }
+        
+        throw NSError(
+            domain: "",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: "Unable to decode episodes response"]
+        )
+    }
+    
+    private func firstJSONObjectDataIfConcatenated(from data: Data) -> Data? {
+        guard let text = String(data: data, encoding: .utf8) else { return nil }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.first == "{" else { return nil }
+        
+        var depth = 0
+        var inString = false
+        var isEscaped = false
+        
+        for (index, char) in trimmed.enumerated() {
+            if inString {
+                if isEscaped {
+                    isEscaped = false
+                } else if char == "\\" {
+                    isEscaped = true
+                } else if char == "\"" {
+                    inString = false
+                }
+                continue
+            }
+            
+            if char == "\"" {
+                inString = true
+            } else if char == "{" {
+                depth += 1
+            } else if char == "}" {
+                depth -= 1
+                if depth == 0 {
+                    let endIndex = trimmed.index(trimmed.startIndex, offsetBy: index)
+                    let firstObject = String(trimmed[...endIndex])
+                    return firstObject.data(using: .utf8)
+                }
+            }
+        }
+        
+        return nil
     }
 }
 

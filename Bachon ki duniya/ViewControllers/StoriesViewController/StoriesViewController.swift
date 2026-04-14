@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 class StoriesViewController: UIViewController {
     
@@ -55,17 +56,13 @@ class StoriesViewController: UIViewController {
         cell.titleLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         cell.textLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         
+        let placeholder = UIImage(named: "placeholder")
         guard let imageUrl = episode.thumbnailURL, !imageUrl.isEmpty, let url = URL(string: imageUrl) else {
-            cell.mainImageView.image = UIImage(named: "placeholder")
+            cell.mainImageView.image = placeholder
             return
         }
         
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data, let image = UIImage(data: data) else { return }
-            DispatchQueue.main.async {
-                cell.mainImageView.image = image
-            }
-        }.resume()
+        cell.mainImageView.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
     }
     
     @IBAction func backBtn(_ sender: UIButton) {
@@ -90,6 +87,9 @@ extension StoriesViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        let episode = episodes[indexPath.row]
+        guard let url = episode.videoURL, !url.isEmpty else { return }
+        VideoPlaybackPresenter.play(urlString: url, from: self)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

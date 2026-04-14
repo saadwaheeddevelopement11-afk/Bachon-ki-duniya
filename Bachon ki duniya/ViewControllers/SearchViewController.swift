@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 class SearchViewController: UIViewController {
     
@@ -89,17 +90,13 @@ class SearchViewController: UIViewController {
         cell.titleLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         cell.textLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         
+        let placeholder = UIImage(named: "placeholder")
         guard let imageUrl = item.thumbnailURL, !imageUrl.isEmpty, let url = URL(string: imageUrl) else {
-            cell.mainImageView.image = UIImage(named: "placeholder")
+            cell.mainImageView.image = placeholder
             return
         }
         
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data, let image = UIImage(data: data) else { return }
-            DispatchQueue.main.async {
-                cell.mainImageView.image = image
-            }
-        }.resume()
+        cell.mainImageView.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
     }
 }
 

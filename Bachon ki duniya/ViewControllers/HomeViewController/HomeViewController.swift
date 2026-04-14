@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 class HomeViewController: UIViewController {
     
@@ -191,34 +192,13 @@ class HomeViewController: UIViewController {
     
     // Helper method to load image from URL with caching
     private func loadImage(from urlString: String, into imageView: UIImageView) {
+        let placeholder = UIImage(named: "placeholder")
         guard !urlString.isEmpty, let url = URL(string: urlString) else {
-            // Set a placeholder image if URL is empty
-            imageView.image = UIImage(named: "placeholder")
+            imageView.image = placeholder
             return
         }
         
-        // Simple caching mechanism
-        let cacheKey = urlString as NSString
-        if let cachedImage = ImageCache.shared.getImage(forKey: cacheKey) {
-            imageView.image = cachedImage
-            return
-        }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            guard let data = data, error == nil, let image = UIImage(data: data) else {
-                DispatchQueue.main.async {
-                    imageView.image = UIImage(named: "placeholder")
-                }
-                return
-            }
-            
-            // Cache the image
-            ImageCache.shared.setImage(image, forKey: cacheKey)
-            
-            DispatchQueue.main.async {
-                imageView.image = image
-            }
-        }.resume()
+        imageView.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
     }
     
     @IBAction func languageSelectionBtn(_ sender: UIButton) {
@@ -276,22 +256,6 @@ class HomeViewController: UIViewController {
         transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         navigationController.view.layer.add(transition, forKey: kCATransition)
         navigationController.pushViewController(viewController, animated: false)
-    }
-}
-
-// MARK: - Image Cache Helper
-class ImageCache {
-    static let shared = ImageCache()
-    private let cache = NSCache<NSString, UIImage>()
-    
-    private init() {}
-    
-    func getImage(forKey key: NSString) -> UIImage? {
-        return cache.object(forKey: key)
-    }
-    
-    func setImage(_ image: UIImage, forKey key: NSString) {
-        cache.setObject(image, forKey: key)
     }
 }
 

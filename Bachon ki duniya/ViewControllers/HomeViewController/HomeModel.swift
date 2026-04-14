@@ -52,8 +52,8 @@ struct Subcategory: Codable {
 
 // MARK: - Episode Models
 struct EpisodeResponse: Codable {
-    let status: String
-    let code: String
+    let status: String?
+    let code: String?
     let data: [Episode]
 }
 
