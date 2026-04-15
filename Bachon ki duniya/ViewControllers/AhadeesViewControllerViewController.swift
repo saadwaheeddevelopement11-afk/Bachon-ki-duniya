@@ -35,7 +35,7 @@ class AhadeesViewController: UIViewController {
 extension AhadeesViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        5
+        return 5
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -52,5 +52,10 @@ extension AhadeesViewController: UITableViewDataSource {
     }
 }
 
-extension AhadeesViewController: UITableViewDelegate {}
+extension AhadeesViewController: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print("indexPath: \(indexPath.row)")
+    }
+}
 

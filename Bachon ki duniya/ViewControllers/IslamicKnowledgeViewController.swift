@@ -10,8 +10,10 @@ import UIKit
 class IslamicKnowledgeViewController: UIViewController {
     
     @IBOutlet weak var tableview: UITableView!
+    @IBOutlet weak var bannerImage: UIImageView!
     
     private let items = Array(repeating: "Item", count: 10)
+    var topBannerImage: UIImage? = nil
     
     var categoryId: Int = 0
     var categoryTitle: String = ""
@@ -19,6 +21,7 @@ class IslamicKnowledgeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        bannerImage.image = topBannerImage
         setupTableView()
     }
     

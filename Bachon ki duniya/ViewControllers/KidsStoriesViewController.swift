@@ -395,6 +395,7 @@ extension KidsStoriesViewController: UITableViewDelegate {
             // Pass tapped subcategory id as category_id for /series API
             seriesVC.categoryId = subcategory.id
             seriesVC.categoryTitle = title
+            seriesVC.topBannerImage = subcategory.img ?? ""
             performPlayfulPush(seriesVC)
         }
     }

@@ -14,8 +14,10 @@ class SeriesViewController: UIViewController {
     var categoryTitle = "Series"
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var topBanner: UIImageView!
     
     private var seriesItems: [SeriesItem] = []
+    var topBannerImage = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,6 +27,10 @@ class SeriesViewController: UIViewController {
     }
     
     private func setupTableView() {
+        let placeholder = UIImage(named: "placeholder")
+        if let url = URL(string: topBannerImage) {
+            self.topBanner.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
+        }
         tableView.delegate = self
         tableView.dataSource = self
         tableView.tableFooterView = UIView()

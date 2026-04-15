@@ -10,6 +10,9 @@
         <array key="Poppins-Bold.ttf">
             <string>Poppins-Bold</string>
         </array>
+        <array key="Poppins-Medium.ttf">
+            <string>Poppins-Medium</string>
+        </array>
         <array key="Poppins-Regular.ttf">
             <string>Poppins-Regular</string>
         </array>
@@ -42,7 +45,7 @@
                         </userDefinedRuntimeAttributes>
                     </imageView>
                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="hbZ-Gg-rYS">
-                        <rect key="frame" x="15" y="3" width="305.33333333333331" height="176"/>
+                        <rect key="frame" x="15" y="-2" width="305.33333333333331" height="181"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XQU-jH-58c">
                                 <rect key="frame" x="0.0" y="0.0" width="305.33333333333331" height="50"/>
@@ -81,23 +84,30 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zRE-pg-ieR">
-                                <rect key="frame" x="0.0" y="136" width="305.33333333333331" height="40"/>
+                                <rect key="frame" x="0.0" y="136" width="305.33333333333331" height="45"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gGZ-aS-HPy">
-                                        <rect key="frame" x="0.0" y="0.0" width="80" height="40"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="90" height="45"/>
                                         <subviews>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="btnPinkBg" translatesAutoresizingMaskIntoConstraints="NO" id="qpR-W7-i7O">
+                                                <rect key="frame" x="0.0" y="0.0" width="90" height="45"/>
+                                            </imageView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Explore" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2Vp-T0-Ixh">
-                                                <rect key="frame" x="13.333333333333332" y="9.6666666666666572" width="53.333333333333343" height="21"/>
-                                                <fontDescription key="fontDescription" name="Poppins-Regular" family="Poppins" pointSize="15"/>
-                                                <color key="textColor" red="0.14509803921568626" green="0.082352941176470587" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <rect key="frame" x="23.333333333333332" y="9.6666666666666572" width="43.333333333333343" height="17"/>
+                                                <fontDescription key="fontDescription" name="Poppins-Medium" family="Poppins" pointSize="12"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
-                                            <constraint firstItem="2Vp-T0-Ixh" firstAttribute="centerY" secondItem="gGZ-aS-HPy" secondAttribute="centerY" id="5Bj-7y-KDv"/>
+                                            <constraint firstAttribute="bottom" secondItem="qpR-W7-i7O" secondAttribute="bottom" id="1fu-6y-gmW"/>
+                                            <constraint firstItem="2Vp-T0-Ixh" firstAttribute="centerY" secondItem="gGZ-aS-HPy" secondAttribute="centerY" multiplier="0.8" id="5Bj-7y-KDv"/>
+                                            <constraint firstAttribute="trailing" secondItem="qpR-W7-i7O" secondAttribute="trailing" id="86W-sa-t6q"/>
                                             <constraint firstItem="2Vp-T0-Ixh" firstAttribute="centerX" secondItem="gGZ-aS-HPy" secondAttribute="centerX" id="8ef-zR-zCA"/>
+                                            <constraint firstItem="qpR-W7-i7O" firstAttribute="leading" secondItem="gGZ-aS-HPy" secondAttribute="leading" id="Hxy-J3-dgR"/>
                                             <constraint firstAttribute="width" secondItem="gGZ-aS-HPy" secondAttribute="height" multiplier="2:1" id="X1J-cf-RbK"/>
+                                            <constraint firstItem="qpR-W7-i7O" firstAttribute="top" secondItem="gGZ-aS-HPy" secondAttribute="top" id="anc-AC-Nii"/>
                                         </constraints>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -111,7 +121,7 @@
                                     <constraint firstAttribute="bottom" secondItem="gGZ-aS-HPy" secondAttribute="bottom" id="6Tq-Qv-WSC"/>
                                     <constraint firstItem="gGZ-aS-HPy" firstAttribute="leading" secondItem="zRE-pg-ieR" secondAttribute="leading" id="8hz-aF-Th0"/>
                                     <constraint firstItem="gGZ-aS-HPy" firstAttribute="top" secondItem="zRE-pg-ieR" secondAttribute="top" id="fCN-CG-ffQ"/>
-                                    <constraint firstAttribute="height" constant="40" id="gw0-QM-BGC"/>
+                                    <constraint firstAttribute="height" constant="45" id="gw0-QM-BGC"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -144,6 +154,7 @@
         </tableViewCell>
     </objects>
     <resources>
+        <image name="btnPinkBg" width="74" height="43.666667938232422"/>
         <image name="leftShadow" width="230.66667175292969" height="129"/>
     </resources>
 </document>

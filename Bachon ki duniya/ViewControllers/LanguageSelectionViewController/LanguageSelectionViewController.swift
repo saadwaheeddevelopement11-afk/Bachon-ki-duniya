@@ -62,7 +62,10 @@ class LanguageSelectionViewController: UIViewController {
     private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "LanguageCell")
+        tableView.register(
+            UINib(nibName: "LanguagesTableViewCell", bundle: nil),
+            forCellReuseIdentifier: "LanguagesTableViewCell"
+        )
         tableView.allowsSelection = true
     }
     
@@ -217,28 +220,27 @@ extension LanguageSelectionViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "LanguageCell", for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: "LanguagesTableViewCell",
+            for: indexPath
+        ) as? LanguagesTableViewCell else {
+            return UITableViewCell()
+        }
+        
         let language = languages[indexPath.row]
         
-        // Configure cell
-        cell.textLabel?.text = language.nativeName
-        cell.detailTextLabel?.text = language.name
+        // Configure label with API value
+        cell.languageName.text = language.nativeName
         
-        // Checkmark for selected language
-        if let selected = selectedLanguage,
-           selected.languageCode == language.languageCode {
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
-        }
+        // Selected state with border on bgImage
+        let isSelectedLanguage = selectedLanguage?.languageCode == language.languageCode
+        cell.configureSelection(isSelected: isSelectedLanguage)
         
         // Set text alignment based on language direction
         if language.direction == "RTL" {
-            cell.textLabel?.textAlignment = .right
-            cell.detailTextLabel?.textAlignment = .right
+            cell.languageName.textAlignment = .right
         } else {
-            cell.textLabel?.textAlignment = .left
-            cell.detailTextLabel?.textAlignment = .left
+            cell.languageName.textAlignment = .left
         }
         
         return cell
