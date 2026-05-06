@@ -14,9 +14,9 @@
             filePath = "Bachon ki duniya/ViewControllers/HomeViewController/HomeViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
-            landmarkName = "navigateToAppropriateViewController(item:)"
+            startingLineNumber = "328"
+            endingLineNumber = "328"
+            landmarkName = "showError(_:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -30,9 +30,9 @@
             filePath = "Bachon ki duniya/ViewControllers/HomeViewController/HomeViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "381"
-            endingLineNumber = "381"
-            landmarkName = "navigateToGeneralKnowledge(with:)"
+            startingLineNumber = "383"
+            endingLineNumber = "383"
+            landmarkName = "animateContentEntrance()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

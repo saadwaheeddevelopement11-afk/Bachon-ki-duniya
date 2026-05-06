@@ -90,10 +90,23 @@ class APIManager {
 extension APIManager {
     
     // Fetch subcategories for a specific category
-    func fetchSubcategories(categoryId: Int, languageCode: String, completion: @escaping (Result<[Subcategory], Error>) -> Void) {
-        let urlString = "https://kidskahani.ideationtec.live/subcategories/\(categoryId)?lang=\(languageCode)"
+    func fetchSubcategories(
+        categoryId: Int,
+        languageCode: String,
+        subcategoryId: Int? = nil,
+        completion: @escaping (Result<[Subcategory], Error>) -> Void
+    ) {
+        guard var components = URLComponents(string: "https://kidskahani.ideationtec.live/subcategories/\(categoryId)") else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+        var queryItems = [URLQueryItem(name: "lang", value: languageCode)]
+        if let subcategoryId {
+            queryItems.append(URLQueryItem(name: "subcategoryid", value: "\(subcategoryId)"))
+        }
+        components.queryItems = queryItems
         
-        guard let url = URL(string: urlString) else {
+        guard let url = components.url else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
             return
         }
@@ -310,17 +323,57 @@ extension APIManager {
             }
             
             do {
-                let response = try JSONDecoder().decode(SearchResponse.self, from: data)
-                if response.status == "success" {
-                    completion(.success(response.data))
-                } else {
-                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "API returned error status"])))
-                }
+                let episodes = try self.decodeSearchEpisodes(from: data)
+                completion(.success(episodes))
             } catch {
                 print("Decoding error: \(error)")
                 completion(.failure(error))
             }
         }.resume()
+    }
+    
+    private func decodeSearchEpisodes(from data: Data) throws -> [SearchEpisode] {
+        let decoder = JSONDecoder()
+        let payloads = splitTopLevelJSONObjects(from: data)
+        var allEpisodes: [SearchEpisode] = []
+        
+        for payload in payloads {
+            if let wrapped = try? decoder.decode(SearchResponse.self, from: payload), wrapped.status == "success" {
+                allEpisodes.append(contentsOf: wrapped.data)
+                continue
+            }
+            
+            if let rawEpisodes = try? decoder.decode([SearchEpisode].self, from: payload) {
+                allEpisodes.append(contentsOf: rawEpisodes)
+                continue
+            }
+        }
+        
+        if allEpisodes.isEmpty {
+            throw NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Unable to decode search response"]
+            )
+        }
+        
+        // The search endpoint may return one row per language for the same episode id.
+        // Merge those rows into one model so existing language lookup logic still works.
+        var mergedById: [Int: SearchEpisode] = [:]
+        for episode in allEpisodes {
+            if var existing = mergedById[episode.id] {
+                for translation in episode.translations where !existing.translations.contains(where: { $0.langCode == translation.langCode }) {
+                    existing.translations.append(translation)
+                }
+                mergedById[episode.id] = existing
+            } else {
+                mergedById[episode.id] = episode
+            }
+        }
+        
+        return mergedById.values.sorted {
+            ($0.episodeNumber ?? Int.max) < ($1.episodeNumber ?? Int.max)
+        }
     }
     
     private func decodeEpisodes(from data: Data) throws -> [Episode] {

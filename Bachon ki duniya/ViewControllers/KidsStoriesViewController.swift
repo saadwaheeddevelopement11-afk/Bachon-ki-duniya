@@ -13,6 +13,7 @@ class KidsStoriesViewController: UIViewController {
     var categoryId = 0
     var categoryTitle = ""
     var hasSubcategories = false
+    var selectedSubcategoryId: Int?
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView?
@@ -84,23 +85,40 @@ class KidsStoriesViewController: UIViewController {
         isLoading = true
         startPlayfulLoadingAnimation()
         tableView.alpha = 0.7
-        // Always fetch subcategories first using categoryId from Home.
-        fetchSubcategories()
+        
+        if hasSubcategories {
+            fetchSubcategories()
+        } else {
+            fetchRecentEpisodes()
+        }
     }
     
     private func fetchSubcategories() {
         let currentLanguage = LanguageManager.shared.currentLanguageCode
         
-        // API Call: GET /subcategories/{categoryId}?lang={languageCode}
-        APIManager.shared.fetchSubcategories(categoryId: categoryId, languageCode: currentLanguage) { [weak self] result in
+        // API Call:
+        // GET /subcategories/{categoryId}?lang={languageCode}
+        // GET /subcategories/{categoryId}?lang={languageCode}&subcategoryid={id}
+        APIManager.shared.fetchSubcategories(
+            categoryId: categoryId,
+            languageCode: currentLanguage,
+            subcategoryId: selectedSubcategoryId
+        ) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let subcategories):
                     self?.subcategories = subcategories.sorted(by: { $0.order < $1.order })
                     print("Fetched \(subcategories.count) subcategories")
                     self?.tableView.reloadData()
-                    // After fetching subcategories, fetch episodes
-                    self?.fetchRecentEpisodes()
+                    
+                    // If this level has no child rows, fallback to episodes.
+                    if subcategories.isEmpty {
+                        self?.fetchRecentEpisodes()
+                    } else {
+                        self?.isLoading = false
+                        self?.stopPlayfulLoadingAnimation()
+                        self?.animateContentEntrance()
+                    }
                     
                 case .failure(let error):
                     print("Error fetching subcategories: \(error)")
@@ -326,8 +344,11 @@ extension KidsStoriesViewController: UITableViewDelegate {
             let translation = subcategory.getTranslation(for: currentLanguage) ??
                              subcategory.getTranslation(for: "en")
             
-            // Navigate to episodes of this subcategory
-            navigateToEpisodes(for: subcategory, title: translation?.name ?? "Episodes")
+            if subcategory.hasSubcategories {
+                navigateToChildSubcategories(for: subcategory, title: translation?.name ?? "Subcategories")
+            } else {
+                navigateToEpisodes(for: subcategory, title: translation?.name ?? "Episodes")
+            }
             
         case .recentEpisodes:
             let episode = recentEpisodes[indexPath.row]
@@ -393,10 +414,20 @@ extension KidsStoriesViewController: UITableViewDelegate {
     private func navigateToEpisodes(for subcategory: Subcategory, title: String) {
         if let seriesVC = storyboard?.instantiateViewController(withIdentifier: "SeriesViewController") as? SeriesViewController {
             // Pass tapped subcategory id as category_id for /series API
-            seriesVC.categoryId = subcategory.id
+            seriesVC.categoryId = subcategory.directSeriesId ?? subcategory.id
             seriesVC.categoryTitle = title
             seriesVC.topBannerImage = subcategory.img ?? ""
             performPlayfulPush(seriesVC)
+        }
+    }
+    
+    private func navigateToChildSubcategories(for subcategory: Subcategory, title: String) {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
+            vc.categoryId = categoryId
+            vc.categoryTitle = title
+            vc.hasSubcategories = subcategory.hasSubcategories
+            vc.selectedSubcategoryId = subcategory.id
+            performPlayfulPush(vc)
         }
     }
     

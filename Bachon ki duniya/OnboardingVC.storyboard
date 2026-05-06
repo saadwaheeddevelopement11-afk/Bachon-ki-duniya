@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y6W-OH-hqX">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y6W-OH-hqX">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -22,13 +22,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillProportionally" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="rLT-zG-fvh">
-                                <rect key="frame" x="30" y="148" width="333" height="504"/>
+                                <rect key="frame" x="22" y="130" width="349" height="532"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Image" translatesAutoresizingMaskIntoConstraints="NO" id="zNu-Ut-lRf">
-                                        <rect key="frame" x="0.0" y="0.0" width="333" height="360"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="349" height="388"/>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Innovative learning Modern Lerner" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c0t-Im-nug">
-                                        <rect key="frame" x="0.0" y="372" width="333" height="80"/>
+                                        <rect key="frame" x="0.0" y="400" width="349" height="80"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="80" id="pCG-rz-EXq"/>
                                         </constraints>
@@ -37,7 +37,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="It is a long established fact that a reader wil by the readable content of a page when." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pXV-rt-WPl">
-                                        <rect key="frame" x="0.0" y="464" width="333" height="40"/>
+                                        <rect key="frame" x="0.0" y="492" width="349" height="40"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="40" id="Fbi-ZD-CsH"/>
                                         </constraints>
@@ -79,12 +79,12 @@
                         <color key="backgroundColor" name="appBackground"/>
                         <constraints>
                             <constraint firstItem="C8s-Rz-mCd" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="22" id="5ig-Wv-Fyq"/>
-                            <constraint firstItem="rLT-zG-fvh" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" constant="30" id="IZD-eT-EFH"/>
+                            <constraint firstItem="rLT-zG-fvh" firstAttribute="top" secondItem="vDu-zF-Fre" secondAttribute="top" constant="12" id="IZD-eT-EFH"/>
                             <constraint firstItem="C8s-Rz-mCd" firstAttribute="bottom" secondItem="vDu-zF-Fre" secondAttribute="bottom" constant="-22" id="ORy-Ni-kse"/>
                             <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="C8s-Rz-mCd" secondAttribute="trailing" constant="22" id="UAz-xd-WQr"/>
-                            <constraint firstItem="rLT-zG-fvh" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="30" id="cmG-W4-IyS"/>
-                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="rLT-zG-fvh" secondAttribute="trailing" constant="30" id="eIG-2P-VTV"/>
-                            <constraint firstItem="C8s-Rz-mCd" firstAttribute="top" secondItem="rLT-zG-fvh" secondAttribute="bottom" constant="50" id="tJ7-8f-wmv"/>
+                            <constraint firstItem="rLT-zG-fvh" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="22" id="cmG-W4-IyS"/>
+                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="rLT-zG-fvh" secondAttribute="trailing" constant="22" id="eIG-2P-VTV"/>
+                            <constraint firstItem="C8s-Rz-mCd" firstAttribute="top" secondItem="rLT-zG-fvh" secondAttribute="bottom" constant="40" id="tJ7-8f-wmv"/>
                         </constraints>
                     </view>
                     <connections>
@@ -97,10 +97,10 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Image" width="357" height="446.33334350585938"/>
+        <image name="Image" width="322.33334350585938" height="433.33334350585938"/>
         <image name="SignInBtn" width="310.33334350585938" height="50"/>
         <namedColor name="appBackground">
-            <color red="0.96862745098039216" green="0.94509803921568625" blue="0.89803921568627454" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.93333333333333335" green="0.91764705882352937" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

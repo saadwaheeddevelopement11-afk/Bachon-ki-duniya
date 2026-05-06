@@ -13,6 +13,7 @@ class HomeListingColvCell: UICollectionViewCell {
     @IBOutlet weak var titleLbl: UILabel!
     @IBOutlet weak var descriptionLbl: UILabel!
     @IBOutlet weak var bgView: UIView!
+    @IBOutlet weak var bgImage: UIImageView!
     
     // Add this method
     func configureForBanner() {

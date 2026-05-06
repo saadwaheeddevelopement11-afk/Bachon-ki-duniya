@@ -9,59 +9,167 @@ import UIKit
 import SDWebImage
 
 class HomeViewController: UIViewController {
-    
+
     // MARK: - Properties
     private var homeItems: [HomeItem] = []
+    private var tableSections: [HomeCategoryTableSection] = []
     private var isLoading = false
-    
-    private let itemsPerRow: CGFloat = 2
-    private let spacing: CGFloat = 16
-    private let sectionInset: CGFloat = 16
+    private var lastTopCarouselWidth: CGFloat = 0
+
+    /// Visible “peek” of previous/next banner on left & right edges.
+    private let topCarouselSidePeek: CGFloat = 22
+    private let topCarouselInterItemSpacing: CGFloat = 12
+    private let listingBackgroundPool: [String] = (1...9).map { "bg\($0)" }
+
     private let loadingAnimationKey = "kids.loading.wiggle"
-    
-    @IBOutlet weak var collectionView: UICollectionView!
+
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView?
-    
+    @IBOutlet weak var contentTableView: UITableView!
+    @IBOutlet weak var topHorizontalListColV: UICollectionView!
+    @IBOutlet weak var topCarouselPageControl: UIPageControl!
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupCollectionView()
+        setupTopCarousel()
+        setupTableView()
         setupNavigationBar()
         setupLanguageObserver()
         fetchCategories()
     }
-    
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        let w = topHorizontalListColV.bounds.width
+        guard w > 0, abs(w - lastTopCarouselWidth) > 0.5 else { return }
+        lastTopCarouselWidth = w
+        topHorizontalListColV.collectionViewLayout.invalidateLayout()
+        topHorizontalListColV.layoutIfNeeded()
+        let page = min(topCarouselPageControl.currentPage, max(0, homeItems.count - 1))
+        guard !homeItems.isEmpty else { return }
+        scrollTopCarousel(toPageIndex: page, animated: false)
+        syncTopCarouselPageControlWithScrollOffset()
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    
+
     // MARK: - Setup
-    private func setupCollectionView() {
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        
-        // Register default grid cell
-        collectionView.register(
-            UINib(nibName: "HomeListingColvCell", bundle: nil),
-            forCellWithReuseIdentifier: "HomeListingColvCell"
-        )
-        
-        // Register first banner cell (only index 0)
-        collectionView.register(
-            UINib(nibName: "HomeFirstCollectionViewCell", bundle: nil),
-            forCellWithReuseIdentifier: "HomeFirstCollectionViewCell"
-        )
-        
-        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-            layout.minimumInteritemSpacing = spacing
-            layout.minimumLineSpacing = spacing
-            layout.sectionInset = UIEdgeInsets(top: 0, left: sectionInset, bottom: 0, right: sectionInset)
+    private func setupTableView() {
+        contentTableView.delegate = self
+        contentTableView.dataSource = self
+        contentTableView.separatorStyle = .none
+        contentTableView.backgroundColor = .clear
+        contentTableView.showsVerticalScrollIndicator = false
+        contentTableView.rowHeight = UITableView.automaticDimension
+        contentTableView.estimatedRowHeight = 280
+        if #available(iOS 15.0, *) {
+            contentTableView.sectionHeaderTopPadding = 0
         }
-        
-        // Set semantic content based on current language
+
+        contentTableView.register(
+            UINib(nibName: "HomeTableViewCell", bundle: nil),
+            forCellReuseIdentifier: HomeTableViewCell.reuseIdentifier
+        )
+
         updateSemanticContent()
     }
-    
+
+    private func setupTopCarousel() {
+        topHorizontalListColV.backgroundColor = .clear
+        topHorizontalListColV.showsHorizontalScrollIndicator = false
+        topHorizontalListColV.decelerationRate = .fast
+        topHorizontalListColV.isPagingEnabled = false
+
+        if let flow = topHorizontalListColV.collectionViewLayout as? UICollectionViewFlowLayout {
+            flow.scrollDirection = .horizontal
+            flow.minimumLineSpacing = topCarouselInterItemSpacing
+            flow.minimumInteritemSpacing = 0
+            flow.sectionInset = .zero
+        }
+
+        topHorizontalListColV.dataSource = self
+        topHorizontalListColV.delegate = self
+
+        topHorizontalListColV.register(
+            UINib(nibName: "HomeCollectionViewCell", bundle: nil),
+            forCellWithReuseIdentifier: HomeCollectionViewCell.reuseIdentifier
+        )
+
+        refreshTopHorizontalListFromHomeItems(resetPage: true)
+        topCarouselPageControl.hidesForSinglePage = true
+        topCarouselPageControl.pageIndicatorTintColor = UIColor.white.withAlphaComponent(0.35)
+        topCarouselPageControl.currentPageIndicatorTintColor = .white
+        topCarouselPageControl.addTarget(self, action: #selector(topCarouselPageControlChanged(_:)), for: .valueChanged)
+    }
+
+    /// Top strip uses the same `homeItems` from `/categories` until a dedicated carousel API exists.
+    private func refreshTopHorizontalListFromHomeItems(resetPage: Bool) {
+        let count = homeItems.count
+        topCarouselPageControl.numberOfPages = count
+        if !resetPage {
+            topCarouselPageControl.currentPage = min(topCarouselPageControl.currentPage, max(0, count - 1))
+        }
+        topHorizontalListColV.reloadData()
+        topHorizontalListColV.layoutIfNeeded()
+        if resetPage {
+            scrollTopCarousel(toPageIndex: 0, animated: false)
+        }
+        syncTopCarouselPageControlWithScrollOffset()
+    }
+
+    private func topCarouselCellWidth(for collectionWidth: CGFloat) -> CGFloat {
+        max(200, collectionWidth - 2 * topCarouselSidePeek)
+    }
+
+    /// Offset so `index` sits centered horizontally (neighbor cells peek equally).
+    private func topCarouselContentOffsetCentered(forPage index: Int) -> CGFloat {
+        guard let cv = topHorizontalListColV,
+              index >= 0, index < homeItems.count else { return 0 }
+        cv.layoutIfNeeded()
+        guard let attrs = cv.layoutAttributesForItem(at: IndexPath(item: index, section: 0)) else { return 0 }
+        let target = attrs.center.x - cv.bounds.width / 2
+        let maxOffset = max(0, cv.contentSize.width - cv.bounds.width)
+        return min(max(0, target), maxOffset)
+    }
+
+    private func nearestTopCarouselPage(forProposedOffsetX proposedX: CGFloat) -> Int {
+        guard let cv = topHorizontalListColV,
+              !homeItems.isEmpty, cv.bounds.width > 0 else { return 0 }
+        cv.layoutIfNeeded()
+        let visibleMidX = proposedX + cv.bounds.width / 2
+        var best = 0
+        var bestDelta = CGFloat.greatestFiniteMagnitude
+        for i in 0..<homeItems.count {
+            guard let attrs = cv.layoutAttributesForItem(at: IndexPath(item: i, section: 0)) else { continue }
+            let delta = abs(attrs.center.x - visibleMidX)
+            if delta < bestDelta {
+                bestDelta = delta
+                best = i
+            }
+        }
+        return best
+    }
+
+    private func syncTopCarouselPageControlWithScrollOffset() {
+        guard let cv = topHorizontalListColV,
+              cv.bounds.width > 0, !homeItems.isEmpty else { return }
+        let page = nearestTopCarouselPage(forProposedOffsetX: cv.contentOffset.x)
+        if topCarouselPageControl.currentPage != page {
+            topCarouselPageControl.currentPage = page
+        }
+    }
+
+    private func scrollTopCarousel(toPageIndex page: Int, animated: Bool) {
+        let x = topCarouselContentOffsetCentered(forPage: page)
+        topHorizontalListColV.setContentOffset(CGPoint(x: x, y: 0), animated: animated)
+    }
+
+    @objc private func topCarouselPageControlChanged(_ sender: UIPageControl) {
+        scrollTopCarousel(toPageIndex: sender.currentPage, animated: true)
+    }
+
     private func setupNavigationBar() {
         let languageButton = UIBarButtonItem(
             title: LanguageManager.shared.isRTL() ? "🌐 لغات" : "🌐 Languages",
@@ -70,11 +178,10 @@ class HomeViewController: UIViewController {
             action: #selector(languageButtonTapped)
         )
         navigationItem.rightBarButtonItem = languageButton
-        
-        // Update title based on language
+
         navigationItem.title = LanguageManager.shared.isRTL() ? "الصفحة الرئيسية" : "Home"
     }
-    
+
     private func setupLanguageObserver() {
         NotificationCenter.default.addObserver(
             self,
@@ -83,44 +190,43 @@ class HomeViewController: UIViewController {
             object: nil
         )
     }
-    
+
     @objc private func languageChanged() {
-        // Reload categories with new language
         fetchCategories()
         updateSemanticContent()
         setupNavigationBar()
     }
-    
+
     private func updateSemanticContent() {
         if LanguageManager.shared.isRTL() {
             UIView.appearance().semanticContentAttribute = .forceRightToLeft
-            collectionView.semanticContentAttribute = .forceRightToLeft
+            contentTableView.semanticContentAttribute = .forceRightToLeft
+            topHorizontalListColV.semanticContentAttribute = .forceRightToLeft
         } else {
             UIView.appearance().semanticContentAttribute = .forceLeftToRight
-            collectionView.semanticContentAttribute = .forceLeftToRight
+            contentTableView.semanticContentAttribute = .forceLeftToRight
+            topHorizontalListColV.semanticContentAttribute = .forceLeftToRight
         }
     }
-    
+
     @objc private func languageButtonTapped() {
         if let languageVC = storyboard?.instantiateViewController(withIdentifier: "LanguageSelectionViewController") {
             performPlayfulPush(languageVC)
         }
     }
-    
+
     // MARK: - API Calls
     private func fetchCategories() {
         let currentLanguage = LanguageManager.shared.currentLanguageCode
         isLoading = true
         startPlayfulLoadingAnimation()
-        collectionView.alpha = 0.7
-        
+        contentTableView.alpha = 0.7
+
         APIManager.shared.fetchCategories(languageCode: currentLanguage) { [weak self] result in
             DispatchQueue.main.async {
                 self?.isLoading = false
                 self?.stopPlayfulLoadingAnimation()
-                
-                print(result)
-                
+
                 switch result {
                 case .success(let categories):
                     self?.processCategories(categories)
@@ -130,54 +236,97 @@ class HomeViewController: UIViewController {
             }
         }
     }
-    
+
     private func processCategories(_ categories: [Category]) {
         let currentLanguage = LanguageManager.shared.currentLanguageCode
+        let sequencedBackgroundNames = buildRepeatingBackgroundSequence(forCount: categories.count)
         var processedItems: [HomeItem] = []
-        
-        for category in categories {
+
+        for (index, category) in categories.enumerated() {
             if let translation = category.getTranslation(for: currentLanguage) {
-                let homeItem = HomeItem(
+                processedItems.append(HomeItem(
                     id: category.id,
                     imageUrl: category.img ?? "",
                     title: translation.name,
                     description: translation.description,
+                    backgroundImageName: sequencedBackgroundNames[index],
                     color: category.color,
                     order: category.order,
-                    hasSubcategories: category.hasSubcategories  // Pass this information
-                )
-                processedItems.append(homeItem)
+                    hasSubcategories: category.hasSubcategories,
+                    directSeriesId: category.directSeriesId
+                ))
             } else if let defaultTranslation = category.getTranslation(for: "en") {
-                // Fallback to English if current language translation not available
-                let homeItem = HomeItem(
+                processedItems.append(HomeItem(
                     id: category.id,
                     imageUrl: category.img ?? "",
                     title: defaultTranslation.name,
                     description: defaultTranslation.description,
+                    backgroundImageName: sequencedBackgroundNames[index],
                     color: category.color,
                     order: category.order,
-                    hasSubcategories: category.hasSubcategories  // Pass this information
-                )
-                processedItems.append(homeItem)
+                    hasSubcategories: category.hasSubcategories,
+                    directSeriesId: category.directSeriesId
+                ))
             }
         }
-        
-        // Sort by order
+
         processedItems.sort(by: { $0.order < $1.order })
-        
-        self.homeItems = processedItems
-        collectionView.reloadData()
+        homeItems = processedItems
+        rebuildTableSections()
+        contentTableView.reloadData()
+        refreshTopHorizontalListFromHomeItems(resetPage: true)
         animateContentEntrance()
     }
-    
+
+    /// Fixed order sequence: bg1...bg9, then repeats from bg1.
+    private func buildRepeatingBackgroundSequence(forCount count: Int) -> [String] {
+        guard count > 0, !listingBackgroundPool.isEmpty else { return [] }
+        return (0..<count).map { index in
+            listingBackgroundPool[index % listingBackgroundPool.count]
+        }
+    }
+
+    private func rebuildTableSections() {
+        let isRTL = LanguageManager.shared.isRTL()
+        let quickAccessTitle = isRTL ? "وصول سريع" : "Quick access"
+        let allCategoriesTitle = isRTL ? "الفئات" : "Categories"
+
+        var sections: [HomeCategoryTableSection] = []
+
+        guard !homeItems.isEmpty else {
+            tableSections = []
+            return
+        }
+
+        // Row 0: horizontal quick access — same categories, compact tiles
+        sections.append(
+            HomeCategoryTableSection(
+                title: quickAccessTitle,
+                items: homeItems,
+                layout: .horizontalQuickAccess
+            )
+        )
+
+        // Row 1: full list — vertical grid, two tiles per row
+        sections.append(
+            HomeCategoryTableSection(
+                title: allCategoriesTitle,
+                items: homeItems,
+                layout: .verticalGrid
+            )
+        )
+
+        tableSections = sections
+    }
+
     private func showError(_ error: Error) {
         let alertMessage = LanguageManager.shared.isRTL() ?
             "فشل تحميل الفئات: \(error.localizedDescription)" :
             "Failed to load categories: \(error.localizedDescription)"
-        
+
         let retryTitle = LanguageManager.shared.isRTL() ? "إعادة المحاولة" : "Retry"
         let okTitle = LanguageManager.shared.isRTL() ? "موافق" : "OK"
-        
+
         let alert = UIAlertController(
             title: LanguageManager.shared.isRTL() ? "خطأ" : "Error",
             message: alertMessage,
@@ -189,33 +338,22 @@ class HomeViewController: UIViewController {
         alert.addAction(UIAlertAction(title: okTitle, style: .cancel))
         present(alert, animated: true)
     }
-    
-    // Helper method to load image from URL with caching
-    private func loadImage(from urlString: String, into imageView: UIImageView) {
-        let placeholder = UIImage(named: "placeholder")
-        guard !urlString.isEmpty, let url = URL(string: urlString) else {
-            imageView.image = placeholder
-            return
-        }
-        
-        imageView.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
-    }
-    
+
     @IBAction func languageSelectionBtn(_ sender: UIButton) {
-        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LanguageSelectionViewController") as? LanguageSelectionViewController {
-            self.present(vc, animated: true)
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "LanguageSelectionViewController") as? LanguageSelectionViewController {
+            present(vc, animated: true)
         }
     }
-    
+
     private func startPlayfulLoadingAnimation() {
         guard let loadingIndicator else { return }
         loadingIndicator.startAnimating()
-        
+
         UIView.animate(withDuration: 0.35, delay: 0, options: [.autoreverse, .repeat, .allowUserInteraction]) {
             loadingIndicator.transform = CGAffineTransform(scaleX: 1.18, y: 1.18)
             loadingIndicator.alpha = 0.8
         }
-        
+
         let wiggle = CAKeyframeAnimation(keyPath: "transform.rotation")
         wiggle.values = [-0.06, 0.06, -0.04, 0.04, 0]
         wiggle.duration = 0.8
@@ -223,7 +361,7 @@ class HomeViewController: UIViewController {
         wiggle.isAdditive = true
         loadingIndicator.layer.add(wiggle, forKey: loadingAnimationKey)
     }
-    
+
     private func stopPlayfulLoadingAnimation() {
         guard let loadingIndicator else { return }
         loadingIndicator.layer.removeAnimation(forKey: loadingAnimationKey)
@@ -232,9 +370,9 @@ class HomeViewController: UIViewController {
         loadingIndicator.transform = .identity
         loadingIndicator.alpha = 1
     }
-    
+
     private func animateContentEntrance() {
-        collectionView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
+        contentTableView.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
         UIView.animate(
             withDuration: 0.45,
             delay: 0,
@@ -242,11 +380,11 @@ class HomeViewController: UIViewController {
             initialSpringVelocity: 0.4,
             options: [.curveEaseOut]
         ) { [weak self] in
-            self?.collectionView.alpha = 1
-            self?.collectionView.transform = .identity
+            self?.contentTableView.alpha = 1
+            self?.contentTableView.transform = .identity
         }
     }
-    
+
     private func performPlayfulPush(_ viewController: UIViewController) {
         guard let navigationController else { return }
         let transition = CATransition()
@@ -257,109 +395,38 @@ class HomeViewController: UIViewController {
         navigationController.view.layer.add(transition, forKey: kCATransition)
         navigationController.pushViewController(viewController, animated: false)
     }
-}
 
-// MARK: - UICollectionViewDataSource
-extension HomeViewController: UICollectionViewDataSource {
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return homeItems.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let item = homeItems[indexPath.item]
-        let isRTL = LanguageManager.shared.isRTL()
-        
-        if indexPath.item == 0 {
-            guard let firstCell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: "HomeFirstCollectionViewCell",
-                for: indexPath
-            ) as? HomeFirstCollectionViewCell else {
-                return UICollectionViewCell()
-            }
-            
-            loadImage(from: item.imageUrl, into: firstCell.bannerImageView)
-            firstCell.titleLbl.text = item.title
-            firstCell.descriptionLbl.text = item.description
-            firstCell.titleLbl.textAlignment = .center //isRTL ? .right : .left
-            firstCell.descriptionLbl.textAlignment = isRTL ? .right : .left
-            
-            return firstCell
-        }
-        
-        guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: "HomeListingColvCell",
-            for: indexPath
-        ) as? HomeListingColvCell else {
-            return UICollectionViewCell()
-        }
-        
-        loadImage(from: item.imageUrl, into: cell.bannerImageView)
-        cell.titleLbl.text = item.title
-        cell.descriptionLbl.text = item.description
-        
-        // Apply background color if available
-//        if !item.color.isEmpty {
-//            cell.contentView.backgroundColor = UIColor(hex: item.color)
-//        }
-        
-        // Handle RTL text alignment
-        if isRTL {
-            cell.titleLbl.textAlignment = .right
-            cell.descriptionLbl.textAlignment = .right
-        } else {
-            cell.titleLbl.textAlignment = .left
-            cell.descriptionLbl.textAlignment = .left
-        }
-        
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let item = homeItems[indexPath.item]
-        navigateToAppropriateViewController(item: item)
-    }
-
+    // MARK: - Navigation
     private func navigateToAppropriateViewController(item: HomeItem) {
-        // Determine which view controller to push based on category title or ID
-        
         switch item.title {
         case CategoryType.kidsStories.rawValue:
             navigateToKidsStories(with: item)
-            
         case CategoryType.islamicKnowledge.rawValue:
             navigateToIslamicKnowledge(with: item)
-            
         case CategoryType.generalKnowledge.rawValue:
             navigateToGeneralKnowledge(with: item)
-            
         case CategoryType.kidsShows.rawValue:
             navigateToKidsShows(with: item)
-            
         case CategoryType.bedtimeStories.rawValue:
             navigateToBedtimeStories(with: item)
-            
         case CategoryType.growWell.rawValue:
             navigateToGeneralKnowledge(with: item)
-//            navigateToGrowWell(with: item)
-            
         case CategoryType.poems.rawValue:
             navigateToPoems(with: item)
-            
         case CategoryType.letsLearn.rawValue:
             navigateToLetsLearn(with: item)
-            
         case CategoryType.riddles.rawValue:
             navigateToRiddles(with: item)
-            
         default:
-            // Fallback to generic IslamicKnowledgeViewController
             navigateToGenericCategory(with: item)
         }
     }
 
-    // MARK: - Navigation Methods
     private func navigateToKidsStories(with item: HomeItem) {
+        if !item.hasSubcategories {
+            navigateDirectlyToSeries(withId: item.directSeriesId ?? item.id, title: item.title, bannerImage: item.imageUrl)
+            return
+        }
         if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
             vc.categoryId = item.id
             vc.categoryTitle = item.title
@@ -369,6 +436,10 @@ extension HomeViewController: UICollectionViewDataSource {
     }
 
     private func navigateToIslamicKnowledge(with item: HomeItem) {
+        if !item.hasSubcategories {
+            navigateDirectlyToSeries(withId: item.directSeriesId ?? item.id, title: item.title, bannerImage: item.imageUrl)
+            return
+        }
         if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
             vc.categoryId = item.id
             vc.categoryTitle = item.title
@@ -378,6 +449,10 @@ extension HomeViewController: UICollectionViewDataSource {
     }
 
     private func navigateToGeneralKnowledge(with item: HomeItem) {
+        if !item.hasSubcategories {
+            navigateDirectlyToSeries(withId: item.directSeriesId ?? item.id, title: item.title, bannerImage: item.imageUrl)
+            return
+        }
         if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
             vc.categoryId = item.id
             vc.categoryTitle = item.title
@@ -386,87 +461,142 @@ extension HomeViewController: UICollectionViewDataSource {
         }
     }
 
-    private func navigateToKidsShows(with item: HomeItem) {
-//        if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsShowsViewController") as? KidsShowsViewController {
-//            vc.categoryId = item.id
-//            vc.categoryTitle = item.title
-//            vc.hasSubcategories = item.hasSubcategories
-//            navigationController?.pushViewController(vc, animated: true)
-//        }
+    private func navigateDirectlyToSeries(withId id: Int, title: String, bannerImage: String) {
+        if let seriesVC = storyboard?.instantiateViewController(withIdentifier: "SeriesViewController") as? SeriesViewController {
+            seriesVC.categoryId = id
+            seriesVC.categoryTitle = title
+            seriesVC.topBannerImage = bannerImage
+            performPlayfulPush(seriesVC)
+        }
     }
 
-    private func navigateToBedtimeStories(with item: HomeItem) {
-//        if let vc = storyboard?.instantiateViewController(withIdentifier: "BedtimeStoriesViewController") as? BedtimeStoriesViewController {
-//            vc.categoryId = item.id
-//            vc.categoryTitle = item.title
-//            vc.hasSubcategories = item.hasSubcategories
-//            navigationController?.pushViewController(vc, animated: true)
-//        }
+    private func navigateToKidsShows(with item: HomeItem) {}
+    private func navigateToBedtimeStories(with item: HomeItem) {}
+    private func navigateToGrowWell(with item: HomeItem) {}
+    private func navigateToPoems(with item: HomeItem) {}
+    private func navigateToLetsLearn(with item: HomeItem) {}
+    private func navigateToRiddles(with item: HomeItem) {}
+    private func navigateToGenericCategory(with item: HomeItem) {}
+}
+
+// MARK: - Table sections model
+private struct HomeCategoryTableSection {
+    let title: String
+    let items: [HomeItem]
+    let layout: HomeCategoryRowLayout
+}
+
+// MARK: - Top carousel (horizontal)
+extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        guard collectionView === topHorizontalListColV else { return 0 }
+        return homeItems.count
     }
 
-    private func navigateToGrowWell(with item: HomeItem) {
-//        if let vc = storyboard?.instantiateViewController(withIdentifier: "GrowWellViewController") as? GrowWellViewController {
-//            vc.categoryId = item.id
-//            vc.categoryTitle = item.title
-//            vc.hasSubcategories = item.hasSubcategories
-//            navigationController?.pushViewController(vc, animated: true)
-//        }
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard collectionView === topHorizontalListColV,
+              let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: HomeCollectionViewCell.reuseIdentifier,
+                for: indexPath
+              ) as? HomeCollectionViewCell
+        else {
+            return UICollectionViewCell()
+        }
+        let item = homeItems[indexPath.item]
+        cell.configure(with: item, showPlayOverlay: true)
+        return cell
     }
 
-    private func navigateToPoems(with item: HomeItem) {
-//        if let vc = storyboard?.instantiateViewController(withIdentifier: "PoemsViewController") as? PoemsViewController {
-//            vc.categoryId = item.id
-//            vc.categoryTitle = item.title
-//            vc.hasSubcategories = item.hasSubcategories
-//            navigationController?.pushViewController(vc, animated: true)
-//        }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard collectionView === topHorizontalListColV else { return }
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let item = homeItems[indexPath.item]
+        navigateToAppropriateViewController(item: item)
     }
 
-    private func navigateToLetsLearn(with item: HomeItem) {
-//        if let vc = storyboard?.instantiateViewController(withIdentifier: "LetsLearnViewController") as? LetsLearnViewController {
-//            vc.categoryId = item.id
-//            vc.categoryTitle = item.title
-//            vc.hasSubcategories = item.hasSubcategories
-//            navigationController?.pushViewController(vc, animated: true)
-//        }
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        guard collectionView === topHorizontalListColV else { return .zero }
+        let cw = max(collectionView.bounds.width, 1)
+        let ch = collectionView.bounds.height
+        let cellW = topCarouselCellWidth(for: cw)
+        return CGSize(width: cellW, height: max(ch, 1))
     }
 
-    private func navigateToRiddles(with item: HomeItem) {
-//        if let vc = storyboard?.instantiateViewController(withIdentifier: "RiddlesViewController") as? RiddlesViewController {
-//            vc.categoryId = item.id
-//            vc.categoryTitle = item.title
-//            vc.hasSubcategories = item.hasSubcategories
-//            navigationController?.pushViewController(vc, animated: true)
-//        }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView === topHorizontalListColV else { return }
+        syncTopCarouselPageControlWithScrollOffset()
     }
 
-    private func navigateToGenericCategory(with item: HomeItem) {
-        // Fallback to generic view controller
-//        if let vc = storyboard?.instantiateViewController(withIdentifier: "IslamicKnowledgeViewController") as? IslamicKnowledgeViewController {
-//            vc.categoryId = item.id
-//            vc.categoryTitle = item.title
-//            vc.hasSubcategories = item.hasSubcategories
-//            navigationController?.pushViewController(vc, animated: true)
-//        }
+    func scrollViewWillEndDragging(
+        _ scrollView: UIScrollView,
+        withVelocity velocity: CGPoint,
+        targetContentOffset: UnsafeMutablePointer<CGPoint>
+    ) {
+        guard scrollView === topHorizontalListColV, !homeItems.isEmpty else { return }
+        let proposed = targetContentOffset.pointee.x
+        let page = nearestTopCarouselPage(forProposedOffsetX: proposed)
+        targetContentOffset.pointee.x = topCarouselContentOffsetCentered(forPage: page)
+    }
+
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard scrollView === topHorizontalListColV else { return }
+        syncTopCarouselPageControlWithScrollOffset()
+    }
+
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        guard scrollView === topHorizontalListColV else { return }
+        syncTopCarouselPageControlWithScrollOffset()
     }
 }
 
-// MARK: - UICollectionViewDelegateFlowLayout
-extension HomeViewController: UICollectionViewDelegateFlowLayout {
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let totalWidth = collectionView.bounds.width
-        let availableWidth = totalWidth - (sectionInset * 2)
-        
-        if indexPath.item == 0 {
-            // First item (banner) takes full width
-            let bannerHeight: CGFloat = 210
-            return CGSize(width: availableWidth, height: bannerHeight)
-        } else {
-            // All other items: 2 per row
-            let itemWidth = (availableWidth - spacing) / itemsPerRow
-            let itemHeight = itemWidth * 1.1 // Aspect ratio for category cells
-            return CGSize(width: itemWidth, height: itemHeight)
+// MARK: - UITableView
+extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        tableSections.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: HomeTableViewCell.reuseIdentifier,
+            for: indexPath
+        ) as? HomeTableViewCell else {
+            return UITableViewCell()
+        }
+
+        let model = tableSections[indexPath.row]
+        let innerWidth = tableView.bounds.width > 1 ? tableView.bounds.width : (view.bounds.width - 24)
+        cell.configure(
+            title: model.title,
+            items: model.items,
+            layoutKind: model.layout,
+            contentWidth: innerWidth,
+            isRTL: LanguageManager.shared.isRTL()
+        )
+        cell.onSelectItem = { [weak self] item in
+            self?.navigateToAppropriateViewController(item: item)
+        }
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        guard let homeCell = cell as? HomeTableViewCell else { return }
+        let model = tableSections[indexPath.row]
+        let innerWidth = tableView.bounds.width > 1 ? tableView.bounds.width : (view.bounds.width - 24)
+        homeCell.configure(
+            title: model.title,
+            items: model.items,
+            layoutKind: model.layout,
+            contentWidth: innerWidth,
+            isRTL: LanguageManager.shared.isRTL()
+        )
+        homeCell.onSelectItem = { [weak self] item in
+            self?.navigateToAppropriateViewController(item: item)
         }
     }
 }
@@ -491,4 +621,3 @@ extension UIColor {
         self.init(red: CGFloat(r) / 255, green: CGFloat(g) / 255, blue: CGFloat(b) / 255, alpha: CGFloat(a) / 255)
     }
 }
-
