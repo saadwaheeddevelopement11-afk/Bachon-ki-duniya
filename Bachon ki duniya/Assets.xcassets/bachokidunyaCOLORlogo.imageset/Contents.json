@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Kido logo.png",
+      "filename" : "image 665.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Kido logo@2x.png",
+      "filename" : "image 665@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Kido logo@3x.png",
+      "filename" : "image 665@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

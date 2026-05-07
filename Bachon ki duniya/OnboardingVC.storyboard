@@ -22,30 +22,56 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillProportionally" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="rLT-zG-fvh">
-                                <rect key="frame" x="22" y="130" width="349" height="532"/>
+                                <rect key="frame" x="22" y="130" width="349" height="552"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Image" translatesAutoresizingMaskIntoConstraints="NO" id="zNu-Ut-lRf">
-                                        <rect key="frame" x="0.0" y="0.0" width="349" height="388"/>
-                                    </imageView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Innovative learning Modern Lerner" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c0t-Im-nug">
-                                        <rect key="frame" x="0.0" y="400" width="349" height="80"/>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7m9-ws-1Z9">
+                                        <rect key="frame" x="0.0" y="0.0" width="349" height="368"/>
+                                        <subviews>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Image" translatesAutoresizingMaskIntoConstraints="NO" id="zNu-Ut-lRf">
+                                                <rect key="frame" x="0.0" y="0.0" width="349" height="368"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            </imageView>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bachokidunyaCOLORlogo" translatesAutoresizingMaskIntoConstraints="NO" id="UqK-Yi-A3H">
+                                                <rect key="frame" x="87.333333333333329" y="0.0" width="174.33333333333337" height="105"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="105" id="Rme-vF-nOi"/>
+                                                </constraints>
+                                            </imageView>
+                                        </subviews>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="80" id="pCG-rz-EXq"/>
+                                            <constraint firstAttribute="bottom" secondItem="zNu-Ut-lRf" secondAttribute="bottom" id="Bfy-ZH-Rr1"/>
+                                            <constraint firstItem="UqK-Yi-A3H" firstAttribute="centerX" secondItem="7m9-ws-1Z9" secondAttribute="centerX" id="ba3-IT-yXO"/>
+                                            <constraint firstItem="UqK-Yi-A3H" firstAttribute="top" secondItem="7m9-ws-1Z9" secondAttribute="top" id="gI4-fm-XSq"/>
+                                            <constraint firstItem="zNu-Ut-lRf" firstAttribute="leading" secondItem="7m9-ws-1Z9" secondAttribute="leading" id="gTy-me-rgp"/>
+                                            <constraint firstItem="zNu-Ut-lRf" firstAttribute="top" secondItem="7m9-ws-1Z9" secondAttribute="top" id="hFs-Gu-KHE"/>
+                                            <constraint firstAttribute="trailing" secondItem="zNu-Ut-lRf" secondAttribute="trailing" id="kSB-jY-kGs"/>
+                                            <constraint firstItem="UqK-Yi-A3H" firstAttribute="width" secondItem="7m9-ws-1Z9" secondAttribute="width" multiplier="0.5" id="mtq-eA-Kxp"/>
                                         </constraints>
-                                        <fontDescription key="fontDescription" name="KiddosyFree-Regular" family="Kiddosy Free" pointSize="36"/>
+                                    </view>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Big Fun for Little Minds" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c0t-Im-nug">
+                                        <rect key="frame" x="0.0" y="380" width="349" height="120"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="120" id="pCG-rz-EXq"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="KiddosyFree-Regular" family="Kiddosy Free" pointSize="50"/>
                                         <color key="textColor" red="0.82745098039215681" green="0.18431372549019609" blue="0.18431372549019609" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="It is a long established fact that a reader wil by the readable content of a page when." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pXV-rt-WPl">
-                                        <rect key="frame" x="0.0" y="492" width="349" height="40"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pXV-rt-WPl">
+                                        <rect key="frame" x="0.0" y="512" width="349" height="40"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="40" id="Fbi-ZD-CsH"/>
                                         </constraints>
+                                        <string key="text">AI-powered stories, learning &amp; play.
+All in one place.</string>
                                         <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                         <color key="textColor" red="0.14509803921568626" green="0.082352941176470587" blue="0.015686274509803921" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </stackView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="C8s-Rz-mCd">
                                 <rect key="frame" x="22" y="702" width="349" height="60"/>
@@ -84,7 +110,7 @@
                             <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="C8s-Rz-mCd" secondAttribute="trailing" constant="22" id="UAz-xd-WQr"/>
                             <constraint firstItem="rLT-zG-fvh" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" constant="22" id="cmG-W4-IyS"/>
                             <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="rLT-zG-fvh" secondAttribute="trailing" constant="22" id="eIG-2P-VTV"/>
-                            <constraint firstItem="C8s-Rz-mCd" firstAttribute="top" secondItem="rLT-zG-fvh" secondAttribute="bottom" constant="40" id="tJ7-8f-wmv"/>
+                            <constraint firstItem="C8s-Rz-mCd" firstAttribute="top" secondItem="rLT-zG-fvh" secondAttribute="bottom" constant="20" id="tJ7-8f-wmv"/>
                         </constraints>
                     </view>
                     <connections>
@@ -98,6 +124,7 @@
     </scenes>
     <resources>
         <image name="Image" width="322.33334350585938" height="433.33334350585938"/>
+        <image name="bachokidunyaCOLORlogo" width="163.33332824707031" height="50.666667938232422"/>
         <image name="continueBtn" width="307.66665649414062" height="46.666667938232422"/>
         <namedColor name="appBackground">
             <color red="0.93333333333333335" green="0.91764705882352937" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
