@@ -3,7 +3,7 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
-        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="collection view cell content view" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -12,7 +12,7 @@
         <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="HomeCollectionViewCell" id="HCV-CELL" customClass="HomeCollectionViewCell" customModule="Bachon_ki_duniya" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="350" height="150"/>
             <autoresizingMask key="autoresizingMask"/>
-            <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" collectionViewCell="HCV-CELL" id="HCV-CNT">
+            <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="HCV-CNT">
                 <rect key="frame" x="0.0" y="0.0" width="350" height="150"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
@@ -23,13 +23,13 @@
                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="playIcon" translatesAutoresizingMaskIntoConstraints="NO" id="5IC-IG-t4M">
                         <rect key="frame" x="145" y="45" width="60" height="60"/>
                         <constraints>
-                            <constraint firstAttribute="height" constant="60" id="7PF-rF-ydF"/>
-                            <constraint firstAttribute="width" constant="60" id="cHb-8d-xtp"/>
+                            <constraint firstAttribute="width" secondItem="5IC-IG-t4M" secondAttribute="height" multiplier="1:1" id="MPa-ld-jMV"/>
                         </constraints>
                     </imageView>
                 </subviews>
                 <constraints>
                     <constraint firstAttribute="bottom" secondItem="I7x-pw-8VB" secondAttribute="bottom" id="Gav-uo-vWx"/>
+                    <constraint firstItem="5IC-IG-t4M" firstAttribute="height" secondItem="HCV-CNT" secondAttribute="height" multiplier="0.4" id="O1p-5F-jcp"/>
                     <constraint firstAttribute="trailing" secondItem="I7x-pw-8VB" secondAttribute="trailing" id="b3X-Y1-vj5"/>
                     <constraint firstItem="I7x-pw-8VB" firstAttribute="leading" secondItem="HCV-CNT" secondAttribute="leading" id="fma-EP-WXN"/>
                     <constraint firstItem="I7x-pw-8VB" firstAttribute="top" secondItem="HCV-CNT" secondAttribute="top" id="hhf-pj-Eep"/>

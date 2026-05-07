@@ -49,6 +49,16 @@ class HomeCollectionViewCell: UICollectionViewCell {
         imageView?.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
     }
 
+    func configure(withImageURL imageURL: String?, showPlayOverlay: Bool = false) {
+        playOverlayImageView?.isHidden = !showPlayOverlay
+        let placeholder = UIImage(named: "placeholder")
+        guard let imageURL, !imageURL.isEmpty, let url = URL(string: imageURL) else {
+            imageView?.image = placeholder
+            return
+        }
+        imageView?.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         let shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: 12)

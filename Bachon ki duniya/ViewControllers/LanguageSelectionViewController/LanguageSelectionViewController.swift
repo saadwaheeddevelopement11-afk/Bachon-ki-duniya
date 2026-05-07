@@ -21,6 +21,8 @@ class LanguageSelectionViewController: UIViewController {
     private var isLoading = false
     private var selectedLanguage: Language?
     private var originalLanguageCode: String
+    private let languageBackgroundColorNames = ["blue", "purple", "yellow", "lightGreen", "pink", "green", "turquoise"]
+    private let lightBackgroundColorNames: Set<String> = ["yellow", "lightGreen"]
     
     // MARK: - Initialization
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
@@ -220,21 +222,21 @@ extension LanguageSelectionViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: "LanguagesTableViewCell",
-            for: indexPath
-        ) as? LanguagesTableViewCell else {
-            return UITableViewCell()
-        }
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "LanguagesTableViewCell", for: indexPath) as? LanguagesTableViewCell else {
+            return UITableViewCell()}
         
         let language = languages[indexPath.row]
         
         // Configure label with API value
         cell.languageName.text = language.nativeName
         
-        // Selected state with border on bgImage
+        let colorName = languageBackgroundColorNames[indexPath.row % languageBackgroundColorNames.count]
+        let bgColor = UIColor(named: colorName) ?? .systemGray5
+        
+        let useDarkSelectedText = lightBackgroundColorNames.contains(colorName)
+        // Selected state with high-contrast text + shadow
         let isSelectedLanguage = selectedLanguage?.languageCode == language.languageCode
-        cell.configureSelection(isSelected: isSelectedLanguage)
+        cell.configure(backgroundColor: bgColor, isSelected: isSelectedLanguage, useDarkSelectedText: useDarkSelectedText)
         
         // Set text alignment based on language direction
         if language.direction == "RTL" {
@@ -245,6 +247,10 @@ extension LanguageSelectionViewController: UITableViewDataSource {
         
         return cell
     }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return tableView.bounds.height / 7
+    }
 }
 
 // MARK: - UITableViewDelegate
@@ -252,13 +258,19 @@ extension LanguageSelectionViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
         let selected = languages[indexPath.row]
-        
-        // Update selected language
+        let previousSelectedCode = selectedLanguage?.languageCode
         selectedLanguage = selected
-        
-        // Reload table to update checkmark positions
-        tableView.reloadData()
+
+        var rowsToReload: [IndexPath] = [indexPath]
+        if let previousCode = previousSelectedCode,
+           let previousIndex = languages.firstIndex(where: { $0.languageCode == previousCode }),
+           previousIndex != indexPath.row {
+            rowsToReload.append(IndexPath(row: previousIndex, section: 0))
+        }
+
+        UIView.performWithoutAnimation {
+            tableView.reloadRows(at: rowsToReload, with: .none)
+        }
     }
 }

@@ -303,7 +303,7 @@ enum CategoryType: String {
     case islamicKnowledge = "Islamic Knowledge"
     case generalKnowledge = "General Knowledge"
     case kidsShows = "Kids Shows"
-    case bedtimeStories = "Bedtime Stories & Poems"
+    case bedtimeStories = "Bedtime Stories"
     case growWell = "Grow Well"
     case poems = "Poems"
     case letsLearn = "Lets Learn"

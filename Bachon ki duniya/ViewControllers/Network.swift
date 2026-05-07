@@ -37,11 +37,8 @@ class APIManager {
             }
             
             do {
-                let decoder = JSONDecoder()
-                let response = try decoder.decode(CategoryResponse.self, from: data)
-                // Sort categories by order
-                let sortedCategories = response.data.sorted(by: { $0.order < $1.order })
-                completion(.success(sortedCategories))
+                let categories = try self.decodeCategories(from: data)
+                completion(.success(categories))
             } catch {
                 completion(.failure(error))
             }
@@ -331,6 +328,44 @@ extension APIManager {
             }
         }.resume()
     }
+
+    func fetchLatestEpisodes(languageCode: String, completion: @escaping (Result<[LatestEpisodeCategory], Error>) -> Void) {
+        let urlString = "https://kidskahani.ideationtec.live/latest-episodes?lang=\(languageCode)"
+
+        guard let url = URL(string: urlString) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let data = data else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                return
+            }
+
+            do {
+                let decoder = JSONDecoder()
+                let response = try decoder.decode(LatestEpisodesResponse.self, from: data)
+                guard response.status == "success" else {
+                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "API returned error status"])))
+                    return
+                }
+                completion(.success(response.data))
+            } catch {
+                print("Decoding error: \(error)")
+                completion(.failure(error))
+            }
+        }.resume()
+    }
     
     private func decodeSearchEpisodes(from data: Data) throws -> [SearchEpisode] {
         let decoder = JSONDecoder()
@@ -374,6 +409,38 @@ extension APIManager {
         return mergedById.values.sorted {
             ($0.episodeNumber ?? Int.max) < ($1.episodeNumber ?? Int.max)
         }
+    }
+    
+    private func decodeCategories(from data: Data) throws -> [Category] {
+        let decoder = JSONDecoder()
+        let payloads = splitTopLevelJSONObjects(from: data)
+        var allCategories: [Category] = []
+        
+        for payload in payloads {
+            if let wrapped = try? decoder.decode(CategoryResponse.self, from: payload), wrapped.status == "success" {
+                allCategories.append(contentsOf: wrapped.data)
+                continue
+            }
+            
+            if let raw = try? decoder.decode([Category].self, from: payload) {
+                allCategories.append(contentsOf: raw)
+                continue
+            }
+        }
+        
+        if allCategories.isEmpty {
+            throw NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Unable to decode categories response"]
+            )
+        }
+        
+        // If the backend duplicates top-level JSON payloads, keep the first occurrence per id.
+        var seen = Set<Int>()
+        let deduped = allCategories.filter { seen.insert($0.id).inserted }
+        
+        return deduped.sorted(by: { $0.order < $1.order })
     }
     
     private func decodeEpisodes(from data: Data) throws -> [Episode] {
@@ -485,6 +552,45 @@ struct SubcategoryResponse: Codable {
     let status: String
     let code: String
     let data: [Subcategory]
+}
+
+struct LatestEpisodesResponse: Codable {
+    let status: String
+    let code: String
+    let total: Int
+    let data: [LatestEpisodeCategory]
+}
+
+struct LatestEpisodeCategory: Codable {
+    let categoryId: Int
+    let categoryName: String
+    let episodes: [LatestEpisode]
+
+    enum CodingKeys: String, CodingKey {
+        case categoryId = "category_id"
+        case categoryName = "category_name"
+        case episodes
+    }
+}
+
+struct LatestEpisode: Codable {
+    let id: Int
+    let episodeNumber: Int?
+    let durationSecs: Int?
+    let thumbnailURL: String?
+    let videoURL: String?
+    let htmlURL: String?
+    let videoStatus: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case episodeNumber = "episode_number"
+        case durationSecs = "duration_secs"
+        case thumbnailURL = "thumbnail_url"
+        case videoURL = "video_url"
+        case htmlURL = "html_url"
+        case videoStatus = "video_status"
+    }
 }
 
 // MARK: - Language Manager

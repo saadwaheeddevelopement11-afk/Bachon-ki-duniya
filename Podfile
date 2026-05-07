@@ -3,12 +3,11 @@
 
 target 'Bachon ki duniya' do
   # Comment the next line if you don't want to use dynamic frameworks
+  # Pods for Bachon ki duniya
   use_frameworks!
   pod 'Wormholy', :configurations => ['Debug']
   pod 'IQKeyboardManagerSwift'
   pod 'Alamofire'
   pod 'SDWebImage'
-
-  # Pods for Bachon ki duniya
 
 end

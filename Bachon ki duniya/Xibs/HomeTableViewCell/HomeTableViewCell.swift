@@ -31,7 +31,7 @@ final class HomeTableViewCell: UITableViewCell {
     private let sectionInset: CGFloat = 16
     private let itemsPerRow: CGFloat = 2
     private let quickAccessItemsPerRow: CGFloat = 5
-    private let quickAccessSpacing: CGFloat = 12
+    private let quickAccessSpacing: CGFloat = 6
     /// Quick access horizontal row (image + title); must match `QuickAccessColVCell` height
     private let quickAccessCollectionHeight: CGFloat = 108
 
@@ -181,7 +181,7 @@ extension HomeTableViewCell: UICollectionViewDataSource, UICollectionViewDelegat
         switch layoutKind {
         case .horizontalQuickAccess:
             let available = contentWidthForLayout - (sectionInset * 2) - quickAccessSpacing * (quickAccessItemsPerRow - 1)
-            let width = max(44, floor(available / quickAccessItemsPerRow))
+            let width = max(46, floor(available / quickAccessItemsPerRow))
             return CGSize(width: width, height: quickAccessCollectionHeight)
 
         case .verticalGrid:

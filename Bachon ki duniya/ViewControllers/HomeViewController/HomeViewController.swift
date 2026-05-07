@@ -470,13 +470,33 @@ class HomeViewController: UIViewController {
         }
     }
 
-    private func navigateToKidsShows(with item: HomeItem) {}
-    private func navigateToBedtimeStories(with item: HomeItem) {}
-    private func navigateToGrowWell(with item: HomeItem) {}
-    private func navigateToPoems(with item: HomeItem) {}
-    private func navigateToLetsLearn(with item: HomeItem) {}
-    private func navigateToRiddles(with item: HomeItem) {}
-    private func navigateToGenericCategory(with item: HomeItem) {}
+    private func navigateToKidsShows(with item: HomeItem) {
+        navigateToGeneralKnowledge(with: item)
+    }
+    
+    private func navigateToBedtimeStories(with item: HomeItem) {
+        navigateToGeneralKnowledge(with: item)
+    }
+    
+    private func navigateToGrowWell(with item: HomeItem) {
+        navigateToGeneralKnowledge(with: item)
+    }
+    
+    private func navigateToPoems(with item: HomeItem) {
+        navigateToGeneralKnowledge(with: item)
+    }
+    
+    private func navigateToLetsLearn(with item: HomeItem) {
+        navigateToGeneralKnowledge(with: item)
+    }
+    
+    private func navigateToRiddles(with item: HomeItem) {
+        navigateToGeneralKnowledge(with: item)
+    }
+    
+    private func navigateToGenericCategory(with item: HomeItem) {
+        navigateToGeneralKnowledge(with: item)
+    }
 }
 
 // MARK: - Table sections model
