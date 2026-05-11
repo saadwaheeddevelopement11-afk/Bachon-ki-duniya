@@ -234,7 +234,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="bachokidunyaCOLORlogo" width="163.33332824707031" height="50.666667938232422"/>
+        <image name="bachokidunyaCOLORlogo" width="287.33334350585938" height="89.333335876464844"/>
         <image name="bgImage" width="390" height="558"/>
         <image name="continueBtn" width="307.66665649414062" height="46.666667938232422"/>
         <image name="getOtpBtn" width="307.66665649414062" height="46.666667938232422"/>

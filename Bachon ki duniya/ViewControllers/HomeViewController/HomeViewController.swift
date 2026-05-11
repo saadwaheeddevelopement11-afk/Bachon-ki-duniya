@@ -14,41 +14,20 @@ class HomeViewController: UIViewController {
     private var homeItems: [HomeItem] = []
     private var tableSections: [HomeCategoryTableSection] = []
     private var isLoading = false
-    private var lastTopCarouselWidth: CGFloat = 0
-
-    /// Visible “peek” of previous/next banner on left & right edges.
-    private let topCarouselSidePeek: CGFloat = 22
-    private let topCarouselInterItemSpacing: CGFloat = 12
     private let listingBackgroundPool: [String] = (1...9).map { "bg\($0)" }
 
     private let loadingAnimationKey = "kids.loading.wiggle"
 
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView?
     @IBOutlet weak var contentTableView: UITableView!
-    @IBOutlet weak var topHorizontalListColV: UICollectionView!
-    @IBOutlet weak var topCarouselPageControl: UIPageControl!
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupTopCarousel()
         setupTableView()
         setupNavigationBar()
         setupLanguageObserver()
         fetchCategories()
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        let w = topHorizontalListColV.bounds.width
-        guard w > 0, abs(w - lastTopCarouselWidth) > 0.5 else { return }
-        lastTopCarouselWidth = w
-        topHorizontalListColV.collectionViewLayout.invalidateLayout()
-        topHorizontalListColV.layoutIfNeeded()
-        let page = min(topCarouselPageControl.currentPage, max(0, homeItems.count - 1))
-        guard !homeItems.isEmpty else { return }
-        scrollTopCarousel(toPageIndex: page, animated: false)
-        syncTopCarouselPageControlWithScrollOffset()
     }
 
     deinit {
@@ -72,102 +51,12 @@ class HomeViewController: UIViewController {
             UINib(nibName: "HomeTableViewCell", bundle: nil),
             forCellReuseIdentifier: HomeTableViewCell.reuseIdentifier
         )
-
-        updateSemanticContent()
-    }
-
-    private func setupTopCarousel() {
-        topHorizontalListColV.backgroundColor = .clear
-        topHorizontalListColV.showsHorizontalScrollIndicator = false
-        topHorizontalListColV.decelerationRate = .fast
-        topHorizontalListColV.isPagingEnabled = false
-
-        if let flow = topHorizontalListColV.collectionViewLayout as? UICollectionViewFlowLayout {
-            flow.scrollDirection = .horizontal
-            flow.minimumLineSpacing = topCarouselInterItemSpacing
-            flow.minimumInteritemSpacing = 0
-            flow.sectionInset = .zero
-        }
-
-        topHorizontalListColV.dataSource = self
-        topHorizontalListColV.delegate = self
-
-        topHorizontalListColV.register(
-            UINib(nibName: "HomeCollectionViewCell", bundle: nil),
-            forCellWithReuseIdentifier: HomeCollectionViewCell.reuseIdentifier
+        contentTableView.register(
+            UINib(nibName: "TopCaroselTableViewCell", bundle: nil),
+            forCellReuseIdentifier: "TopCaroselTableViewCell"
         )
 
-        refreshTopHorizontalListFromHomeItems(resetPage: true)
-        topCarouselPageControl.hidesForSinglePage = true
-        topCarouselPageControl.pageIndicatorTintColor = UIColor.white.withAlphaComponent(0.35)
-        topCarouselPageControl.currentPageIndicatorTintColor = .white
-        topCarouselPageControl.addTarget(self, action: #selector(topCarouselPageControlChanged(_:)), for: .valueChanged)
-    }
-
-    /// Top strip uses the same `homeItems` from `/categories` until a dedicated carousel API exists.
-    private func refreshTopHorizontalListFromHomeItems(resetPage: Bool) {
-        let count = homeItems.count
-        topCarouselPageControl.numberOfPages = count
-        if !resetPage {
-            topCarouselPageControl.currentPage = min(topCarouselPageControl.currentPage, max(0, count - 1))
-        }
-        topHorizontalListColV.reloadData()
-        topHorizontalListColV.layoutIfNeeded()
-        if resetPage {
-            scrollTopCarousel(toPageIndex: 0, animated: false)
-        }
-        syncTopCarouselPageControlWithScrollOffset()
-    }
-
-    private func topCarouselCellWidth(for collectionWidth: CGFloat) -> CGFloat {
-        max(200, collectionWidth - 2 * topCarouselSidePeek)
-    }
-
-    /// Offset so `index` sits centered horizontally (neighbor cells peek equally).
-    private func topCarouselContentOffsetCentered(forPage index: Int) -> CGFloat {
-        guard let cv = topHorizontalListColV,
-              index >= 0, index < homeItems.count else { return 0 }
-        cv.layoutIfNeeded()
-        guard let attrs = cv.layoutAttributesForItem(at: IndexPath(item: index, section: 0)) else { return 0 }
-        let target = attrs.center.x - cv.bounds.width / 2
-        let maxOffset = max(0, cv.contentSize.width - cv.bounds.width)
-        return min(max(0, target), maxOffset)
-    }
-
-    private func nearestTopCarouselPage(forProposedOffsetX proposedX: CGFloat) -> Int {
-        guard let cv = topHorizontalListColV,
-              !homeItems.isEmpty, cv.bounds.width > 0 else { return 0 }
-        cv.layoutIfNeeded()
-        let visibleMidX = proposedX + cv.bounds.width / 2
-        var best = 0
-        var bestDelta = CGFloat.greatestFiniteMagnitude
-        for i in 0..<homeItems.count {
-            guard let attrs = cv.layoutAttributesForItem(at: IndexPath(item: i, section: 0)) else { continue }
-            let delta = abs(attrs.center.x - visibleMidX)
-            if delta < bestDelta {
-                bestDelta = delta
-                best = i
-            }
-        }
-        return best
-    }
-
-    private func syncTopCarouselPageControlWithScrollOffset() {
-        guard let cv = topHorizontalListColV,
-              cv.bounds.width > 0, !homeItems.isEmpty else { return }
-        let page = nearestTopCarouselPage(forProposedOffsetX: cv.contentOffset.x)
-        if topCarouselPageControl.currentPage != page {
-            topCarouselPageControl.currentPage = page
-        }
-    }
-
-    private func scrollTopCarousel(toPageIndex page: Int, animated: Bool) {
-        let x = topCarouselContentOffsetCentered(forPage: page)
-        topHorizontalListColV.setContentOffset(CGPoint(x: x, y: 0), animated: animated)
-    }
-
-    @objc private func topCarouselPageControlChanged(_ sender: UIPageControl) {
-        scrollTopCarousel(toPageIndex: sender.currentPage, animated: true)
+        updateSemanticContent()
     }
 
     private func setupNavigationBar() {
@@ -201,11 +90,9 @@ class HomeViewController: UIViewController {
         if LanguageManager.shared.isRTL() {
             UIView.appearance().semanticContentAttribute = .forceRightToLeft
             contentTableView.semanticContentAttribute = .forceRightToLeft
-            topHorizontalListColV.semanticContentAttribute = .forceRightToLeft
         } else {
             UIView.appearance().semanticContentAttribute = .forceLeftToRight
             contentTableView.semanticContentAttribute = .forceLeftToRight
-            topHorizontalListColV.semanticContentAttribute = .forceLeftToRight
         }
     }
 
@@ -274,7 +161,6 @@ class HomeViewController: UIViewController {
         homeItems = processedItems
         rebuildTableSections()
         contentTableView.reloadData()
-        refreshTopHorizontalListFromHomeItems(resetPage: true)
         animateContentEntrance()
     }
 
@@ -301,13 +187,22 @@ class HomeViewController: UIViewController {
         // Row 0: horizontal quick access — same categories, compact tiles
         sections.append(
             HomeCategoryTableSection(
+                title: "",
+                items: homeItems,
+                layout: .topCarousel
+            )
+        )
+        
+        // Row 1: horizontal quick access — same categories, compact tiles
+        sections.append(
+            HomeCategoryTableSection(
                 title: quickAccessTitle,
                 items: homeItems,
                 layout: .horizontalQuickAccess
             )
         )
 
-        // Row 1: full list — vertical grid, two tiles per row
+        // Row 2: full list — vertical grid, two tiles per row
         sections.append(
             HomeCategoryTableSection(
                 title: allCategoriesTitle,
@@ -503,75 +398,13 @@ class HomeViewController: UIViewController {
 private struct HomeCategoryTableSection {
     let title: String
     let items: [HomeItem]
-    let layout: HomeCategoryRowLayout
+    let layout: HomeTableSectionLayout
 }
 
-// MARK: - Top carousel (horizontal)
-extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard collectionView === topHorizontalListColV else { return 0 }
-        return homeItems.count
-    }
-
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard collectionView === topHorizontalListColV,
-              let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: HomeCollectionViewCell.reuseIdentifier,
-                for: indexPath
-              ) as? HomeCollectionViewCell
-        else {
-            return UICollectionViewCell()
-        }
-        let item = homeItems[indexPath.item]
-        cell.configure(with: item, showPlayOverlay: true)
-        return cell
-    }
-
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard collectionView === topHorizontalListColV else { return }
-        collectionView.deselectItem(at: indexPath, animated: true)
-        let item = homeItems[indexPath.item]
-        navigateToAppropriateViewController(item: item)
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        sizeForItemAt indexPath: IndexPath
-    ) -> CGSize {
-        guard collectionView === topHorizontalListColV else { return .zero }
-        let cw = max(collectionView.bounds.width, 1)
-        let ch = collectionView.bounds.height
-        let cellW = topCarouselCellWidth(for: cw)
-        return CGSize(width: cellW, height: max(ch, 1))
-    }
-
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView === topHorizontalListColV else { return }
-        syncTopCarouselPageControlWithScrollOffset()
-    }
-
-    func scrollViewWillEndDragging(
-        _ scrollView: UIScrollView,
-        withVelocity velocity: CGPoint,
-        targetContentOffset: UnsafeMutablePointer<CGPoint>
-    ) {
-        guard scrollView === topHorizontalListColV, !homeItems.isEmpty else { return }
-        let proposed = targetContentOffset.pointee.x
-        let page = nearestTopCarouselPage(forProposedOffsetX: proposed)
-        targetContentOffset.pointee.x = topCarouselContentOffsetCentered(forPage: page)
-    }
-
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        guard scrollView === topHorizontalListColV else { return }
-        syncTopCarouselPageControlWithScrollOffset()
-    }
-
-    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        guard scrollView === topHorizontalListColV else { return }
-        syncTopCarouselPageControlWithScrollOffset()
-    }
+private enum HomeTableSectionLayout {
+    case topCarousel
+    case horizontalQuickAccess
+    case verticalGrid
 }
 
 // MARK: - UITableView
@@ -582,41 +415,73 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: HomeTableViewCell.reuseIdentifier,
-            for: indexPath
-        ) as? HomeTableViewCell else {
-            return UITableViewCell()
-        }
-
         let model = tableSections[indexPath.row]
-        let innerWidth = tableView.bounds.width > 1 ? tableView.bounds.width : (view.bounds.width - 24)
-        cell.configure(
-            title: model.title,
-            items: model.items,
-            layoutKind: model.layout,
-            contentWidth: innerWidth,
-            isRTL: LanguageManager.shared.isRTL()
-        )
-        cell.onSelectItem = { [weak self] item in
-            self?.navigateToAppropriateViewController(item: item)
+        
+        switch model.layout {
+        case .topCarousel:
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "TopCaroselTableViewCell", for: indexPath) as? TopCaroselTableViewCell else {
+                return UITableViewCell()
+            }
+            cell.configure(items: model.items, isRTL: LanguageManager.shared.isRTL()) { [weak self] item in
+                self?.navigateToAppropriateViewController(item: item)
+            }
+            return cell
+            
+        case .horizontalQuickAccess, .verticalGrid:
+            guard let cell = tableView.dequeueReusableCell(
+                withIdentifier: HomeTableViewCell.reuseIdentifier,
+                for: indexPath
+            ) as? HomeTableViewCell else {
+                return UITableViewCell()
+            }
+            let innerWidth = tableView.bounds.width > 1 ? tableView.bounds.width : (view.bounds.width - 24)
+            let rowLayout: HomeCategoryRowLayout = (model.layout == .horizontalQuickAccess) ? .horizontalQuickAccess : .verticalGrid
+            cell.configure(
+                title: model.title,
+                items: model.items,
+                layoutKind: rowLayout,
+                contentWidth: innerWidth,
+                isRTL: LanguageManager.shared.isRTL()
+            )
+            cell.onSelectItem = { [weak self] item in
+                self?.navigateToAppropriateViewController(item: item)
+            }
+            return cell
         }
-        return cell
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard let homeCell = cell as? HomeTableViewCell else { return }
         let model = tableSections[indexPath.row]
+        
+        if model.layout == .topCarousel,
+           let carouselCell = cell as? TopCaroselTableViewCell {
+            carouselCell.configure(items: model.items, isRTL: LanguageManager.shared.isRTL()) { [weak self] item in
+                self?.navigateToAppropriateViewController(item: item)
+            }
+            return
+        }
+        
+        guard let homeCell = cell as? HomeTableViewCell else { return }
         let innerWidth = tableView.bounds.width > 1 ? tableView.bounds.width : (view.bounds.width - 24)
+        let rowLayout: HomeCategoryRowLayout = (model.layout == .horizontalQuickAccess) ? .horizontalQuickAccess : .verticalGrid
         homeCell.configure(
             title: model.title,
             items: model.items,
-            layoutKind: model.layout,
+            layoutKind: rowLayout,
             contentWidth: innerWidth,
             isRTL: LanguageManager.shared.isRTL()
         )
         homeCell.onSelectItem = { [weak self] item in
             self?.navigateToAppropriateViewController(item: item)
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        switch tableSections[indexPath.row].layout {
+        case .topCarousel:
+            return 220
+        case .horizontalQuickAccess, .verticalGrid:
+            return UITableView.automaticDimension
         }
     }
 }

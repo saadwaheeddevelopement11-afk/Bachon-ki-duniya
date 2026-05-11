@@ -124,7 +124,7 @@ All in one place.</string>
     </scenes>
     <resources>
         <image name="Image" width="322.33334350585938" height="433.33334350585938"/>
-        <image name="bachokidunyaCOLORlogo" width="163.33332824707031" height="50.666667938232422"/>
+        <image name="bachokidunyaCOLORlogo" width="287.33334350585938" height="89.333335876464844"/>
         <image name="continueBtn" width="307.66665649414062" height="46.666667938232422"/>
         <namedColor name="appBackground">
             <color red="0.93333333333333335" green="0.91764705882352937" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
