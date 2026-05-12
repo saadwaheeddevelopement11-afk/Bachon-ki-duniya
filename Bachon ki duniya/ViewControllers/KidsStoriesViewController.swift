@@ -23,7 +23,8 @@ class KidsStoriesViewController: UIViewController {
     private var recentEpisodes: [Episode] = [] // Replace with your actual episode model
     private var isLoading = false
     private let loadingAnimationKey = "kids.loading.wiggle"
-    
+    private var languageObserver: NSObjectProtocol?
+
     // Section enum
     private enum Section: Int, CaseIterable {
         case subcategories
@@ -45,15 +46,35 @@ class KidsStoriesViewController: UIViewController {
         setupTableView()
         setupNavigation()
         fetchData()
+        languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.onAppLanguageDidChange()
+        }
+    }
+
+    deinit {
+        if let languageObserver {
+            NotificationCenter.default.removeObserver(languageObserver)
+        }
+    }
+
+    private func onAppLanguageDidChange() {
+        LanguageManager.shared.fetchLocalizedCategoryTitle(categoryId: categoryId) { [weak self] name in
+            guard let self else { return }
+            if let name, !name.isEmpty {
+                self.categoryTitle = name
+            }
+            self.setupNavigation()
+            self.fetchData()
+        }
     }
     
     private func setupNavigation() {
         title = categoryTitle
         navigationController?.navigationBar.prefersLargeTitles = false
         
-        // Add back button if needed
+        let rtl = LanguageManager.shared.isRTL()
         let backButton = UIBarButtonItem(
-            image: UIImage(systemName: "chevron.left"),
+            image: UIImage(systemName: rtl ? "chevron.right" : "chevron.left"),
             style: .plain,
             target: self,
             action: #selector(backButtonTapped)

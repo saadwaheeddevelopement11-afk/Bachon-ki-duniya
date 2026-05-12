@@ -16,11 +16,38 @@ class SearchViewController: UIViewController {
     private let resultsTableView = UITableView(frame: .zero, style: .plain)
     private var results: [SearchEpisode] = []
     private var searchWorkItem: DispatchWorkItem?
+    private var languageObserver: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupSearch()
         setupResultsTable()
+        applySearchFieldDirection()
+        languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.applySearchFieldDirection()
+            self?.reloadSearchResultsForCurrentLanguage()
+        }
+    }
+
+    deinit {
+        if let languageObserver {
+            NotificationCenter.default.removeObserver(languageObserver)
+        }
+    }
+
+    private func applySearchFieldDirection() {
+        let rtl = LanguageManager.shared.isRTL()
+        searchTextfield.textAlignment = rtl ? .right : .natural
+        searchTextfield.semanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
+    }
+
+    private func reloadSearchResultsForCurrentLanguage() {
+        let query = searchTextfield.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !query.isEmpty else {
+            resultsTableView.reloadData()
+            return
+        }
+        performSearch(query: query)
     }
     
     private func setupSearch() {

@@ -23,7 +23,7 @@
                         </constraints>
                     </imageView>
                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="4UZ-Qm-B3d">
-                        <rect key="frame" x="0.0" y="20" width="333" height="102"/>
+                        <rect key="frame" x="15" y="20" width="318" height="102"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="YnE-ZW-AuP">
                             <size key="itemSize" width="128" height="128"/>
@@ -71,7 +71,7 @@
                     <constraint firstAttribute="bottom" secondItem="4UZ-Qm-B3d" secondAttribute="bottom" constant="20" id="PgL-U7-9Ju"/>
                     <constraint firstAttribute="bottom" secondItem="5eL-nY-DU6" secondAttribute="bottom" id="dej-vR-0XW"/>
                     <constraint firstItem="4UZ-Qm-B3d" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="20" id="t0n-y4-g7W"/>
-                    <constraint firstItem="4UZ-Qm-B3d" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="tVP-F6-syb"/>
+                    <constraint firstItem="4UZ-Qm-B3d" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="15" id="tVP-F6-syb"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>

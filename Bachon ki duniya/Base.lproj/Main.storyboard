@@ -363,7 +363,7 @@
                                 </constraints>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="9Yd-Aa-4cW">
-                                <rect key="frame" x="0.0" y="182" width="375" height="513"/>
+                                <rect key="frame" x="0.0" y="182" width="375" height="630"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </tableView>
                         </subviews>
@@ -374,7 +374,7 @@
                             <constraint firstItem="vAv-Zz-frH" firstAttribute="trailing" secondItem="9Yd-Aa-4cW" secondAttribute="trailing" id="3bK-tv-QMJ"/>
                             <constraint firstItem="wHu-qd-GxI" firstAttribute="leading" secondItem="vAv-Zz-frH" secondAttribute="leading" id="LoW-no-ZPh"/>
                             <constraint firstItem="sGy-A7-EKA" firstAttribute="leading" secondItem="vAv-Zz-frH" secondAttribute="leading" id="PLC-P4-oAk"/>
-                            <constraint firstItem="vAv-Zz-frH" firstAttribute="bottom" secondItem="9Yd-Aa-4cW" secondAttribute="bottom" id="Qzk-WP-SGv"/>
+                            <constraint firstAttribute="bottom" secondItem="9Yd-Aa-4cW" secondAttribute="bottom" id="Qzk-WP-SGv"/>
                             <constraint firstItem="9Yd-Aa-4cW" firstAttribute="top" secondItem="wHu-qd-GxI" secondAttribute="bottom" constant="12" id="R5D-8p-n2B"/>
                             <constraint firstItem="wHu-qd-GxI" firstAttribute="top" secondItem="vAv-Zz-frH" secondAttribute="top" id="U7H-Kk-vQ3"/>
                             <constraint firstItem="vAv-Zz-frH" firstAttribute="trailing" secondItem="wHu-qd-GxI" secondAttribute="trailing" id="ffW-T1-5np"/>
@@ -397,16 +397,16 @@
             </objects>
             <point key="canvasLocation" x="-1854.1984732824426" y="1134.5070422535211"/>
         </scene>
-        <!--Tab Bar Controller-->
+        <!--Main Tab Bar Controller-->
         <scene sceneID="bae-vS-qO5">
             <objects>
-                <tabBarController id="hcb-Li-ie9" sceneMemberID="viewController">
+                <tabBarController id="hcb-Li-ie9" customClass="MainTabBarController" customModule="Bachon_ki_duniya" customModuleProvider="target" sceneMemberID="viewController">
                     <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="IpP-lg-HNP">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="49"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="backgroundColor" name="tabBarBgColor"/>
-                        <color key="barTintColor" red="0.82745098039999998" green="0.1843137255" blue="0.1843137255" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <color key="selectedImageTintColor" red="0.82745098039999998" green="0.1843137255" blue="0.1843137255" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="barTintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="selectedImageTintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </tabBar>
                     <connections>
                         <segue destination="yR6-EL-MKS" kind="relationship" relationship="viewControllers" id="WyQ-LH-yBt"/>
@@ -423,7 +423,9 @@
         <scene sceneID="2v7-Nr-tdo">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" navigationBarHidden="YES" id="yR6-EL-MKS" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Home" image="Home" selectedImage="homeSelected" id="NqQ-Gu-HHC"/>
+                    <tabBarItem key="tabBarItem" title="Home" image="Home" selectedImage="homeSelected" id="NqQ-Gu-HHC">
+                        <color key="badgeColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </tabBarItem>
                     <toolbarItems/>
                     <nil key="simulatedTopBarMetrics"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Qbs-pT-BDI">
@@ -638,7 +640,7 @@
                                 </constraints>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="uMI-K0-R4t">
-                                <rect key="frame" x="0.0" y="226" width="375" height="469"/>
+                                <rect key="frame" x="0.0" y="226" width="375" height="586"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </tableView>
                         </subviews>
@@ -660,7 +662,7 @@
                             <constraint firstItem="gdT-OR-rVw" firstAttribute="leading" secondItem="C50-7v-2T1" secondAttribute="leading" id="e1o-GE-hQD"/>
                             <constraint firstItem="C50-7v-2T1" firstAttribute="trailing" secondItem="uMI-K0-R4t" secondAttribute="trailing" id="eSi-3s-Ncc"/>
                             <constraint firstItem="iop-C0-Jlj" firstAttribute="leading" secondItem="C50-7v-2T1" secondAttribute="leading" constant="12" id="g9v-1b-b60"/>
-                            <constraint firstItem="C50-7v-2T1" firstAttribute="bottom" secondItem="uMI-K0-R4t" secondAttribute="bottom" id="hkU-Sb-7AW"/>
+                            <constraint firstAttribute="bottom" secondItem="uMI-K0-R4t" secondAttribute="bottom" id="hkU-Sb-7AW"/>
                             <constraint firstItem="8jT-BE-xpf" firstAttribute="leading" secondItem="9ti-td-O6O" secondAttribute="leading" id="lDi-Iu-jvp"/>
                         </constraints>
                     </view>
@@ -704,7 +706,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                             </imageView>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="99P-ZP-KpH">
-                                <rect key="frame" x="0.0" y="100" width="375" height="595"/>
+                                <rect key="frame" x="0.0" y="100" width="375" height="712"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bvl-L3-WbY" userLabel="scrollContView">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="848"/>
@@ -1414,7 +1416,7 @@
                             <constraint firstItem="99P-ZP-KpH" firstAttribute="leading" secondItem="dwc-6F-CEh" secondAttribute="leading" id="5Ed-fG-vy7"/>
                             <constraint firstItem="99P-ZP-KpH" firstAttribute="top" secondItem="dwc-6F-CEh" secondAttribute="top" id="6Dh-AU-Wtr"/>
                             <constraint firstItem="rGj-4B-DnI" firstAttribute="leading" secondItem="dwc-6F-CEh" secondAttribute="leading" id="FBF-cR-mAH"/>
-                            <constraint firstItem="dwc-6F-CEh" firstAttribute="bottom" secondItem="99P-ZP-KpH" secondAttribute="bottom" id="MWm-MJ-Uxk"/>
+                            <constraint firstAttribute="bottom" secondItem="99P-ZP-KpH" secondAttribute="bottom" id="MWm-MJ-Uxk"/>
                             <constraint firstItem="dwc-6F-CEh" firstAttribute="trailing" secondItem="rGj-4B-DnI" secondAttribute="trailing" id="aBx-fM-ZYB"/>
                             <constraint firstItem="dwc-6F-CEh" firstAttribute="trailing" secondItem="99P-ZP-KpH" secondAttribute="trailing" id="cwN-Os-h8u"/>
                             <constraint firstAttribute="bottom" secondItem="rGj-4B-DnI" secondAttribute="bottom" id="zVA-GK-MKK"/>
@@ -1594,16 +1596,16 @@
                                 <rect key="frame" x="0.0" y="100" width="375" height="70"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="uzv-xo-dk8">
-                                        <rect key="frame" x="108.00000000000001" y="15.333333333333332" width="159.33333333333337" height="39.333333333333343"/>
+                                        <rect key="frame" x="118" y="13.666666666666668" width="139" height="42.666666666666657"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Kids Stories" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Lgb-Jx-TiZ">
-                                                <rect key="frame" x="0.0" y="0.0" width="159.33333333333334" height="23.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="139" height="25.333333333333332"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="20"/>
                                                 <color key="textColor" red="0.14509803921568626" green="0.082352941176470587" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Story about bird and rabbit " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8jV-ZT-euI">
-                                                <rect key="frame" x="0.0" y="25.333333333333329" width="159.33333333333334" height="14"/>
+                                                <rect key="frame" x="0.0" y="27.333333333333325" width="139" height="15.333333333333332"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="12"/>
                                                 <color key="textColor" red="0.14509803921568626" green="0.082352941176470587" blue="0.015686274509803921" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -1688,16 +1690,16 @@
                                 <rect key="frame" x="0.0" y="100" width="375" height="70"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="yqN-sd-7cx">
-                                        <rect key="frame" x="103.33333333333333" y="23.333333333333329" width="168.66666666666669" height="23.333333333333329"/>
+                                        <rect key="frame" x="112.66666666666667" y="22.333333333333329" width="149.66666666666663" height="25.333333333333329"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Islamic Knowledge" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BZe-I4-xNG">
-                                                <rect key="frame" x="0.0" y="0.0" width="168.66666666666666" height="23.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="149.66666666666666" height="25.333333333333332"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="20"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Story about bird and rabbit " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KW6-W9-wys">
-                                                <rect key="frame" x="0.0" y="0.0" width="168.66666666666666" height="0.0"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="149.66666666666666" height="0.0"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="12"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -1782,16 +1784,16 @@
                                 <rect key="frame" x="0.0" y="100" width="375" height="70"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="TlY-kc-1gX">
-                                        <rect key="frame" x="99.666666666666671" y="23.333333333333329" width="175.66666666666663" height="23.333333333333329"/>
+                                        <rect key="frame" x="110.00000000000001" y="22.333333333333329" width="155.33333333333337" height="25.333333333333329"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="General Knowledge" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2BU-gl-bOt">
-                                                <rect key="frame" x="0.0" y="0.0" width="175.66666666666666" height="23.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="155.33333333333334" height="25.333333333333332"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="20"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Story about bird and rabbit " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IW5-gj-QPA">
-                                                <rect key="frame" x="0.0" y="0.0" width="175.66666666666666" height="0.0"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="155.33333333333334" height="0.0"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="12"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -1876,16 +1878,16 @@
                                 <rect key="frame" x="0.0" y="100" width="375" height="70"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="CBe-Ge-CcT">
-                                        <rect key="frame" x="108.00000000000001" y="23.333333333333329" width="159.33333333333337" height="23.333333333333329"/>
+                                        <rect key="frame" x="118" y="22.333333333333329" width="139" height="25.333333333333329"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LjS-VT-IOh">
-                                                <rect key="frame" x="0.0" y="0.0" width="159.33333333333334" height="23.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="139" height="25.333333333333332"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="20"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Story about bird and rabbit " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5bL-Jf-vrk">
-                                                <rect key="frame" x="0.0" y="0.0" width="159.33333333333334" height="0.0"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="139" height="0.0"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="12"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -1970,16 +1972,16 @@
                                 <rect key="frame" x="0.0" y="100" width="375" height="70"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="6yv-4D-Uvo">
-                                        <rect key="frame" x="108.00000000000001" y="23.333333333333329" width="159.33333333333337" height="23.333333333333329"/>
+                                        <rect key="frame" x="118" y="22.333333333333329" width="139" height="25.333333333333329"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Ahadees" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="A4G-Zj-cg6">
-                                                <rect key="frame" x="0.0" y="0.0" width="159.33333333333334" height="23.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="139" height="25.333333333333332"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="20"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Story about bird and rabbit " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2UY-FK-7YD">
-                                                <rect key="frame" x="0.0" y="0.0" width="159.33333333333334" height="0.0"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="139" height="0.0"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="12"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -2050,7 +2052,7 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="321" height="102"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CTf-ja-hgQ">
-                                                        <rect key="frame" x="0.0" y="0.0" width="321" height="87.666666666666671"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="321" height="76"/>
                                                         <string key="text">Narrated by Anas bin Malik: A group of three men came to the houses of the wives of the Prophet (Peace Be Upon Him) asking how the Prophet (Peace Be Upon Him) worshipped (Allah), and when they were...</string>
                                                         <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="15"/>
                                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -2186,16 +2188,16 @@
                                 <rect key="frame" x="0.0" y="100" width="375" height="70"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="qle-UK-u0g">
-                                        <rect key="frame" x="93.666666666666671" y="23.333333333333329" width="187.66666666666663" height="23.333333333333329"/>
+                                        <rect key="frame" x="106" y="22.333333333333329" width="163" height="25.333333333333329"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Guess Animal Sound" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8zg-sk-jfU">
-                                                <rect key="frame" x="0.0" y="0.0" width="187.66666666666666" height="23.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="163" height="25.333333333333332"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="20"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Story about bird and rabbit " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vhd-Id-4UK">
-                                                <rect key="frame" x="0.0" y="0.0" width="187.66666666666666" height="0.0"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="163" height="0.0"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="12"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -2436,16 +2438,16 @@
                                 <rect key="frame" x="0.0" y="100" width="375" height="70"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="U4Z-g2-lGA">
-                                        <rect key="frame" x="108.00000000000001" y="23.333333333333329" width="159.33333333333337" height="23.333333333333329"/>
+                                        <rect key="frame" x="118" y="22.333333333333329" width="139" height="25.333333333333329"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Stories" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0BX-OP-YlT">
-                                                <rect key="frame" x="0.0" y="0.0" width="159.33333333333334" height="23.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="139" height="25.333333333333332"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="20"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Story about bird and rabbit " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5p2-S8-bcs">
-                                                <rect key="frame" x="0.0" y="0.0" width="159.33333333333334" height="0.0"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="139" height="0.0"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="12"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -2531,16 +2533,16 @@
                                 <rect key="frame" x="0.0" y="100" width="375" height="70"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="zxz-yo-MzL">
-                                        <rect key="frame" x="108.00000000000001" y="23.333333333333329" width="159.33333333333337" height="23.333333333333329"/>
+                                        <rect key="frame" x="118" y="22.333333333333329" width="139" height="25.333333333333329"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Series" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QU5-3G-YCg">
-                                                <rect key="frame" x="0.0" y="0.0" width="159.33333333333334" height="23.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="139" height="25.333333333333332"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="20"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A Story about bird and rabbit " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wKa-Vq-F7f">
-                                                <rect key="frame" x="0.0" y="0.0" width="159.33333333333334" height="0.0"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="139" height="0.0"/>
                                                 <fontDescription key="fontDescription" name="Acme-Regular" family="Acme" pointSize="12"/>
                                                 <color key="textColor" red="0.1450980392" green="0.08235294118" blue="0.015686274510000001" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
@@ -2625,12 +2627,12 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Bookmark" width="22" height="22"/>
+        <image name="Bookmark" width="22.666666030883789" height="25"/>
         <image name="Group 48095574" width="329" height="112"/>
-        <image name="Home" width="19" height="19.666666030883789"/>
+        <image name="Home" width="27.666666030883789" height="24.666666030883789"/>
         <image name="LanguageBG" width="294" height="517"/>
-        <image name="Profile" width="17.666666030883789" height="19.666666030883789"/>
-        <image name="Search" width="22" height="22"/>
+        <image name="Profile" width="29" height="29"/>
+        <image name="Search" width="25.333333969116211" height="26"/>
         <image name="SrachIcon" width="19" height="19"/>
         <image name="arrowIcon" width="6" height="12"/>
         <image name="backButton" width="42" height="48"/>
@@ -2643,10 +2645,10 @@
         <image name="hadeesBg" width="352" height="195"/>
         <image name="hadeesPlayButton" width="85" height="44.666667938232422"/>
         <image name="homeBg" width="390" height="860.33331298828125"/>
-        <image name="homeSelected" width="33.333332061767578" height="36.666667938232422"/>
+        <image name="homeSelected" width="27.666666030883789" height="24.666666030883789"/>
         <image name="libraryBgImg" width="390" height="1128"/>
         <image name="librarySearchBg" width="357" height="54"/>
-        <image name="librarySelected" width="33.333332061767578" height="36.666667938232422"/>
+        <image name="librarySelected" width="22.666666030883789" height="25"/>
         <image name="libraryTopBg" width="390" height="242"/>
         <image name="logoutIcon" width="81" height="23"/>
         <image name="mic" width="34" height="34"/>
@@ -2655,10 +2657,10 @@
         <image name="parentalControlcon" width="17.333333969116211" height="21.333333969116211"/>
         <image name="parentalOpenBtnIcon" width="22" height="22"/>
         <image name="profileImage" width="228" height="235"/>
-        <image name="profileSelected" width="33.333332061767578" height="36.666667938232422"/>
+        <image name="profileSelected" width="29" height="29"/>
         <image name="searchBg" width="390" height="759.33331298828125"/>
         <image name="searchIcon" width="18" height="18"/>
-        <image name="searchSelected" width="33.333332061767578" height="36.666667938232422"/>
+        <image name="searchSelected" width="25.333333969116211" height="26"/>
         <image name="serachBarBg" width="357" height="54"/>
         <image name="termsOfService" width="21" height="20"/>
         <image name="topBg" width="390" height="300.66665649414062"/>
@@ -2669,9 +2671,6 @@
         </namedColor>
         <namedColor name="greencolor">
             <color red="0.67450980392156867" green="0.93333333333333335" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="tabBarBgColor">
-            <color red="1" green="0.99215686274509807" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

@@ -60,6 +60,7 @@ final class AppRouter {
             window.rootViewController = root
         }
         window.makeKeyAndVisible()
+        LanguageManager.shared.applyLayoutDirectionToApplication()
     }
 }
 

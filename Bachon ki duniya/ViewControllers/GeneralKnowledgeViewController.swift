@@ -16,10 +16,32 @@ class GeneralKnowledgeViewController: UIViewController {
     @IBOutlet weak var tableview: UITableView!
     
     private let items = Array(repeating: "Item", count: 10)
+    private var languageObserver: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if !categoryTitle.isEmpty { title = categoryTitle }
         setupTableView()
+        languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.refreshAfterLanguageChange()
+        }
+    }
+
+    deinit {
+        if let languageObserver {
+            NotificationCenter.default.removeObserver(languageObserver)
+        }
+    }
+
+    private func refreshAfterLanguageChange() {
+        LanguageManager.shared.fetchLocalizedCategoryTitle(categoryId: categoryId) { [weak self] name in
+            guard let self else { return }
+            if let name, !name.isEmpty {
+                self.categoryTitle = name
+                self.title = name
+            }
+            self.tableview.reloadData()
+        }
     }
     
     private func setupTableView() {

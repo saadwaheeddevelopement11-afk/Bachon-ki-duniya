@@ -10,11 +10,21 @@ import UIKit
 class AhadeesViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
+    private var languageObserver: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         setupTableView()
+        languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.tableView.reloadData()
+        }
+    }
+
+    deinit {
+        if let languageObserver {
+            NotificationCenter.default.removeObserver(languageObserver)
+        }
     }
     
     private func setupTableView() {
@@ -48,6 +58,9 @@ extension AhadeesViewController: UITableViewDataSource {
         cell.mainImageView.image = UIImage(named: "testimage")
         cell.titleLbl.text = "Whoever believes in Allah and the last day should..."
         cell.textLbl.text = "- Sahih Al Bukhari 6136"
+        let rtl = LanguageManager.shared.isRTL()
+        cell.titleLbl.textAlignment = rtl ? .right : .left
+        cell.textLbl.textAlignment = rtl ? .right : .left
         return cell
     }
 }

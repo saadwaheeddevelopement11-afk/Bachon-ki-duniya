@@ -249,7 +249,7 @@ extension APIManager {
     }
     
     // Fetch episodes for a selected series/content id
-    func fetchEpisodes(seriesId: Int, languageCode: String, completion: @escaping (Result<[StoryEpisode], Error>) -> Void) {
+    func fetchEpisodes(seriesId: Int, languageCode: String, completion: @escaping (Result<([StoryEpisode], String?), Error>) -> Void) {
         let urlString = "https://kidskahani.ideationtec.live/episodes/\(seriesId)?lang=\(languageCode)"
         
         guard let url = URL(string: urlString) else {
@@ -275,12 +275,13 @@ extension APIManager {
             do {
                 let response = try JSONDecoder().decode(StoryEpisodesResponse.self, from: data)
                 if response.status == "success" {
-                    let flattenedEpisodes = response.data.seasons
-                        .sorted(by: { $0.seasonNumber < $1.seasonNumber })
+                    let seasonsSorted = response.data.seasons.sorted(by: { $0.seasonNumber < $1.seasonNumber })
+                    let headerTitle = seasonsSorted.first?.title
+                    let flattenedEpisodes = seasonsSorted
                         .flatMap { season in
                             season.episodes.sorted(by: { $0.episodeNumber < $1.episodeNumber })
                         }
-                    completion(.success(flattenedEpisodes))
+                    completion(.success((flattenedEpisodes, headerTitle)))
                 } else {
                     completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "API returned error status"])))
                 }
@@ -593,6 +594,11 @@ struct LatestEpisode: Codable {
     }
 }
 
+extension Notification.Name {
+    /// Posted after the user selects a new app language (`LanguageManager.saveLanguage`).
+    static let languageDidChange = Notification.Name("LanguageChanged")
+}
+
 // MARK: - Language Manager
 class LanguageManager {
     static let shared = LanguageManager()
@@ -634,16 +640,60 @@ class LanguageManager {
         currentLanguageCode = language.languageCode
         currentLanguageName = language.nativeName
         currentLanguageDirection = language.direction
-        
-        // Update app's semantic content direction
-        if language.direction == "RTL" {
-            UIView.appearance().semanticContentAttribute = .forceRightToLeft
-        } else {
-            UIView.appearance().semanticContentAttribute = .forceLeftToRight
-        }
+        applyLayoutDirectionToApplication()
     }
     
     func isRTL() -> Bool {
         return currentLanguageDirection == "RTL"
+    }
+    
+    /// Applies LTR/RTL to the appearance proxy, key windows, and the entire view hierarchy so existing screens flip reliably (not only newly created views).
+    func applyLayoutDirectionToApplication() {
+        let attr: UISemanticContentAttribute = isRTL() ? .forceRightToLeft : .forceLeftToRight
+        UIView.appearance().semanticContentAttribute = attr
+        
+        for scene in UIApplication.shared.connectedScenes {
+            guard let windowScene = scene as? UIWindowScene else { continue }
+            for window in windowScene.windows {
+                window.semanticContentAttribute = attr
+                if let root = window.rootViewController?.view {
+                    applySemanticContentAttribute(attr, toSubtreeStartingAt: root)
+                }
+                window.setNeedsLayout()
+                window.layoutIfNeeded()
+            }
+        }
+    }
+    
+    private func applySemanticContentAttribute(_ attr: UISemanticContentAttribute, toSubtreeStartingAt view: UIView) {
+        view.semanticContentAttribute = attr
+        for sub in view.subviews {
+            applySemanticContentAttribute(attr, toSubtreeStartingAt: sub)
+        }
+    }
+    
+    /// Refreshes the localized navigation title for a home category after language change.
+    func fetchLocalizedCategoryTitle(categoryId: Int, completion: @escaping (String?) -> Void) {
+        guard categoryId > 0 else {
+            completion(nil)
+            return
+        }
+        let lang = currentLanguageCode
+        APIManager.shared.fetchCategories(languageCode: lang) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let categories):
+                    guard let category = categories.first(where: { $0.id == categoryId }) else {
+                        completion(nil)
+                        return
+                    }
+                    let name = category.getTranslation(for: lang)?.name
+                        ?? category.getTranslation(for: "en")?.name
+                    completion(name)
+                case .failure:
+                    completion(nil)
+                }
+            }
+        }
     }
 }

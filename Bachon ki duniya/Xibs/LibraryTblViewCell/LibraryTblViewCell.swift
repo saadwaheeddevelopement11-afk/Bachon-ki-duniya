@@ -44,6 +44,9 @@ class LibraryTblViewCell: UITableViewCell {
 
     func configure(title: String, episodes: [LatestEpisode]) {
         titleLbl.text = title
+        let rtl = LanguageManager.shared.isRTL()
+        titleLbl.textAlignment = rtl ? .right : .left
+        collectionView.semanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
         self.episodes = episodes
         collectionView.reloadData()
     }

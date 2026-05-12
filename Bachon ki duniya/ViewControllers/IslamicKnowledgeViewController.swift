@@ -18,11 +18,33 @@ class IslamicKnowledgeViewController: UIViewController {
     var categoryId: Int = 0
     var categoryTitle: String = ""
     var hasSubcategories: Bool = false
-    
+    private var languageObserver: NSObjectProtocol?
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        if !categoryTitle.isEmpty { title = categoryTitle }
         bannerImage.image = topBannerImage
         setupTableView()
+        languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.refreshAfterLanguageChange()
+        }
+    }
+
+    deinit {
+        if let languageObserver {
+            NotificationCenter.default.removeObserver(languageObserver)
+        }
+    }
+
+    private func refreshAfterLanguageChange() {
+        LanguageManager.shared.fetchLocalizedCategoryTitle(categoryId: categoryId) { [weak self] name in
+            guard let self else { return }
+            if let name, !name.isEmpty {
+                self.categoryTitle = name
+                self.title = name
+            }
+            self.tableview.reloadData()
+        }
     }
     
     private func setupTableView() {

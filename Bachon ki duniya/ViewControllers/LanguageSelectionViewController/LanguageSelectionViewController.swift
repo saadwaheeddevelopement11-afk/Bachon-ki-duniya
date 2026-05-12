@@ -145,7 +145,7 @@ class LanguageSelectionViewController: UIViewController {
         LanguageManager.shared.saveLanguage(selected)
         
         // Notify to reload home screen
-        NotificationCenter.default.post(name: NSNotification.Name("LanguageChanged"), object: nil)
+        NotificationCenter.default.post(name: .languageDidChange, object: nil)
         
         // Show success message before dismissing
         let successMessage = LanguageManager.shared.isRTL() ?

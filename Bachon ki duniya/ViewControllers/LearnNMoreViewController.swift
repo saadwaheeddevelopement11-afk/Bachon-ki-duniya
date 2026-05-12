@@ -11,11 +11,21 @@ class LearnNMoreViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     private var latestCategories: [LatestEpisodeCategory] = []
-    
+    private var languageObserver: NSObjectProtocol?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
         fetchLatestEpisodes()
+        languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.fetchLatestEpisodes()
+        }
+    }
+
+    deinit {
+        if let languageObserver {
+            NotificationCenter.default.removeObserver(languageObserver)
+        }
     }
     
     private func setupTableView() {

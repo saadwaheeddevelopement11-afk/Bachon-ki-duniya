@@ -16,6 +16,7 @@ class StoriesViewController: UIViewController {
     @IBOutlet weak var seriesTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     private var episodes: [StoryEpisode] = []
+    private var languageObserver: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,6 +24,15 @@ class StoriesViewController: UIViewController {
         seriesTitleLabel.text = seriesTitle
         setupTableView()
         fetchEpisodes()
+        languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.fetchEpisodes()
+        }
+    }
+
+    deinit {
+        if let languageObserver {
+            NotificationCenter.default.removeObserver(languageObserver)
+        }
     }
     
     private func setupTableView() {
@@ -40,8 +50,14 @@ class StoriesViewController: UIViewController {
         APIManager.shared.fetchEpisodes(seriesId: seriesId, languageCode: currentLanguage) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
-                case .success(let episodes):
+                case .success(let payload):
+                    let (episodes, headerTitle) = payload
                     self?.episodes = episodes
+                    if let headerTitle, !headerTitle.isEmpty {
+                        self?.seriesTitle = headerTitle
+                        self?.title = headerTitle
+                        self?.seriesTitleLabel.text = headerTitle
+                    }
                     self?.tableView.reloadData()
                 case .failure(let error):
                     print("Error fetching episodes for series: \(error)")

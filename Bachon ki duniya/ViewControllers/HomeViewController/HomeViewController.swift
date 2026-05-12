@@ -55,8 +55,6 @@ class HomeViewController: UIViewController {
             UINib(nibName: "TopCaroselTableViewCell", bundle: nil),
             forCellReuseIdentifier: "TopCaroselTableViewCell"
         )
-
-        updateSemanticContent()
     }
 
     private func setupNavigationBar() {
@@ -75,25 +73,14 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(languageChanged),
-            name: NSNotification.Name("LanguageChanged"),
+            name: .languageDidChange,
             object: nil
         )
     }
 
     @objc private func languageChanged() {
         fetchCategories()
-        updateSemanticContent()
         setupNavigationBar()
-    }
-
-    private func updateSemanticContent() {
-        if LanguageManager.shared.isRTL() {
-            UIView.appearance().semanticContentAttribute = .forceRightToLeft
-            contentTableView.semanticContentAttribute = .forceRightToLeft
-        } else {
-            UIView.appearance().semanticContentAttribute = .forceLeftToRight
-            contentTableView.semanticContentAttribute = .forceLeftToRight
-        }
     }
 
     @objc private func languageButtonTapped() {

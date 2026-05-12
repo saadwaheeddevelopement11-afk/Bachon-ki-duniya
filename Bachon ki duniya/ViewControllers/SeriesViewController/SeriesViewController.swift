@@ -18,12 +18,33 @@ class SeriesViewController: UIViewController {
     
     private var seriesItems: [SeriesItem] = []
     var topBannerImage = ""
+    private var languageObserver: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         title = categoryTitle
         setupTableView()
         fetchSeries()
+        languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.refreshLocalizedCategoryTitleAndReload()
+        }
+    }
+
+    deinit {
+        if let languageObserver {
+            NotificationCenter.default.removeObserver(languageObserver)
+        }
+    }
+
+    private func refreshLocalizedCategoryTitleAndReload() {
+        LanguageManager.shared.fetchLocalizedCategoryTitle(categoryId: categoryId) { [weak self] name in
+            guard let self else { return }
+            if let name, !name.isEmpty {
+                self.categoryTitle = name
+                self.title = name
+            }
+            self.fetchSeries()
+        }
     }
     
     private func setupTableView() {
