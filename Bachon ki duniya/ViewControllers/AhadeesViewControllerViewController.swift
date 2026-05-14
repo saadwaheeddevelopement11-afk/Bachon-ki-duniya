@@ -56,8 +56,8 @@ extension AhadeesViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         cell.mainImageView.image = UIImage(named: "testimage")
-        cell.titleLbl.text = "Whoever believes in Allah and the last day should..."
-        cell.textLbl.text = "- Sahih Al Bukhari 6136"
+        cell.titleLbl.text = AppL10n.t(.ahadeesSampleTitle)
+        cell.textLbl.text = AppL10n.t(.ahadeesSampleSubtitle)
         let rtl = LanguageManager.shared.isRTL()
         cell.titleLbl.textAlignment = rtl ? .right : .left
         cell.textLbl.textAlignment = rtl ? .right : .left

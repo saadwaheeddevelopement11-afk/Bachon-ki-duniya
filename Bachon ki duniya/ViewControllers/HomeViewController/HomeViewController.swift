@@ -20,11 +20,14 @@ class HomeViewController: UIViewController {
 
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView?
     @IBOutlet weak var contentTableView: UITableView!
+    @IBOutlet weak var homeGreetingLabel: UILabel!
+    @IBOutlet weak var homeSubtitleLabel: UILabel!
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
+        applyHomeHeaderCopy()
         setupNavigationBar()
         setupLanguageObserver()
         fetchCategories()
@@ -59,14 +62,22 @@ class HomeViewController: UIViewController {
 
     private func setupNavigationBar() {
         let languageButton = UIBarButtonItem(
-            title: LanguageManager.shared.isRTL() ? "🌐 لغات" : "🌐 Languages",
+            title: AppL10n.t(.homeLanguagesButton),
             style: .plain,
             target: self,
             action: #selector(languageButtonTapped)
         )
         navigationItem.rightBarButtonItem = languageButton
 
-        navigationItem.title = LanguageManager.shared.isRTL() ? "الصفحة الرئيسية" : "Home"
+        navigationItem.title = AppL10n.t(.homeNavTitle)
+    }
+
+    private func applyHomeHeaderCopy() {
+        homeGreetingLabel.text = AppL10n.t(.homeGreeting)
+        homeSubtitleLabel.text = AppL10n.t(.homeSubtitle)
+        let rtl = LanguageManager.shared.isRTL()
+        homeGreetingLabel.textAlignment = rtl ? .right : .natural
+        homeSubtitleLabel.textAlignment = rtl ? .right : .natural
     }
 
     private func setupLanguageObserver() {
@@ -80,6 +91,7 @@ class HomeViewController: UIViewController {
 
     @objc private func languageChanged() {
         fetchCategories()
+        applyHomeHeaderCopy()
         setupNavigationBar()
     }
 
@@ -160,9 +172,8 @@ class HomeViewController: UIViewController {
     }
 
     private func rebuildTableSections() {
-        let isRTL = LanguageManager.shared.isRTL()
-        let quickAccessTitle = isRTL ? "وصول سريع" : "Quick access"
-        let allCategoriesTitle = isRTL ? "الفئات" : "Categories"
+        let quickAccessTitle = AppL10n.t(.homeQuickAccess)
+        let allCategoriesTitle = AppL10n.t(.homeCategories)
 
         var sections: [HomeCategoryTableSection] = []
 
@@ -202,22 +213,17 @@ class HomeViewController: UIViewController {
     }
 
     private func showError(_ error: Error) {
-        let alertMessage = LanguageManager.shared.isRTL() ?
-            "فشل تحميل الفئات: \(error.localizedDescription)" :
-            "Failed to load categories: \(error.localizedDescription)"
-
-        let retryTitle = LanguageManager.shared.isRTL() ? "إعادة المحاولة" : "Retry"
-        let okTitle = LanguageManager.shared.isRTL() ? "موافق" : "OK"
+        let alertMessage = AppL10n.t(.failedToLoadCategoriesFormat, error.localizedDescription)
 
         let alert = UIAlertController(
-            title: LanguageManager.shared.isRTL() ? "خطأ" : "Error",
+            title: AppL10n.t(.errorTitle),
             message: alertMessage,
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: retryTitle, style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: AppL10n.t(.retry), style: .default) { [weak self] _ in
             self?.fetchCategories()
         })
-        alert.addAction(UIAlertAction(title: okTitle, style: .cancel))
+        alert.addAction(UIAlertAction(title: AppL10n.t(.ok), style: .cancel))
         present(alert, animated: true)
     }
 

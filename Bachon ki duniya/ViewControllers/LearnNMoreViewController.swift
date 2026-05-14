@@ -10,14 +10,20 @@ import UIKit
 class LearnNMoreViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var libraryTitleLabel: UILabel!
+    @IBOutlet weak var librarySubtitleLabel: UILabel!
+    @IBOutlet weak var librarySearchField: UITextField!
+    @IBOutlet weak var librarySearchMicPlaceholderField: UITextField!
     private var latestCategories: [LatestEpisodeCategory] = []
     private var languageObserver: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
+        applyLocalizedLibraryChrome()
         fetchLatestEpisodes()
         languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.applyLocalizedLibraryChrome()
             self?.fetchLatestEpisodes()
         }
     }
@@ -28,6 +34,16 @@ class LearnNMoreViewController: UIViewController {
         }
     }
     
+    private func applyLocalizedLibraryChrome() {
+        libraryTitleLabel.text = AppL10n.t(.libraryTitle)
+        librarySubtitleLabel.text = AppL10n.t(.librarySubtitle)
+        librarySearchField.placeholder = AppL10n.t(.librarySearchPlaceholder)
+        librarySearchMicPlaceholderField.placeholder = AppL10n.t(.librarySearchShortPlaceholder)
+        let rtl = LanguageManager.shared.isRTL()
+        libraryTitleLabel.textAlignment = rtl ? .right : .natural
+        librarySubtitleLabel.textAlignment = rtl ? .right : .natural
+    }
+
     private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self

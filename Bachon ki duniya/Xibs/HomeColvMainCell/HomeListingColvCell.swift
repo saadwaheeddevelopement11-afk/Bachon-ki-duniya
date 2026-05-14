@@ -19,8 +19,8 @@ class HomeListingColvCell: UICollectionViewCell {
     func configureForBanner() {
         // Configure cell to look like a banner
         bannerImageView.image = UIImage(named: "banner_placeholder") // Set your banner image
-        titleLbl.text = LanguageManager.shared.isRTL() ? "عرض خاص" : "Special Offer"
-        descriptionLbl.text = LanguageManager.shared.isRTL() ? "اكتشف المزيد" : "Discover More"
+        titleLbl.text = AppL10n.t(.specialOfferTitle)
+        descriptionLbl.text = AppL10n.t(.specialOfferSubtitle)
         
         // Optional: Style the banner differently
         bannerImageView.contentMode = .scaleAspectFill

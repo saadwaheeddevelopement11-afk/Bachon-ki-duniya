@@ -30,6 +30,24 @@ final class MainTabBarController: UITabBarController, UITabBarControllerDelegate
         configureTabBarItems()
         configureAppearance()
         configureSelectionIndicator()
+        applyLocalizedTabAccessibility()
+        NotificationCenter.default.addObserver(self, selector: #selector(appLanguageDidChange), name: .languageDidChange, object: nil)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func appLanguageDidChange() {
+        applyLocalizedTabAccessibility()
+        layoutSelectionIndicator(animated: true)
+    }
+
+    private func applyLocalizedTabAccessibility() {
+        let keys: [AppStringKey] = [.tabHome, .tabSearch, .tabLibrary, .tabProfile]
+        for (index, vc) in (viewControllers ?? []).enumerated() where index < keys.count {
+            vc.tabBarItem.accessibilityLabel = AppL10n.t(keys[index])
+        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -154,7 +172,14 @@ final class MainTabBarController: UITabBarController, UITabBarControllerDelegate
         
         let segment = tabBar.bounds.width / CGFloat(count)
         let idx = CGFloat(selectedIndex)
-        let centerX = segment * idx + segment / 2
+        // `selectedIndex` follows `viewControllers` order; tab bar mirrors items in RTL, so map to visual slot from leading edge.
+        let visualSlot: CGFloat
+        if tabBar.effectiveUserInterfaceLayoutDirection == .rightToLeft {
+            visualSlot = CGFloat(count - 1) - idx
+        } else {
+            visualSlot = idx
+        }
+        let centerX = segment * visualSlot + segment / 2
         let width = Style.indicatorWidth
         let height = Style.indicatorHeight
         let frame = CGRect(

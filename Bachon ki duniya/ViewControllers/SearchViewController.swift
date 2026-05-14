@@ -12,6 +12,8 @@ class SearchViewController: UIViewController {
     
     @IBOutlet weak var searchContView: UIView!
     @IBOutlet weak var searchTextfield: UITextField!
+    @IBOutlet weak var searchScreenTitleLabel: UILabel!
+    @IBOutlet weak var searchMicPlaceholderField: UITextField!
     
     private let resultsTableView = UITableView(frame: .zero, style: .plain)
     private var results: [SearchEpisode] = []
@@ -22,8 +24,10 @@ class SearchViewController: UIViewController {
         super.viewDidLoad()
         setupSearch()
         setupResultsTable()
+        applyLocalizedSearchChrome()
         applySearchFieldDirection()
         languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
+            self?.applyLocalizedSearchChrome()
             self?.applySearchFieldDirection()
             self?.reloadSearchResultsForCurrentLanguage()
         }
@@ -33,6 +37,14 @@ class SearchViewController: UIViewController {
         if let languageObserver {
             NotificationCenter.default.removeObserver(languageObserver)
         }
+    }
+
+    private func applyLocalizedSearchChrome() {
+        searchScreenTitleLabel.text = AppL10n.t(.searchTitle)
+        searchTextfield.placeholder = AppL10n.t(.searchPlaceholder)
+        searchMicPlaceholderField.placeholder = AppL10n.t(.searchShortPlaceholder)
+        let rtl = LanguageManager.shared.isRTL()
+        searchScreenTitleLabel.textAlignment = rtl ? .right : .natural
     }
 
     private func applySearchFieldDirection() {

@@ -11,7 +11,7 @@ import SDWebImage
 class StoriesViewController: UIViewController {
     
     var seriesId = 0
-    var seriesTitle = "Stories"
+    var seriesTitle = ""
     
     @IBOutlet weak var seriesTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
@@ -20,6 +20,9 @@ class StoriesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if seriesTitle.isEmpty {
+            seriesTitle = AppL10n.t(.storiesDefaultTitle)
+        }
         title = seriesTitle
         seriesTitleLabel.text = seriesTitle
         setupTableView()

@@ -125,7 +125,7 @@ extension SeriesViewController: UITableViewDataSource, UITableViewDelegate {
         let currentLanguage = LanguageManager.shared.currentLanguageCode
         let selectedTitle = selectedSeries.getTranslation(for: currentLanguage)?.name ??
             selectedSeries.getTranslation(for: "en")?.name ??
-            "Stories"
+            AppL10n.t(.storiesDefaultTitle)
         
         if let storiesVC = storyboard?.instantiateViewController(withIdentifier: "StoriesViewController") as? StoriesViewController {
             storiesVC.seriesId = selectedSeries.id

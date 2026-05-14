@@ -15,6 +15,8 @@ class LanguageSelectionViewController: UIViewController {
     @IBOutlet weak var confirmButton: UIButton!
     @IBOutlet weak var crossButton: UIButton!
     @IBOutlet weak var containerView: UIView!
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var subtitleLabel: UILabel!
     
     // MARK: - Properties
     private var languages: [Language] = []
@@ -42,6 +44,15 @@ class LanguageSelectionViewController: UIViewController {
         setupTableView()
         setupGestures()
         fetchLanguages()
+        NotificationCenter.default.addObserver(self, selector: #selector(appLanguageDidChange), name: .languageDidChange, object: nil)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func appLanguageDidChange() {
+        applySheetCopy()
     }
     
     // MARK: - Setup Methods
@@ -59,6 +70,15 @@ class LanguageSelectionViewController: UIViewController {
         // Make container view rounded corners
         containerView.layer.cornerRadius = 12
         containerView.clipsToBounds = true
+        applySheetCopy()
+    }
+
+    private func applySheetCopy() {
+        titleLabel.text = AppL10n.t(.languageSheetTitle)
+        subtitleLabel.text = AppL10n.t(.languageSheetSubtitle)
+        let rtl = LanguageManager.shared.isRTL()
+        titleLabel.textAlignment = rtl ? .right : .natural
+        subtitleLabel.textAlignment = rtl ? .right : .natural
     }
     
     private func setupTableView() {
@@ -106,10 +126,8 @@ class LanguageSelectionViewController: UIViewController {
            selected.languageCode != originalLanguageCode {
             
             // Show confirmation alert
-            let alertTitle = LanguageManager.shared.isRTL() ? "تغيير اللغة" : "Change Language"
-            let alertMessage = LanguageManager.shared.isRTL() ?
-                "هل تريد تغيير اللغة إلى \(selected.nativeName)؟" :
-                "Do you want to change the language to \(selected.nativeName)?"
+            let alertTitle = AppL10n.t(.changeLanguageTitle)
+            let alertMessage = AppL10n.t(.changeLanguageMessageFormat, selected.nativeName)
             
             let alert = UIAlertController(
                 title: alertTitle,
@@ -117,8 +135,8 @@ class LanguageSelectionViewController: UIViewController {
                 preferredStyle: .alert
             )
             
-            let changeTitle = LanguageManager.shared.isRTL() ? "تغيير" : "Change"
-            let cancelTitle = LanguageManager.shared.isRTL() ? "إلغاء" : "Cancel"
+            let changeTitle = AppL10n.t(.change)
+            let cancelTitle = AppL10n.t(.cancel)
             
             alert.addAction(UIAlertAction(title: changeTitle, style: .default) { [weak self] _ in
                 self?.changeLanguage()
@@ -148,17 +166,15 @@ class LanguageSelectionViewController: UIViewController {
         NotificationCenter.default.post(name: .languageDidChange, object: nil)
         
         // Show success message before dismissing
-        let successMessage = LanguageManager.shared.isRTL() ?
-            "تم تغيير اللغة إلى \(selected.nativeName)" :
-            "Language changed to \(selected.nativeName)"
+        let successMessage = AppL10n.t(.languageChangedFormat, selected.nativeName)
         
         let alert = UIAlertController(
-            title: LanguageManager.shared.isRTL() ? "نجاح" : "Success",
+            title: AppL10n.t(.successTitle),
             message: successMessage,
             preferredStyle: .alert
         )
         
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: AppL10n.t(.ok), style: .default) { [weak self] _ in
             self?.dismissScreen()
         })
         
@@ -200,14 +216,14 @@ class LanguageSelectionViewController: UIViewController {
     
     private func showError(_ error: Error) {
         let alert = UIAlertController(
-            title: "Error",
-            message: "Failed to load languages: \(error.localizedDescription)",
+            title: AppL10n.t(.errorTitle),
+            message: AppL10n.t(.failedToLoadLanguagesFormat, error.localizedDescription),
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "Retry", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: AppL10n.t(.retry), style: .default) { [weak self] _ in
             self?.fetchLanguages()
         })
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: AppL10n.t(.cancel), style: .cancel) { [weak self] _ in
             self?.dismissScreen()
         })
         present(alert, animated: true)

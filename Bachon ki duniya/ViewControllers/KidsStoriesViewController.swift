@@ -33,7 +33,7 @@ class KidsStoriesViewController: UIViewController {
         var title: String {
             switch self {
             case .recentEpisodes:
-                return LanguageManager.shared.isRTL() ? "الحلقات الأخيرة" : "Recent Episodes"
+                return AppL10n.t(.recentEpisodesSection)
             case .subcategories:
                 return ""
             }
@@ -179,16 +179,14 @@ class KidsStoriesViewController: UIViewController {
     }
     
     private func showError(_ error: Error) {
-        let alertMessage = LanguageManager.shared.isRTL() ?
-            "فشل تحميل المحتوى: \(error.localizedDescription)" :
-            "Failed to load content: \(error.localizedDescription)"
-        
+        let alertMessage = AppL10n.t(.failedToLoadContentFormat, error.localizedDescription)
+
         let alert = UIAlertController(
-            title: LanguageManager.shared.isRTL() ? "خطأ" : "Error",
+            title: AppL10n.t(.errorTitle),
             message: alertMessage,
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: AppL10n.t(.ok), style: .default))
         present(alert, animated: true)
     }
     
@@ -366,7 +364,7 @@ extension KidsStoriesViewController: UITableViewDelegate {
                              subcategory.getTranslation(for: "en")
             
             if subcategory.hasSubcategories {
-                navigateToChildSubcategories(for: subcategory, title: translation?.name ?? "Subcategories")
+                navigateToChildSubcategories(for: subcategory, title: translation?.name ?? AppL10n.t(.subcategoriesFallbackTitle))
             } else {
                 navigateToEpisodes(for: subcategory, title: translation?.name ?? "Episodes")
             }
