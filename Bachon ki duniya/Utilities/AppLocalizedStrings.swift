@@ -1,17 +1,13 @@
 import Foundation
 
-/// Keys for UI strings resolved from `LanguageManager.shared.currentLanguageCode` (no app restart).
-enum AppStringKey: String {
+/// Runtime UI copy for `LanguageManager` languages (no app restart). Add new keys here and provide `en` + `ur` (+ `ar` when needed).
+enum AppStringKey: String, CaseIterable {
     case homeGreeting
     case homeSubtitle
     case homeNavTitle
     case homeLanguagesButton
     case homeQuickAccess
     case homeCategories
-    case tabHome
-    case tabSearch
-    case tabLibrary
-    case tabProfile
     case searchTitle
     case searchPlaceholder
     case searchShortPlaceholder
@@ -21,6 +17,7 @@ enum AppStringKey: String {
     case librarySearchShortPlaceholder
     case languageSheetTitle
     case languageSheetSubtitle
+    case categoryScreenSubtitle
     case recentEpisodesSection
     case specialOfferTitle
     case specialOfferSubtitle
@@ -48,29 +45,25 @@ enum AppStringKey: String {
     case profileTermsOfService
     case profileSampleCategoryName
     case profileWatchTimeSample
-    case ahadeesSampleTitle
-    case ahadeesSampleSubtitle
-    case profileLogoutTitle
-    case profileLogoutMessage
-    case profileLogoutAction
 }
 
-enum AppL10n {
+enum AppLocalizedStrings {
 
-    static func t(_ key: AppStringKey) -> String {
-        let bucket = languageBucket()
-        if let row = table[bucket], let s = row[key] { return s }
+    static func text(_ key: AppStringKey) -> String {
+        let lang = normalizedLanguageBucket()
+        if let v = table[lang]?[key] { return v }
         return table["en"]![key]!
     }
 
-    static func t(_ key: AppStringKey, _ arg1: CVarArg) -> String {
-        String(format: t(key), arg1)
+    static func text(_ key: AppStringKey, _ args: CVarArg...) -> String {
+        let format = text(key)
+        return String(format: format, arguments: args)
     }
 
-    private static func languageBucket() -> String {
-        let c = LanguageManager.shared.currentLanguageCode.lowercased()
-        if c.hasPrefix("ur") { return "ur" }
-        if c.hasPrefix("ar") { return "ar" }
+    private static func normalizedLanguageBucket() -> String {
+        let raw = LanguageManager.shared.currentLanguageCode.lowercased()
+        if raw.hasPrefix("ur") { return "ur" }
+        if raw.hasPrefix("ar") { return "ar" }
         return "en"
     }
 
@@ -82,10 +75,6 @@ enum AppL10n {
             .homeLanguagesButton: "🌐 Languages",
             .homeQuickAccess: "Quick access",
             .homeCategories: "Categories",
-            .tabHome: "Home",
-            .tabSearch: "Search",
-            .tabLibrary: "Library",
-            .tabProfile: "Profile",
             .searchTitle: "Search",
             .searchPlaceholder: "Search stories, poems, quizzes...",
             .searchShortPlaceholder: "Search",
@@ -95,6 +84,7 @@ enum AppL10n {
             .librarySearchShortPlaceholder: "Search",
             .languageSheetTitle: "Select Language",
             .languageSheetSubtitle: "Please Select Preferred Language",
+            .categoryScreenSubtitle: "Explore fun lessons and stories",
             .recentEpisodesSection: "Recent Episodes",
             .specialOfferTitle: "Special Offer",
             .specialOfferSubtitle: "Discover More",
@@ -121,12 +111,7 @@ enum AppL10n {
             .profileFAQs: "FAQs",
             .profileTermsOfService: "Terms Of Service",
             .profileSampleCategoryName: "Kids Stories",
-            .profileWatchTimeSample: "30min 15sec",
-            .ahadeesSampleTitle: "Whoever believes in Allah and the last day should...",
-            .ahadeesSampleSubtitle: "- Sahih Al Bukhari 6136",
-            .profileLogoutTitle: "Log out?",
-            .profileLogoutMessage: "You will need to sign in again to use your account.",
-            .profileLogoutAction: "Log out"
+            .profileWatchTimeSample: "30min 15sec"
         ],
         "ur": [
             .homeGreeting: "ارے چیمپ 👋",
@@ -135,10 +120,6 @@ enum AppL10n {
             .homeLanguagesButton: "🌐 زبانیں",
             .homeQuickAccess: "فوری رسائی",
             .homeCategories: "اقسام",
-            .tabHome: "ہوم",
-            .tabSearch: "تلاش",
-            .tabLibrary: "لائبریری",
-            .tabProfile: "پروفائل",
             .searchTitle: "تلاش",
             .searchPlaceholder: "کہانیاں، نظمیں، کوئز تلاش کریں...",
             .searchShortPlaceholder: "تلاش",
@@ -148,6 +129,7 @@ enum AppL10n {
             .librarySearchShortPlaceholder: "تلاش",
             .languageSheetTitle: "زبان منتخب کریں",
             .languageSheetSubtitle: "براہ کرم اپنی پسندیدہ زبان منتخب کریں",
+            .categoryScreenSubtitle: "دلچسپ سبق اور کہانیاں دریافت کریں",
             .recentEpisodesSection: "حالیہ اقساط",
             .specialOfferTitle: "خصوصی پیشکش",
             .specialOfferSubtitle: "مزید دریافت کریں",
@@ -174,12 +156,7 @@ enum AppL10n {
             .profileFAQs: "اکثر پوچھے گئے سوالات",
             .profileTermsOfService: "سروس کی شرائط",
             .profileSampleCategoryName: "بچوں کی کہانیاں",
-            .profileWatchTimeSample: "30 منٹ 15 سیکنڈ",
-            .ahadeesSampleTitle: "جو اللہ اور آخرت پر ایمان رکھتا ہے وہ...",
-            .ahadeesSampleSubtitle: "- صحیح بخاری ۶۱۳۶",
-            .profileLogoutTitle: "لاگ آؤٹ؟",
-            .profileLogoutMessage: "دوبارہ استعمال کے لیے آپ کو سائن ان کرنا ہوگا۔",
-            .profileLogoutAction: "لاگ آؤٹ"
+            .profileWatchTimeSample: "30 منٹ 15 سیکنڈ"
         ],
         "ar": [
             .homeGreeting: "مرحباً أيها البطل 👋",
@@ -188,10 +165,6 @@ enum AppL10n {
             .homeLanguagesButton: "🌐 لغات",
             .homeQuickAccess: "وصول سريع",
             .homeCategories: "الفئات",
-            .tabHome: "الرئيسية",
-            .tabSearch: "بحث",
-            .tabLibrary: "المكتبة",
-            .tabProfile: "الملف",
             .searchTitle: "بحث",
             .searchPlaceholder: "ابحث عن قصص وأشعار وألغاز...",
             .searchShortPlaceholder: "بحث",
@@ -201,6 +174,7 @@ enum AppL10n {
             .librarySearchShortPlaceholder: "بحث",
             .languageSheetTitle: "اختر اللغة",
             .languageSheetSubtitle: "يرجى اختيار اللغة المفضلة",
+            .categoryScreenSubtitle: "استكشف دروساً وقصصاً ممتعة",
             .recentEpisodesSection: "الحلقات الأخيرة",
             .specialOfferTitle: "عرض خاص",
             .specialOfferSubtitle: "اكتشف المزيد",
@@ -227,12 +201,7 @@ enum AppL10n {
             .profileFAQs: "الأسئلة الشائعة",
             .profileTermsOfService: "شروط الخدمة",
             .profileSampleCategoryName: "قصص الأطفال",
-            .profileWatchTimeSample: "30 دقيقة 15 ثانية",
-            .ahadeesSampleTitle: "من آمن بالله واليوم الآخر فليقل خيراً أو ليصمت...",
-            .ahadeesSampleSubtitle: "- صحيح البخاري 6136",
-            .profileLogoutTitle: "تسجيل الخروج؟",
-            .profileLogoutMessage: "ستحتاج إلى تسجيل الدخول مرة أخرى لاستخدام حسابك.",
-            .profileLogoutAction: "تسجيل الخروج"
+            .profileWatchTimeSample: "30 دقيقة 15 ثانية"
         ]
     ]
 }
