@@ -82,8 +82,14 @@ extension LearnNMoreViewController: UITableViewDataSource, UITableViewDelegate {
         cell.configure(title: category.categoryName, episodes: category.episodes)
         cell.onSelectEpisode = { [weak self] episode in
             guard let self else { return }
-            guard let url = episode.videoURL, !url.isEmpty else { return }
-            VideoPlaybackPresenter.play(urlString: url, from: self)
+            let title: String
+            if let number = episode.episodeNumber {
+                title = "\(category.categoryName) · E\(number)"
+            } else {
+                title = category.categoryName
+            }
+            guard let context = VideoPlaybackContext.from(episode: episode, title: title) else { return }
+            VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
         }
         return cell
     }

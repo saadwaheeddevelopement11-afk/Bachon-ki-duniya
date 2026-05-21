@@ -107,8 +107,8 @@ extension StoriesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let episode = episodes[indexPath.row]
-        guard let url = episode.videoURL, !url.isEmpty else { return }
-        VideoPlaybackPresenter.play(urlString: url, from: self)
+        guard let context = VideoPlaybackContext.from(episode: episode) else { return }
+        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

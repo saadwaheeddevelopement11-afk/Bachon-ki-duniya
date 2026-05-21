@@ -12,6 +12,7 @@ class HomeViewController: UIViewController {
 
     // MARK: - Properties
     private var homeItems: [HomeItem] = []
+    private var continueWatchingRecords: [ContinueWatchingRecord] = []
     private var tableSections: [HomeCategoryTableSection] = []
     private var isLoading = false
     private let listingBackgroundPool: [String] = (1...9).map { "bg\($0)" }
@@ -31,6 +32,13 @@ class HomeViewController: UIViewController {
         setupNavigationBar()
         setupLanguageObserver()
         fetchCategories()
+        reloadContinueWatching()
+        setupContinueWatchingObserver()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        reloadContinueWatching()
     }
 
     deinit {
@@ -58,6 +66,32 @@ class HomeViewController: UIViewController {
             UINib(nibName: "TopCaroselTableViewCell", bundle: nil),
             forCellReuseIdentifier: "TopCaroselTableViewCell"
         )
+        contentTableView.register(
+            ContinueWatchingTableViewCell.self,
+            forCellReuseIdentifier: ContinueWatchingTableViewCell.reuseIdentifier
+        )
+    }
+
+    private func setupContinueWatchingObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(continueWatchingDidChange),
+            name: .continueWatchingDidChange,
+            object: nil
+        )
+    }
+
+    @objc private func continueWatchingDidChange() {
+        reloadContinueWatching()
+    }
+
+    private func reloadContinueWatching() {
+        ContinueWatchingStore.fetchForHome { [weak self] records in
+            guard let self else { return }
+            self.continueWatchingRecords = records
+            self.rebuildTableSections()
+            self.contentTableView.reloadData()
+        }
     }
 
     private func setupNavigationBar() {
@@ -173,16 +207,26 @@ class HomeViewController: UIViewController {
 
     private func rebuildTableSections() {
         let quickAccessTitle = AppL10n.t(.homeQuickAccess)
+        let continueWatchingTitle = AppL10n.t(.homeContinueWatching)
         let allCategoriesTitle = AppL10n.t(.homeCategories)
 
         var sections: [HomeCategoryTableSection] = []
 
         guard !homeItems.isEmpty else {
-            tableSections = []
+            if !continueWatchingRecords.isEmpty {
+                sections.append(
+                    HomeCategoryTableSection(
+                        title: continueWatchingTitle,
+                        continueWatching: continueWatchingRecords,
+                        layout: .continueWatching
+                    )
+                )
+            }
+            tableSections = sections
             return
         }
 
-        // Row 0: horizontal quick access — same categories, compact tiles
+        // Row 0: top carousel
         sections.append(
             HomeCategoryTableSection(
                 title: "",
@@ -190,8 +234,8 @@ class HomeViewController: UIViewController {
                 layout: .topCarousel
             )
         )
-        
-        // Row 1: horizontal quick access — same categories, compact tiles
+
+        // Row 1: quick access
         sections.append(
             HomeCategoryTableSection(
                 title: quickAccessTitle,
@@ -200,7 +244,18 @@ class HomeViewController: UIViewController {
             )
         )
 
-        // Row 2: full list — vertical grid, two tiles per row
+        // Row 2: continue watching (between quick access and categories)
+        if !continueWatchingRecords.isEmpty {
+            sections.append(
+                HomeCategoryTableSection(
+                    title: continueWatchingTitle,
+                    continueWatching: continueWatchingRecords,
+                    layout: .continueWatching
+                )
+            )
+        }
+
+        // Row 3: categories grid
         sections.append(
             HomeCategoryTableSection(
                 title: allCategoriesTitle,
@@ -210,6 +265,11 @@ class HomeViewController: UIViewController {
         )
 
         tableSections = sections
+    }
+
+    private func playContinueWatching(_ record: ContinueWatchingRecord) {
+        guard let context = VideoPlaybackContext.from(record: record) else { return }
+        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
     }
 
     private func showError(_ error: Error) {
@@ -391,12 +451,26 @@ class HomeViewController: UIViewController {
 private struct HomeCategoryTableSection {
     let title: String
     let items: [HomeItem]
+    let continueWatching: [ContinueWatchingRecord]
     let layout: HomeTableSectionLayout
+
+    init(
+        title: String,
+        items: [HomeItem] = [],
+        continueWatching: [ContinueWatchingRecord] = [],
+        layout: HomeTableSectionLayout
+    ) {
+        self.title = title
+        self.items = items
+        self.continueWatching = continueWatching
+        self.layout = layout
+    }
 }
 
 private enum HomeTableSectionLayout {
     case topCarousel
     case horizontalQuickAccess
+    case continueWatching
     case verticalGrid
 }
 
@@ -419,7 +493,24 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
                 self?.navigateToAppropriateViewController(item: item)
             }
             return cell
-            
+
+        case .continueWatching:
+            guard let cell = tableView.dequeueReusableCell(
+                withIdentifier: ContinueWatchingTableViewCell.reuseIdentifier,
+                for: indexPath
+            ) as? ContinueWatchingTableViewCell else {
+                return UITableViewCell()
+            }
+            cell.configure(
+                title: model.title,
+                records: model.continueWatching,
+                isRTL: LanguageManager.shared.isRTL()
+            )
+            cell.onSelectRecord = { [weak self] record in
+                self?.playContinueWatching(record)
+            }
+            return cell
+
         case .horizontalQuickAccess, .verticalGrid:
             guard let cell = tableView.dequeueReusableCell(
                 withIdentifier: HomeTableViewCell.reuseIdentifier,
@@ -453,7 +544,20 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
             }
             return
         }
-        
+
+        if model.layout == .continueWatching,
+           let continueCell = cell as? ContinueWatchingTableViewCell {
+            continueCell.configure(
+                title: model.title,
+                records: model.continueWatching,
+                isRTL: LanguageManager.shared.isRTL()
+            )
+            continueCell.onSelectRecord = { [weak self] record in
+                self?.playContinueWatching(record)
+            }
+            return
+        }
+
         guard let homeCell = cell as? HomeTableViewCell else { return }
         let innerWidth = tableView.bounds.width > 1 ? tableView.bounds.width : (view.bounds.width - 24)
         let rowLayout: HomeCategoryRowLayout = (model.layout == .horizontalQuickAccess) ? .horizontalQuickAccess : .verticalGrid
@@ -473,6 +577,8 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
         switch tableSections[indexPath.row].layout {
         case .topCarousel:
             return 220
+        case .continueWatching:
+            return UITableView.automaticDimension
         case .horizontalQuickAccess, .verticalGrid:
             return UITableView.automaticDimension
         }

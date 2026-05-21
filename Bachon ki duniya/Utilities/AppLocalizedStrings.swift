@@ -8,6 +8,7 @@ enum AppStringKey: String, CaseIterable {
     case homeLanguagesButton
     case homeQuickAccess
     case homeCategories
+    case homeContinueWatching
     case searchTitle
     case searchPlaceholder
     case searchShortPlaceholder
@@ -45,6 +46,25 @@ enum AppStringKey: String, CaseIterable {
     case profileTermsOfService
     case profileSampleCategoryName
     case profileWatchTimeSample
+    case tabHome
+    case tabSearch
+    case tabLibrary
+    case tabProfile
+    case ahadeesSampleTitle
+    case ahadeesSampleSubtitle
+    case profileLogoutTitle
+    case profileLogoutMessage
+    case profileLogoutAction
+}
+
+enum AppL10n {
+    static func t(_ key: AppStringKey) -> String {
+        AppLocalizedStrings.text(key)
+    }
+
+    static func t(_ key: AppStringKey, _ arg1: CVarArg) -> String {
+        String(format: AppLocalizedStrings.text(key), arg1)
+    }
 }
 
 enum AppLocalizedStrings {
@@ -75,6 +95,7 @@ enum AppLocalizedStrings {
             .homeLanguagesButton: "🌐 Languages",
             .homeQuickAccess: "Quick access",
             .homeCategories: "Categories",
+            .homeContinueWatching: "Continue Watching",
             .searchTitle: "Search",
             .searchPlaceholder: "Search stories, poems, quizzes...",
             .searchShortPlaceholder: "Search",
@@ -111,7 +132,16 @@ enum AppLocalizedStrings {
             .profileFAQs: "FAQs",
             .profileTermsOfService: "Terms Of Service",
             .profileSampleCategoryName: "Kids Stories",
-            .profileWatchTimeSample: "30min 15sec"
+            .profileWatchTimeSample: "30min 15sec",
+            .tabHome: "Home",
+            .tabSearch: "Search",
+            .tabLibrary: "Library",
+            .tabProfile: "Profile",
+            .ahadeesSampleTitle: "Whoever believes in Allah and the last day should...",
+            .ahadeesSampleSubtitle: "- Sahih Al Bukhari 6136",
+            .profileLogoutTitle: "Log out?",
+            .profileLogoutMessage: "You will need to sign in again to use your account.",
+            .profileLogoutAction: "Log out"
         ],
         "ur": [
             .homeGreeting: "ارے چیمپ 👋",
@@ -120,6 +150,7 @@ enum AppLocalizedStrings {
             .homeLanguagesButton: "🌐 زبانیں",
             .homeQuickAccess: "فوری رسائی",
             .homeCategories: "اقسام",
+            .homeContinueWatching: "دیکھنا جاری رکھیں",
             .searchTitle: "تلاش",
             .searchPlaceholder: "کہانیاں، نظمیں، کوئز تلاش کریں...",
             .searchShortPlaceholder: "تلاش",
@@ -156,7 +187,16 @@ enum AppLocalizedStrings {
             .profileFAQs: "اکثر پوچھے گئے سوالات",
             .profileTermsOfService: "سروس کی شرائط",
             .profileSampleCategoryName: "بچوں کی کہانیاں",
-            .profileWatchTimeSample: "30 منٹ 15 سیکنڈ"
+            .profileWatchTimeSample: "30 منٹ 15 سیکنڈ",
+            .tabHome: "ہوم",
+            .tabSearch: "تلاش",
+            .tabLibrary: "لائبریری",
+            .tabProfile: "پروفائل",
+            .ahadeesSampleTitle: "جو اللہ اور آخرت پر ایمان رکھتا ہے وہ...",
+            .ahadeesSampleSubtitle: "- صحیح بخاری ۶۱۳۶",
+            .profileLogoutTitle: "لاگ آؤٹ؟",
+            .profileLogoutMessage: "دوبارہ استعمال کے لیے آپ کو سائن ان کرنا ہوگا۔",
+            .profileLogoutAction: "لاگ آؤٹ"
         ],
         "ar": [
             .homeGreeting: "مرحباً أيها البطل 👋",
@@ -165,6 +205,7 @@ enum AppLocalizedStrings {
             .homeLanguagesButton: "🌐 لغات",
             .homeQuickAccess: "وصول سريع",
             .homeCategories: "الفئات",
+            .homeContinueWatching: "متابعة المشاهدة",
             .searchTitle: "بحث",
             .searchPlaceholder: "ابحث عن قصص وأشعار وألغاز...",
             .searchShortPlaceholder: "بحث",
@@ -201,7 +242,16 @@ enum AppLocalizedStrings {
             .profileFAQs: "الأسئلة الشائعة",
             .profileTermsOfService: "شروط الخدمة",
             .profileSampleCategoryName: "قصص الأطفال",
-            .profileWatchTimeSample: "30 دقيقة 15 ثانية"
+            .profileWatchTimeSample: "30 دقيقة 15 ثانية",
+            .tabHome: "الرئيسية",
+            .tabSearch: "بحث",
+            .tabLibrary: "المكتبة",
+            .tabProfile: "الملف",
+            .ahadeesSampleTitle: "من آمن بالله واليوم الآخر فليقل خيراً أو ليصمت...",
+            .ahadeesSampleSubtitle: "- صحيح البخاري 6136",
+            .profileLogoutTitle: "تسجيل الخروج؟",
+            .profileLogoutMessage: "ستحتاج إلى تسجيل الدخول مرة أخرى لاستخدام حسابك.",
+            .profileLogoutAction: "تسجيل الخروج"
         ]
     ]
 }
