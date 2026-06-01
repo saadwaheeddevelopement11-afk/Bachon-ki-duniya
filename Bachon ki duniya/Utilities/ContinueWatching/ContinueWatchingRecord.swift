@@ -15,12 +15,7 @@ struct ContinueWatchingRecord: Equatable {
 
     var progress: Float {
         guard durationMs > 0 else { return 0 }
-        let watched = max(lastPositionMs, durationPlayedMs)
-        return min(1, Float(watched) / Float(durationMs))
-    }
-
-    var isNearlyComplete: Bool {
-        progress >= 0.95
+        return min(1, Float(lastPositionMs) / Float(durationMs))
     }
 }
 
@@ -50,7 +45,7 @@ struct VideoPlaybackContext {
 
     static func from(episode: StoryEpisode) -> VideoPlaybackContext? {
         guard let url = episode.videoURL, !url.isEmpty else { return nil }
-        let durationMs = Int64(episode.durationSecs ?? 0) * 1000
+        let durationMs = WatchTimeMilliseconds.fromAPISeconds(episode.durationSecs)
         return VideoPlaybackContext(
             videoId: episode.id,
             title: episode.title,
@@ -62,7 +57,7 @@ struct VideoPlaybackContext {
 
     static func from(episode: LatestEpisode, title: String) -> VideoPlaybackContext? {
         guard let url = episode.videoURL, !url.isEmpty else { return nil }
-        let durationMs = Int64(episode.durationSecs ?? 0) * 1000
+        let durationMs = WatchTimeMilliseconds.fromAPISeconds(episode.durationSecs)
         return VideoPlaybackContext(
             videoId: episode.id,
             title: title,

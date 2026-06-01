@@ -2,37 +2,50 @@ import Foundation
 
 enum ContinueWatchingStore {
 
-    private static let minimumWatchedMs: Int64 = 3_000
+    /// Mirrors Android `saveVideo`. All time arguments are **milliseconds**; skips when duration/watchTime < 1 ms.
+    static func saveVideo(
+        context: VideoPlaybackContext,
+        playerDurationMs: Int64,
+        currentPositionMs: Int64,
+        watchTimeMs: Int64,
+        postToServer: Bool
+    ) {
+        guard playerDurationMs >= 1, watchTimeMs >= 1 else { return }
 
-    static func saveProgress(context: VideoPlaybackContext, currentPositionMs: Int64, durationMs: Int64) {
-        let played = max(currentPositionMs, 0)
-        guard played >= minimumWatchedMs else { return }
+        let isFinished = currentPositionMs >= playerDurationMs - 1000
+        var positionMs = currentPositionMs
+        if isFinished {
+            positionMs = playerDurationMs
+        }
 
-        let totalDuration = max(durationMs, context.durationMs, played)
         ContinueWatchingDatabase.shared.upsert(
             videoId: context.videoId,
             title: context.title,
-            durationMs: totalDuration,
+            durationMs: playerDurationMs,
             imageURL: context.thumbnailURL,
-            lastPositionMs: played,
-            durationPlayedMs: played,
+            lastPositionMs: positionMs,
+            durationPlayedMs: watchTimeMs,
             videoURL: context.videoURL
         )
-        notifyChange()
-    }
 
-    static func removeIfCompleted(videoId: Int, currentPositionMs: Int64, durationMs: Int64) {
-        guard durationMs > 0 else { return }
-        let ratio = Double(currentPositionMs) / Double(durationMs)
-        if ratio >= 0.95 {
-            ContinueWatchingDatabase.shared.delete(videoId: videoId)
+        if postToServer {
+            WatchTracker.track(
+                episodeId: context.videoId,
+                durationMs: playerDurationMs,
+                positionMs: positionMs,
+                watchTimeMs: watchTimeMs
+            )
             notifyChange()
         }
     }
 
     static func fetchForHome(limit: Int = 12, completion: @escaping ([ContinueWatchingRecord]) -> Void) {
         ContinueWatchingDatabase.shared.fetchRecent(limit: limit) { records in
-            let visible = records.filter { !$0.isNearlyComplete && $0.progress > 0 }
+            let visible = records.filter { record in
+                guard record.durationMs > 0 else { return false }
+                let position = max(record.lastPositionMs, record.durationPlayedMs)
+                return position < record.durationMs - 1000
+            }
             completion(visible)
         }
     }

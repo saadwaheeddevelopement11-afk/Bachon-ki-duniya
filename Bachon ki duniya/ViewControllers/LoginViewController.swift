@@ -11,6 +11,13 @@ class LoginViewController: UIViewController {
 
     // Note: storyboard currently has no outlet connections, so we locate views at runtime.
     private weak var phoneTextField: UITextField?
+
+    /// Digits entered on the login screen (for OTP + watch tracking).
+    var currentPhoneDigits: String? {
+        let digits = (phoneTextField?.text ?? "").filter(\.isNumber)
+        guard (10...15).contains(digits.count) else { return nil }
+        return UserSession.normalizePhoneDigits(digits)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,9 +84,15 @@ private extension LoginViewController {
             return
         }
         
+        let normalized = UserSession.normalizePhoneDigits(digits)
+        UserSession.saveMsisdn(digits: normalized)
+
         // Navigate to Confirm OTP screen
         let sb = UIStoryboard(name: "Login", bundle: nil)
-        let vc = sb.instantiateViewController(withIdentifier: "ConfirmOTPViewController")
+        guard let vc = sb.instantiateViewController(withIdentifier: "ConfirmOTPViewController") as? ConfirmOTPViewController else {
+            return
+        }
+        vc.pendingMsisdnDigits = normalized
         vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true)
     }

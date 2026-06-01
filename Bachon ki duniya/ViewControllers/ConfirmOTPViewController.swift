@@ -9,6 +9,9 @@ import UIKit
 
 class ConfirmOTPViewController: UIViewController {
 
+    /// Set by `LoginViewController` when presenting this screen.
+    var pendingMsisdnDigits: String?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         wireUI()
@@ -47,6 +50,13 @@ private extension ConfirmOTPViewController {
     }
     
     func completeLogin() {
+        if let digits = pendingMsisdnDigits, !digits.isEmpty {
+            UserSession.saveMsisdn(digits: digits)
+        } else if let login = presentingViewController as? LoginViewController,
+                  let digits = login.currentPhoneDigits {
+            UserSession.saveMsisdn(digits: digits)
+        }
+
         // In a real app you'd verify the OTP. For now, treat "Continue" as success.
         UserDefaults.standard.set(true, forKey: AppDefaultsKeys.isLoggedIn)
         isLoggedIn = true

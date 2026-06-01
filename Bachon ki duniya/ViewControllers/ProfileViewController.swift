@@ -83,6 +83,7 @@ class ProfileViewController: UIViewController {
         alert.addAction(UIAlertAction(title: AppL10n.t(.profileLogoutAction), style: .destructive) { _ in
             UserDefaults.standard.set(false, forKey: AppDefaultsKeys.isLoggedIn)
             isLoggedIn = false
+            UserSession.clearMsisdn()
             AppRouter.setRoot(.login, animated: true)
         })
         present(alert, animated: true)

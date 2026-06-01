@@ -9,6 +9,7 @@ enum AppRoute {
 enum AppDefaultsKeys {
     static let hasSeenOnboarding = "hasSeenOnboarding"
     static let isLoggedIn = "isLoggedIn"
+    static let msisdnDigits = "msisdn_digits"
 }
 
 final class AppRouter {
@@ -19,7 +20,11 @@ final class AppRouter {
         let loggedIn = defaults.bool(forKey: AppDefaultsKeys.isLoggedIn)
         
         if !hasSeen { return .onboarding }
-        return loggedIn ? .main : .login
+        if loggedIn {
+            // Watch API needs msisdn; send users without it back to login to enter phone.
+            return UserSession.hasMsisdn ? .main : .login
+        }
+        return .login
     }
     
     static func makeRootViewController(for route: AppRoute) -> UIViewController {

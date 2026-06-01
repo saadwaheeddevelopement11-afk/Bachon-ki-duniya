@@ -43,7 +43,7 @@ enum VideoPlaybackPresenter {
                 }
 
                 let durationSeconds = try await asset.load(.duration).seconds
-                let durationMs = Int64(durationSeconds * 1000)
+                let durationMs = WatchTimeMilliseconds.fromPlayerSeconds(durationSeconds)
                 var resolvedContext = context
                 if var ctx = resolvedContext, ctx.durationMs <= 0, durationMs > 0 {
                     resolvedContext = VideoPlaybackContext(
@@ -69,33 +69,51 @@ enum VideoPlaybackPresenter {
 
                 let playbackContext = resolvedContext
                 var timeObserver: Any?
-                var observedDurationMs = playbackContext?.durationMs ?? durationMs
+                var playerDurationMs = max(playbackContext?.durationMs ?? 0, durationMs)
+                var accumulatedWatchMs: Int64 = 0
+                var lastWatchSampleTime: Date?
 
-                func saveProgress(forceFinal: Bool = false) {
-                    guard let playbackContext else { return }
-                    let currentSeconds = player.currentTime().seconds
-                    guard currentSeconds.isFinite, currentSeconds >= 0 else { return }
-                    let currentMs = Int64(currentSeconds * 1000)
-                    let totalMs = max(observedDurationMs, playbackContext.durationMs, currentMs)
-                    observedDurationMs = totalMs
-                    ContinueWatchingStore.saveProgress(
-                        context: VideoPlaybackContext(
-                            videoId: playbackContext.videoId,
-                            title: playbackContext.title,
-                            thumbnailURL: playbackContext.thumbnailURL,
-                            durationMs: totalMs,
-                            videoURL: playbackContext.videoURL
-                        ),
-                        currentPositionMs: currentMs,
-                        durationMs: totalMs
-                    )
-                    if forceFinal {
-                        ContinueWatchingStore.removeIfCompleted(
-                            videoId: playbackContext.videoId,
-                            currentPositionMs: currentMs,
-                            durationMs: totalMs
-                        )
+                func sampleWatchTime() {
+                    guard player.rate > 0 else {
+                        lastWatchSampleTime = nil
+                        return
                     }
+                    let now = Date()
+                    if let last = lastWatchSampleTime {
+                        let deltaMs = Int64(now.timeIntervalSince(last) * 1000)
+                        if deltaMs > 0, deltaMs < 10_000 {
+                            accumulatedWatchMs += deltaMs
+                        }
+                    }
+                    lastWatchSampleTime = now
+                }
+
+                func currentPositionMs() -> Int64 {
+                    WatchTimeMilliseconds.fromCMTime(player.currentTime())
+                }
+
+                func resolvedDurationMs() -> Int64 {
+                    if let item = player.currentItem {
+                        let itemMs = WatchTimeMilliseconds.fromCMTime(item.duration)
+                        if itemMs > 0 {
+                            playerDurationMs = max(playerDurationMs, itemMs)
+                        }
+                    }
+                    return playerDurationMs
+                }
+
+                func persistProgress(postToServer: Bool) {
+                    guard let playbackContext else { return }
+                    sampleWatchTime()
+                    let positionMs = currentPositionMs()
+                    let totalMs = resolvedDurationMs()
+                    ContinueWatchingStore.saveVideo(
+                        context: playbackContext,
+                        playerDurationMs: totalMs,
+                        currentPositionMs: positionMs,
+                        watchTimeMs: accumulatedWatchMs,
+                        postToServer: postToServer
+                    )
                 }
 
                 playerVC.onEndPlaybackOrDismiss = {
@@ -103,7 +121,7 @@ enum VideoPlaybackPresenter {
                         player.removeTimeObserver(token)
                         timeObserver = nil
                     }
-                    saveProgress(forceFinal: true)
+                    persistProgress(postToServer: true)
                     AppOrientation.shared.isVideoFullscreenActive = false
                     UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
                     UIViewController.attemptRotationToDeviceOrientation()
@@ -127,7 +145,7 @@ enum VideoPlaybackPresenter {
                 if playbackContext != nil {
                     let interval = CMTime(seconds: progressSaveIntervalSeconds, preferredTimescale: 600)
                     timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { _ in
-                        saveProgress()
+                        persistProgress(postToServer: false)
                     }
                 }
 
@@ -138,6 +156,7 @@ enum VideoPlaybackPresenter {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                     presenter.present(playerVC, animated: true) {
                         hideLoader(from: presenter.view)
+                        lastWatchSampleTime = Date()
                         player.play()
                     }
                 }

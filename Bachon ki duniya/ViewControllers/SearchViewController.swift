@@ -19,7 +19,7 @@ class SearchViewController: UIViewController {
     private var results: [SearchEpisode] = []
     private var searchWorkItem: DispatchWorkItem?
     private var languageObserver: NSObjectProtocol?
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupSearch()
@@ -32,13 +32,13 @@ class SearchViewController: UIViewController {
             self?.reloadSearchResultsForCurrentLanguage()
         }
     }
-
+    
     deinit {
         if let languageObserver {
             NotificationCenter.default.removeObserver(languageObserver)
         }
     }
-
+    
     private func applyLocalizedSearchChrome() {
         searchScreenTitleLabel.text = AppL10n.t(.searchTitle)
         searchTextfield.placeholder = AppL10n.t(.searchPlaceholder)
@@ -46,13 +46,13 @@ class SearchViewController: UIViewController {
         let rtl = LanguageManager.shared.isRTL()
         searchScreenTitleLabel.textAlignment = rtl ? .right : .natural
     }
-
+    
     private func applySearchFieldDirection() {
         let rtl = LanguageManager.shared.isRTL()
         searchTextfield.textAlignment = rtl ? .right : .natural
         searchTextfield.semanticContentAttribute = rtl ? .forceRightToLeft : .forceLeftToRight
     }
-
+    
     private func reloadSearchResultsForCurrentLanguage() {
         let query = searchTextfield.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         guard !query.isEmpty else {
