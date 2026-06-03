@@ -46,11 +46,11 @@ class LanguageSelectionViewController: UIViewController {
         fetchLanguages()
         NotificationCenter.default.addObserver(self, selector: #selector(appLanguageDidChange), name: .languageDidChange, object: nil)
     }
-
+    
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-
+    
     @objc private func appLanguageDidChange() {
         applySheetCopy()
     }
@@ -72,7 +72,7 @@ class LanguageSelectionViewController: UIViewController {
         containerView.clipsToBounds = true
         applySheetCopy()
     }
-
+    
     private func applySheetCopy() {
         titleLabel.text = AppL10n.t(.languageSheetTitle)
         subtitleLabel.text = AppL10n.t(.languageSheetSubtitle)
@@ -188,13 +188,13 @@ class LanguageSelectionViewController: UIViewController {
     // MARK: - API Calls
     private func fetchLanguages() {
         isLoading = true
-//        loadingIndicator.startAnimating()
+        //        loadingIndicator.startAnimating()
         confirmButton.isEnabled = false
         
         APIManager.shared.fetchLanguages { [weak self] result in
             DispatchQueue.main.async {
                 self?.isLoading = false
-//                self?.loadingIndicator.stopAnimating()
+                //                self?.loadingIndicator.stopAnimating()
                 self?.confirmButton.isEnabled = true
                 
                 switch result {
