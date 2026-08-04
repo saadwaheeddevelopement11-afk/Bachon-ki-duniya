@@ -29,11 +29,12 @@ enum MsisdnCapturePresenter {
             presentedFrom = nil
             let raw = alert.textFields?.first?.text ?? ""
             let digits = UserSession.normalizePhoneDigits(raw)
-            guard (10...15).contains(digits.count) else {
+            guard UserSession.isValidPakistanMSISDN(digits) else {
                 showInvalidAlert(on: viewController)
                 return
             }
             UserSession.saveMsisdn(digits: digits)
+            UserProfileSync.refreshInBackground()
             #if DEBUG
             print("UserSession: msisdn saved (\(digits))")
             #endif
@@ -53,3 +54,4 @@ enum MsisdnCapturePresenter {
         viewController.present(alert, animated: true)
     }
 }
+ 

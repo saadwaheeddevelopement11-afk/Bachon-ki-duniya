@@ -12,9 +12,12 @@ class StoriesViewController: UIViewController {
     
     var seriesId = 0
     var seriesTitle = ""
+    /// Poster / banner for this show (from series list or category thumb).
+    var topBannerImage = ""
     
     @IBOutlet weak var seriesTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var topBanner: UIImageView!
     private var episodes: [StoryEpisode] = []
     private var languageObserver: NSObjectProtocol?
 
@@ -23,8 +26,8 @@ class StoriesViewController: UIViewController {
         if seriesTitle.isEmpty {
             seriesTitle = AppL10n.t(.storiesDefaultTitle)
         }
-        title = seriesTitle
-        seriesTitleLabel.text = seriesTitle
+        applyTitle()
+        setupBanner()
         setupTableView()
         fetchEpisodes()
         languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
@@ -37,12 +40,27 @@ class StoriesViewController: UIViewController {
             NotificationCenter.default.removeObserver(languageObserver)
         }
     }
+
+    private func applyTitle() {
+        title = seriesTitle
+        seriesTitleLabel?.text = seriesTitle
+    }
+
+    private func setupBanner() {
+        let placeholder = UIImage(named: "placeholder")
+        guard !topBannerImage.isEmpty, let url = URL(string: topBannerImage) else {
+            topBanner?.image = placeholder
+            return
+        }
+        topBanner?.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
+    }
     
     private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
+        tableView.contentInsetAdjustmentBehavior = .automatic
         
         let nib = UINib(nibName: "KidsStoriesTableViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: KidsStoriesTableViewCell.reuseIdentifier)
@@ -53,20 +71,30 @@ class StoriesViewController: UIViewController {
         APIManager.shared.fetchEpisodes(seriesId: seriesId, languageCode: currentLanguage) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
-                case .success(let payload):
-                    let (episodes, headerTitle) = payload
+                case .success(let episodes):
                     self?.episodes = episodes
-                    if let headerTitle, !headerTitle.isEmpty {
-                        self?.seriesTitle = headerTitle
-                        self?.title = headerTitle
-                        self?.seriesTitleLabel.text = headerTitle
-                    }
+                    // Keep the show name passed from navigation — season titles are "Season 1", etc.
+                    self?.applyTitle()
+                    self?.applyBannerFallbackIfNeeded()
                     self?.tableView.reloadData()
                 case .failure(let error):
                     print("Error fetching episodes for series: \(error)")
                 }
             }
         }
+    }
+
+    private func applyBannerFallbackIfNeeded() {
+        guard topBannerImage.isEmpty,
+              let thumb = episodes.first?.thumbnailURL,
+              !thumb.isEmpty,
+              let url = URL(string: thumb) else { return }
+        topBannerImage = thumb
+        topBanner?.sd_setImage(
+            with: url,
+            placeholderImage: UIImage(named: "placeholder"),
+            options: [.retryFailed, .continueInBackground, .highPriority]
+        )
     }
     
     private func configureEpisodeCell(_ cell: KidsStoriesTableViewCell, episode: StoryEpisode) {
@@ -107,6 +135,16 @@ extension StoriesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let episode = episodes[indexPath.row]
+
+        if episode.isHTMLGame, let htmlURL = episode.htmlURL {
+            let gameVC = HTMLGameViewController()
+            gameVC.gameTitleText = episode.title
+            gameVC.htmlURLString = htmlURL
+            gameVC.modalPresentationStyle = .fullScreen
+            present(gameVC, animated: true)
+            return
+        }
+
         guard let context = VideoPlaybackContext.from(episode: episode) else { return }
         VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
     }

@@ -82,6 +82,425 @@ class APIManager {
         
         task.resume()
     }
+
+    func fetchHomeSliderVideos(
+        languageCode: String,
+        limit: Int = 5,
+        completion: @escaping (Result<[HomeSliderVideo], Error>) -> Void
+    ) {
+        let endpoint = "/home-slider-videos?lang=\(languageCode)&limit=\(limit)"
+        guard let url = URL(string: baseURL + endpoint) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error {
+                completion(.failure(error))
+                return
+            }
+            guard let data else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                return
+            }
+            do {
+                let videos = try self.decodeHomeSliderVideos(from: data)
+                completion(.success(videos))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    /// `GET /profile/{msisdn}` — e.g. `/profile/923369790892`
+    func fetchProfile(
+        msisdn: String,
+        completion: @escaping (Result<UserProfile, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard UserSession.isValidPakistanMSISDN(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        let endpoint = "/profile/\(digits)"
+        guard let url = URL(string: baseURL + endpoint) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error {
+                completion(.failure(error))
+                return
+            }
+            guard let data else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                return
+            }
+            do {
+                let decoder = JSONDecoder()
+                let wrapped = try decoder.decode(UserProfileAPIResponse.self, from: data)
+                guard wrapped.status.lowercased() == "success" else {
+                    completion(.failure(NSError(
+                        domain: "",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Profile request failed (\(wrapped.code))"]
+                    )))
+                    return
+                }
+                completion(.success(wrapped.data))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    private func decodeHomeSliderVideos(from data: Data) throws -> [HomeSliderVideo] {
+        let decoder = JSONDecoder()
+        let payloads = splitTopLevelJSONObjects(from: data)
+        var all: [HomeSliderVideo] = []
+
+        for payload in payloads {
+            if let wrapped = try? decoder.decode(HomeSliderVideosResponse.self, from: payload),
+               wrapped.status == "success" {
+                all.append(contentsOf: wrapped.data)
+                continue
+            }
+            if let raw = try? decoder.decode([HomeSliderVideo].self, from: payload) {
+                all.append(contentsOf: raw)
+            }
+        }
+
+        guard !all.isEmpty else {
+            throw NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Unable to decode home slider videos"]
+            )
+        }
+
+        var seen = Set<Int>()
+        return all.filter { seen.insert($0.id).inserted }
+    }
+
+    // MARK: - OTP
+
+    func generateOTP(phone: String, completion: @escaping (Result<OTPGenerateResponse, Error>) -> Void) {
+        let normalized = UserSession.normalizePhoneDigits(phone)
+        postOTP(path: "/otp/generate", body: ["phone": normalized], completion: completion)
+    }
+
+    func verifyOTP(phone: String, otp: String, completion: @escaping (Result<OTPVerifyResponse, Error>) -> Void) {
+        let normalized = UserSession.normalizePhoneDigits(phone)
+        postOTP(path: "/otp/verify", body: ["phone": normalized, "otp": otp], completion: completion)
+    }
+
+    private func postOTP<T: Decodable>(
+        path: String,
+        body: [String: String],
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
+        guard let url = URL(string: baseURL + path) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error {
+                completion(.failure(error))
+                return
+            }
+            guard let data else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                return
+            }
+            do {
+                let decoded = try JSONDecoder().decode(T.self, from: data)
+                completion(.success(decoded))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    // MARK: - Parental Controls
+
+    func fetchParentalStatus(
+        msisdn: String,
+        completion: @escaping (Result<ParentalStatusData, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let url = URL(string: baseURL + "/parental/status/\(digits)") else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error {
+                completion(.failure(error))
+                return
+            }
+            guard let data else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                return
+            }
+            do {
+                let wrapped = try JSONDecoder().decode(ParentalStatusAPIResponse.self, from: data)
+                guard (wrapped.status.lowercased() == "success" || wrapped.code == "000"),
+                      let status = wrapped.data else {
+                    completion(.failure(NSError(
+                        domain: "",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Unable to load parental status"]
+                    )))
+                    return
+                }
+                completion(.success(status))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    func setupParentalControls(
+        msisdn: String,
+        pin: String,
+        dailyLimitMinutes: Int,
+        completion: @escaping (Result<ParentalMessageResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let msisdnValue = Int64(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        postParentalJSON(
+            path: "/parental/setup",
+            body: [
+                "msisdn": msisdnValue,
+                "pin": pin,
+                "daily_limit_minutes": dailyLimitMinutes
+            ],
+            completion: completion
+        )
+    }
+
+    func verifyParentalPIN(
+        msisdn: String,
+        pin: String,
+        completion: @escaping (Result<ParentalMessageResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let msisdnValue = Int64(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        postParentalJSON(
+            path: "/parental/verify-pin",
+            body: ["msisdn": msisdnValue, "pin": pin],
+            completion: completion
+        )
+    }
+
+    func disableParentalControls(
+        msisdn: String,
+        pin: String,
+        completion: @escaping (Result<ParentalMessageResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let msisdnValue = Int64(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        postParentalJSON(
+            path: "/parental/disable",
+            body: ["msisdn": msisdnValue, "pin": pin],
+            completion: completion
+        )
+    }
+
+    func updateParentalControls(
+        msisdn: String,
+        currentPIN: String,
+        newPIN: String?,
+        dailyLimitMinutes: Int,
+        completion: @escaping (Result<ParentalMessageResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let msisdnValue = Int64(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        var body: [String: Any] = [
+            "msisdn": msisdnValue,
+            "current_pin": currentPIN,
+            "daily_limit_minutes": dailyLimitMinutes
+        ]
+        if let newPIN, !newPIN.isEmpty {
+            body["new_pin"] = newPIN
+        } else {
+            body["new_pin"] = currentPIN
+        }
+        postParentalJSON(path: "/parental/update", body: body, completion: completion)
+    }
+
+    func lockParentalCategory(
+        msisdn: String,
+        categoryId: Int,
+        completion: @escaping (Result<ParentalMessageResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let msisdnValue = Int64(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        postParentalJSON(
+            path: "/parental/lock-category",
+            body: ["msisdn": msisdnValue, "category_id": categoryId],
+            completion: completion
+        )
+    }
+
+    func unlockParentalCategory(
+        msisdn: String,
+        categoryId: Int,
+        completion: @escaping (Result<ParentalMessageResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let msisdnValue = Int64(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        postParentalJSON(
+            path: "/parental/unlock-category",
+            body: ["msisdn": msisdnValue, "category_id": categoryId],
+            completion: completion
+        )
+    }
+
+    func requestParentalPINReset(
+        phone: String,
+        completion: @escaping (Result<ParentalResetPINRequestResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(phone)
+        postParentalJSON(
+            path: "/parental/reset-pin/request",
+            body: ["phone": digits],
+            completion: completion
+        )
+    }
+
+    func confirmParentalPINReset(
+        msisdn: String,
+        otp: String,
+        newPIN: String,
+        completion: @escaping (Result<ParentalMessageResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let msisdnValue = Int64(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        postParentalJSON(
+            path: "/parental/reset-pin/confirm",
+            body: [
+                "msisdn": msisdnValue,
+                "otp": otp,
+                "new_pin": newPIN
+            ],
+            completion: completion
+        )
+    }
+
+    private func postParentalJSON<T: Decodable>(
+        path: String,
+        body: [String: Any],
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
+        guard let url = URL(string: baseURL + path) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error {
+                completion(.failure(error))
+                return
+            }
+            guard let data else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                return
+            }
+            do {
+                let decoded = try JSONDecoder().decode(T.self, from: data)
+                completion(.success(decoded))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+}
+
+// MARK: - OTP Models
+
+struct OTPGenerateResponse: Decodable {
+    let status: String
+    let code: String
+    let message: String?
+    let data: OTPGenerateData?
+}
+
+struct OTPGenerateData: Decodable {
+    let phone: String?
+    let expiresIn: String?
+
+    enum CodingKeys: String, CodingKey {
+        case phone
+        case expiresIn = "expires_in"
+    }
+}
+
+struct OTPVerifyResponse: Decodable {
+    let status: String
+    let code: String
+    let message: String?
+    let data: OTPVerifyData?
+}
+
+struct OTPVerifyData: Decodable {
+    let phone: String?
+    // Keep flexible — backend may add token/user fields later.
 }
 
 extension APIManager {
@@ -249,7 +668,7 @@ extension APIManager {
     }
     
     // Fetch episodes for a selected series/content id
-    func fetchEpisodes(seriesId: Int, languageCode: String, completion: @escaping (Result<([StoryEpisode], String?), Error>) -> Void) {
+    func fetchEpisodes(seriesId: Int, languageCode: String, completion: @escaping (Result<[StoryEpisode], Error>) -> Void) {
         let urlString = "https://kidskahani.ideationtec.live/episodes/\(seriesId)?lang=\(languageCode)"
         
         guard let url = URL(string: urlString) else {
@@ -273,23 +692,39 @@ extension APIManager {
             }
             
             do {
-                let response = try JSONDecoder().decode(StoryEpisodesResponse.self, from: data)
-                if response.status == "success" {
-                    let seasonsSorted = response.data.seasons.sorted(by: { $0.seasonNumber < $1.seasonNumber })
-                    let headerTitle = seasonsSorted.first?.title
-                    let flattenedEpisodes = seasonsSorted
-                        .flatMap { season in
-                            season.episodes.sorted(by: { $0.episodeNumber < $1.episodeNumber })
-                        }
-                    completion(.success((flattenedEpisodes, headerTitle)))
-                } else {
-                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "API returned error status"])))
-                }
+                let episodes = try self.decodeStoryEpisodes(from: data)
+                completion(.success(episodes))
             } catch {
                 print("Decoding error: \(error)")
                 completion(.failure(error))
             }
         }.resume()
+    }
+
+    private func decodeStoryEpisodes(from data: Data) throws -> [StoryEpisode] {
+        let decoder = JSONDecoder()
+        let payloads = splitTopLevelJSONObjects(from: data)
+        var flattened: [StoryEpisode] = []
+
+        for payload in payloads {
+            guard let wrapped = try? decoder.decode(StoryEpisodesResponse.self, from: payload),
+                  wrapped.status == "success" else { continue }
+            let seasonsSorted = wrapped.data.seasons.sorted(by: { $0.seasonNumber < $1.seasonNumber })
+            flattened.append(contentsOf: seasonsSorted.flatMap { season in
+                season.episodes.sorted(by: { $0.episodeNumber < $1.episodeNumber })
+            })
+        }
+
+        guard !flattened.isEmpty else {
+            throw NSError(
+                domain: "",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Unable to decode story episodes response"]
+            )
+        }
+
+        var seen = Set<Int>()
+        return flattened.filter { seen.insert($0.id).inserted }
     }
     
     func searchEpisodes(query: String, completion: @escaping (Result<[SearchEpisode], Error>) -> Void) {
@@ -393,22 +828,18 @@ extension APIManager {
             )
         }
         
-        // The search endpoint may return one row per language for the same episode id.
-        // Merge those rows into one model so existing language lookup logic still works.
-        var mergedById: [Int: SearchEpisode] = [:]
-        for episode in allEpisodes {
-            if var existing = mergedById[episode.id] {
-                for translation in episode.translations where !existing.translations.contains(where: { $0.langCode == translation.langCode }) {
-                    existing.translations.append(translation)
-                }
-                mergedById[episode.id] = existing
-            } else {
-                mergedById[episode.id] = episode
-            }
+        // API may duplicate the whole JSON payload and returns one row per language
+        // for the same episode id. Keep each language row (different video_url) and
+        // only drop exact duplicates of (id + lang_code).
+        var seen = Set<String>()
+        let deduped = allEpisodes.filter { episode in
+            let key = "\(episode.id)|\(episode.langCode ?? "")|\(episode.videoURL ?? "")"
+            return seen.insert(key).inserted
         }
         
-        return mergedById.values.sorted {
-            ($0.episodeNumber ?? Int.max) < ($1.episodeNumber ?? Int.max)
+        return deduped.sorted {
+            if $0.id != $1.id { return $0.id < $1.id }
+            return ($0.langName ?? "") < ($1.langName ?? "")
         }
     }
     
@@ -638,7 +1069,7 @@ class LanguageManager {
     
     func saveLanguage(_ language: Language) {
         currentLanguageCode = language.languageCode
-        currentLanguageName = language.nativeName
+        currentLanguageName = language.name
         currentLanguageDirection = language.direction
         applyLayoutDirectionToApplication()
     }

@@ -67,6 +67,30 @@ struct VideoPlaybackContext {
         )
     }
 
+    static func from(episode: SearchEpisode) -> VideoPlaybackContext? {
+        guard let url = episode.videoURL, !url.isEmpty else { return nil }
+        let durationMs = WatchTimeMilliseconds.fromAPISeconds(episode.durationSecs)
+        return VideoPlaybackContext(
+            videoId: episode.id,
+            title: episode.displayTitle,
+            thumbnailURL: episode.thumbnailURL,
+            durationMs: durationMs,
+            videoURL: url
+        )
+    }
+
+    static func from(slider: HomeSliderVideo) -> VideoPlaybackContext? {
+        guard let url = slider.videoURL, !url.isEmpty else { return nil }
+        let durationMs = WatchTimeMilliseconds.fromAPISeconds(slider.durationSecs)
+        return VideoPlaybackContext(
+            videoId: slider.id,
+            title: slider.displayTitle,
+            thumbnailURL: slider.thumbnailURL,
+            durationMs: durationMs,
+            videoURL: url
+        )
+    }
+
     static func from(record: ContinueWatchingRecord) -> VideoPlaybackContext? {
         guard !record.videoURL.isEmpty else { return nil }
         return VideoPlaybackContext(

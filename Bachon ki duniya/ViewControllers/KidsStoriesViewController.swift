@@ -17,6 +17,7 @@ class KidsStoriesViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView?
+    @IBOutlet weak var titleLbl: UILabel!
     
     // Data arrays
     private var subcategories: [Subcategory] = []
@@ -69,7 +70,10 @@ class KidsStoriesViewController: UIViewController {
     }
     
     private func setupNavigation() {
-        title = categoryTitle
+        let displayTitle = categoryTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        title = displayTitle.isEmpty ? AppL10n.t(.storiesDefaultTitle) : displayTitle
+        titleLbl?.text = title
+        titleLbl?.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         navigationController?.navigationBar.prefersLargeTitles = false
         
         let rtl = LanguageManager.shared.isRTL()
@@ -96,6 +100,7 @@ class KidsStoriesViewController: UIViewController {
         
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
+        tableView.contentInsetAdjustmentBehavior = .automatic
         
         // Set estimated heights for dynamic cells
         tableView.estimatedRowHeight = 120
@@ -430,10 +435,21 @@ extension KidsStoriesViewController: UITableViewDelegate {
     }
     
     // MARK: - Navigation Methods
+    /// `direct_series_id` is a series content id → open episodes.
+    /// Otherwise open the series list with `/series?category_id={subcategory.id}`.
     private func navigateToEpisodes(for subcategory: Subcategory, title: String) {
+        if let seriesId = subcategory.directSeriesId {
+            if let storiesVC = storyboard?.instantiateViewController(withIdentifier: "StoriesViewController") as? StoriesViewController {
+                storiesVC.seriesId = seriesId
+                storiesVC.seriesTitle = title
+                storiesVC.topBannerImage = subcategory.img ?? ""
+                performPlayfulPush(storiesVC)
+            }
+            return
+        }
+
         if let seriesVC = storyboard?.instantiateViewController(withIdentifier: "SeriesViewController") as? SeriesViewController {
-            // Pass tapped subcategory id as category_id for /series API
-            seriesVC.categoryId = subcategory.directSeriesId ?? subcategory.id
+            seriesVC.categoryId = subcategory.id
             seriesVC.categoryTitle = title
             seriesVC.topBannerImage = subcategory.img ?? ""
             performPlayfulPush(seriesVC)

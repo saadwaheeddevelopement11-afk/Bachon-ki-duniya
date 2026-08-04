@@ -9,9 +9,9 @@ import UIKit
 import SDWebImage
 
 enum HomeCategoryRowLayout {
-    /// Row 0: horizontal strip using `QuickAccessColVCell`
+    /// Horizontal strip using `QuickAccessColVCell` + local asset icons
     case horizontalQuickAccess
-    /// Row 1: full category grid using `HomeListingColvCell`
+    /// Full category grid using `HomeListingColvCell`
     case verticalGrid
 }
 
@@ -24,6 +24,7 @@ final class HomeTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionHeightConstraint: NSLayoutConstraint!
 
     private var items: [HomeItem] = []
+    private var quickAccessItems: [QuickAccessItem] = []
     private var layoutKind: HomeCategoryRowLayout = .verticalGrid
     private var contentWidthForLayout: CGFloat = UIScreen.main.bounds.width
 
@@ -36,6 +37,7 @@ final class HomeTableViewCell: UITableViewCell {
     private let quickAccessCollectionHeight: CGFloat = 108
 
     var onSelectItem: ((HomeItem) -> Void)?
+    var onSelectQuickAccess: ((QuickAccessItem) -> Void)?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -62,7 +64,9 @@ final class HomeTableViewCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         items = []
+        quickAccessItems = []
         onSelectItem = nil
+        onSelectQuickAccess = nil
     }
 
     func configure(
@@ -72,10 +76,32 @@ final class HomeTableViewCell: UITableViewCell {
         contentWidth: CGFloat,
         isRTL: Bool
     ) {
+        self.items = items
+        self.quickAccessItems = []
+        configureChrome(title: title, layoutKind: layoutKind, contentWidth: contentWidth, isRTL: isRTL)
+        collectionView.reloadData()
+    }
+
+    func configureQuickAccess(
+        title: String,
+        items: [QuickAccessItem],
+        contentWidth: CGFloat,
+        isRTL: Bool
+    ) {
+        self.quickAccessItems = items
+        self.items = []
+        configureChrome(title: title, layoutKind: .horizontalQuickAccess, contentWidth: contentWidth, isRTL: isRTL)
+        collectionView.reloadData()
+    }
+
+    private func configureChrome(
+        title: String,
+        layoutKind: HomeCategoryRowLayout,
+        contentWidth: CGFloat,
+        isRTL: Bool
+    ) {
         titleLbl.text = title
         titleLbl.textAlignment = isRTL ? .right : .left
-
-        self.items = items
         self.layoutKind = layoutKind
         self.contentWidthForLayout = max(contentWidth, 1)
 
@@ -87,7 +113,7 @@ final class HomeTableViewCell: UITableViewCell {
             flow.minimumLineSpacing = quickAccessSpacing
             flow.minimumInteritemSpacing = quickAccessSpacing
             flow.sectionInset = UIEdgeInsets(top: 0, left: sectionInset, bottom: 0, right: sectionInset)
-            collectionView.isScrollEnabled = true
+            collectionView.isScrollEnabled = false
             collectionView.semanticContentAttribute = isRTL ? .forceRightToLeft : .forceLeftToRight
             collectionHeightConstraint.constant = quickAccessCollectionHeight
 
@@ -107,8 +133,6 @@ final class HomeTableViewCell: UITableViewCell {
             let gridHeight = CGFloat(rows) * h + CGFloat(max(0, rows - 1)) * spacing
             collectionHeightConstraint.constant = max(gridHeight, 0)
         }
-
-        collectionView.reloadData()
     }
 
     private func loadImage(from urlString: String, into imageView: UIImageView) {
@@ -129,16 +153,18 @@ final class HomeTableViewCell: UITableViewCell {
 extension HomeTableViewCell: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        items.count
+        switch layoutKind {
+        case .horizontalQuickAccess:
+            return quickAccessItems.count
+        case .verticalGrid:
+            return items.count
+        }
     }
 
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
-        let item = items[indexPath.item]
-        let isRTL = LanguageManager.shared.isRTL()
-
         switch layoutKind {
         case .horizontalQuickAccess:
             guard let cell = collectionView.dequeueReusableCell(
@@ -147,7 +173,8 @@ extension HomeTableViewCell: UICollectionViewDataSource, UICollectionViewDelegat
             ) as? QuickAccessColVCell else {
                 return UICollectionViewCell()
             }
-            loadImage(from: item.imageUrl, into: cell.thumbImageView)
+            let item = quickAccessItems[indexPath.item]
+            cell.thumbImageView.image = UIImage(named: item.iconName)
             cell.titleLbl.text = item.title
             cell.titleLbl.textAlignment = .center
             return cell
@@ -159,6 +186,7 @@ extension HomeTableViewCell: UICollectionViewDataSource, UICollectionViewDelegat
             ) as? HomeListingColvCell else {
                 return UICollectionViewCell()
             }
+            let item = items[indexPath.item]
             loadImage(from: item.imageUrl, into: cell.bannerImageView)
             cell.bgImage.image = UIImage(named: item.backgroundImageName)
             cell.titleLbl.text = item.title
@@ -169,6 +197,7 @@ extension HomeTableViewCell: UICollectionViewDataSource, UICollectionViewDelegat
             let textColor: UIColor = usesDarkText ? .black : .white
             cell.titleLbl.textColor = textColor
             cell.descriptionLbl.textColor = textColor
+            cell.setLocked(ParentalStatusStore.isCategoryLocked(item.id))
             return cell
         }
     }
@@ -194,6 +223,11 @@ extension HomeTableViewCell: UICollectionViewDataSource, UICollectionViewDelegat
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        onSelectItem?(items[indexPath.item])
+        switch layoutKind {
+        case .horizontalQuickAccess:
+            onSelectQuickAccess?(quickAccessItems[indexPath.item])
+        case .verticalGrid:
+            onSelectItem?(items[indexPath.item])
+        }
     }
 }

@@ -23,8 +23,6 @@ class LanguageSelectionViewController: UIViewController {
     private var isLoading = false
     private var selectedLanguage: Language?
     private var originalLanguageCode: String
-    private let languageBackgroundColorNames = ["blue", "purple", "yellow", "lightGreen", "pink", "green", "turquoise"]
-    private let lightBackgroundColorNames: Set<String> = ["yellow", "lightGreen"]
     
     // MARK: - Initialization
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
@@ -127,7 +125,7 @@ class LanguageSelectionViewController: UIViewController {
             
             // Show confirmation alert
             let alertTitle = AppL10n.t(.changeLanguageTitle)
-            let alertMessage = AppL10n.t(.changeLanguageMessageFormat, selected.nativeName)
+            let alertMessage = AppL10n.t(.changeLanguageMessageFormat, selected.name)
             
             let alert = UIAlertController(
                 title: alertTitle,
@@ -166,7 +164,7 @@ class LanguageSelectionViewController: UIViewController {
         NotificationCenter.default.post(name: .languageDidChange, object: nil)
         
         // Show success message before dismissing
-        let successMessage = AppL10n.t(.languageChangedFormat, selected.nativeName)
+        let successMessage = AppL10n.t(.languageChangedFormat, selected.name)
         
         let alert = UIAlertController(
             title: AppL10n.t(.successTitle),
@@ -239,27 +237,15 @@ extension LanguageSelectionViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "LanguagesTableViewCell", for: indexPath) as? LanguagesTableViewCell else {
-            return UITableViewCell()}
+            return UITableViewCell()
+        }
         
         let language = languages[indexPath.row]
+        // Always show the English language name on the option buttons.
+        cell.languageName.text = language.name
         
-        // Configure label with API value
-        cell.languageName.text = language.nativeName
-        
-        let colorName = languageBackgroundColorNames[indexPath.row % languageBackgroundColorNames.count]
-        let bgColor = UIColor(named: colorName) ?? .systemGray5
-        
-        let useDarkSelectedText = lightBackgroundColorNames.contains(colorName)
-        // Selected state with high-contrast text + shadow
         let isSelectedLanguage = selectedLanguage?.languageCode == language.languageCode
-        cell.configure(backgroundColor: bgColor, isSelected: isSelectedLanguage, useDarkSelectedText: useDarkSelectedText)
-        
-        // Set text alignment based on language direction
-        if language.direction == "RTL" {
-            cell.languageName.textAlignment = .right
-        } else {
-            cell.languageName.textAlignment = .left
-        }
+        cell.configure(isSelected: isSelectedLanguage)
         
         return cell
     }

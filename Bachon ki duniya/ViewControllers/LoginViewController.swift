@@ -11,12 +11,14 @@ class LoginViewController: UIViewController {
 
     // Note: storyboard currently has no outlet connections, so we locate views at runtime.
     private weak var phoneTextField: UITextField?
+    private var isRequestingOTP = false
 
     /// Digits entered on the login screen (for OTP + watch tracking).
     var currentPhoneDigits: String? {
         let digits = (phoneTextField?.text ?? "").filter(\.isNumber)
-        guard (10...15).contains(digits.count) else { return nil }
-        return UserSession.normalizePhoneDigits(digits)
+        let normalized = UserSession.normalizePhoneDigits(digits)
+        guard UserSession.isValidPakistanMSISDN(normalized) else { return nil }
+        return normalized
     }
     
     override func viewDidLoad() {
@@ -74,27 +76,72 @@ private extension LoginViewController {
     
     func handleGetOTP() {
         view.endEditing(true)
+        guard !isRequestingOTP else { return }
         
         let raw = phoneTextField?.text ?? ""
-        let digits = raw.filter(\.isNumber)
+        let normalized = UserSession.normalizePhoneDigits(raw)
         
-        // Basic validation: 10-15 digits (covers local and E.164 without '+').
-        guard (10...15).contains(digits.count) else {
-            presentAlert(title: "Invalid phone number", message: "Please enter a valid phone number.")
+        guard UserSession.isValidPakistanMSISDN(normalized) else {
+            presentAlert(
+                title: "Invalid phone number",
+                message: "Please enter a valid phone number (e.g. 03001234567 or 923001234567)."
+            )
             return
         }
         
-        let normalized = UserSession.normalizePhoneDigits(digits)
-        UserSession.saveMsisdn(digits: normalized)
+        isRequestingOTP = true
+        setGetOTPLoading(true)
 
-        // Navigate to Confirm OTP screen
+        APIManager.shared.generateOTP(phone: normalized) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.isRequestingOTP = false
+                self.setGetOTPLoading(false)
+
+                switch result {
+                case .success(let response):
+                    let ok = response.status.lowercased() == "success" || response.code == "000"
+                    guard ok else {
+                        self.presentAlert(
+                            title: "OTP",
+                            message: response.message ?? "Unable to send OTP. Please try again."
+                        )
+                        return
+                    }
+                    self.openConfirmOTP(phone: normalized, expiresIn: response.data?.expiresIn)
+                case .failure(let error):
+                    self.presentAlert(title: "OTP", message: error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    func openConfirmOTP(phone: String, expiresIn: String?) {
         let sb = UIStoryboard(name: "Login", bundle: nil)
         guard let vc = sb.instantiateViewController(withIdentifier: "ConfirmOTPViewController") as? ConfirmOTPViewController else {
             return
         }
-        vc.pendingMsisdnDigits = normalized
+        vc.pendingMsisdnDigits = phone
+        vc.expiresInText = expiresIn
         vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true)
+    }
+
+    func setGetOTPLoading(_ loading: Bool) {
+        view.isUserInteractionEnabled = !loading
+        if loading {
+            let spinner = UIActivityIndicatorView(style: .medium)
+            spinner.tag = 88001
+            spinner.translatesAutoresizingMaskIntoConstraints = false
+            spinner.startAnimating()
+            view.addSubview(spinner)
+            NSLayoutConstraint.activate([
+                spinner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                spinner.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            ])
+        } else {
+            view.viewWithTag(88001)?.removeFromSuperview()
+        }
     }
     
     func presentAlert(title: String, message: String) {

@@ -10,6 +10,7 @@ enum AppDefaultsKeys {
     static let hasSeenOnboarding = "hasSeenOnboarding"
     static let isLoggedIn = "isLoggedIn"
     static let msisdnDigits = "msisdn_digits"
+    static let displayName = "user_display_name"
 }
 
 final class AppRouter {
@@ -57,6 +58,7 @@ final class AppRouter {
     }
     
     static func setRootViewController(window: UIWindow, root: UIViewController, animated: Bool) {
+        window.overrideUserInterfaceStyle = .light
         if animated {
             UIView.transition(with: window, duration: 0.25, options: .transitionCrossDissolve) {
                 window.rootViewController = root

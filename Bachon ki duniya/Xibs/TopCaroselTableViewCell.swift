@@ -12,8 +12,8 @@ class TopCaroselTableViewCell: UITableViewCell {
     @IBOutlet weak var caroselColV: UICollectionView!
     @IBOutlet weak var carocelPageController: UIPageControl!
     
-    private var items: [HomeItem] = []
-    private var onSelectItem: ((HomeItem) -> Void)?
+    private var items: [HomeSliderVideo] = []
+    private var onSelectItem: ((HomeSliderVideo) -> Void)?
     private var lastWidth: CGFloat = 0
     private let sidePeek: CGFloat = 22
     private let interItemSpacing: CGFloat = 12
@@ -36,7 +36,8 @@ class TopCaroselTableViewCell: UITableViewCell {
             flow.scrollDirection = .horizontal
             flow.minimumLineSpacing = interItemSpacing
             flow.minimumInteritemSpacing = 0
-            flow.sectionInset = .zero
+            // Side insets let the first/last card sit centered (peek on both sides).
+            flow.sectionInset = UIEdgeInsets(top: 0, left: sidePeek, bottom: 0, right: sidePeek)
         }
         
         carocelPageController.hidesForSinglePage = true
@@ -56,8 +57,8 @@ class TopCaroselTableViewCell: UITableViewCell {
         lastWidth = w
         caroselColV.collectionViewLayout.invalidateLayout()
         caroselColV.layoutIfNeeded()
-        let page = min(carocelPageController.currentPage, max(0, items.count - 1))
         guard !items.isEmpty else { return }
+        let page = min(carocelPageController.currentPage, items.count - 1)
         scrollToPage(page, animated: false)
         syncPageControl()
     }
@@ -70,18 +71,31 @@ class TopCaroselTableViewCell: UITableViewCell {
         carocelPageController.numberOfPages = 0
     }
     
-    func configure(items: [HomeItem], isRTL: Bool, onSelectItem: @escaping (HomeItem) -> Void) {
-        self.items = items
+    func configure(videos: [HomeSliderVideo], isRTL: Bool, onSelectItem: @escaping (HomeSliderVideo) -> Void) {
+        self.items = videos
         self.onSelectItem = onSelectItem
-        carocelPageController.numberOfPages = items.count
-        carocelPageController.currentPage = 0
+        carocelPageController.numberOfPages = videos.count
+        // Start on the middle item when possible (e.g. index 2 for 5 items).
+        let startPage = initialCenteredPage(forCount: videos.count)
+        carocelPageController.currentPage = startPage
         caroselColV.semanticContentAttribute = isRTL ? .forceRightToLeft : .forceLeftToRight
-        caroselColV.reloadData()
-        caroselColV.layoutIfNeeded()
-        if !items.isEmpty {
-            scrollToPage(0, animated: false)
+        if let flow = caroselColV.collectionViewLayout as? UICollectionViewFlowLayout {
+            flow.sectionInset = UIEdgeInsets(top: 0, left: sidePeek, bottom: 0, right: sidePeek)
         }
-        syncPageControl()
+        caroselColV.reloadData()
+        caroselColV.collectionViewLayout.invalidateLayout()
+        caroselColV.layoutIfNeeded()
+        DispatchQueue.main.async { [weak self] in
+            guard let self, !self.items.isEmpty else { return }
+            self.scrollToPage(startPage, animated: false)
+            self.syncPageControl()
+        }
+    }
+
+    /// Prefers the middle index so users can scroll both left and right (3rd of 5 → index 2).
+    private func initialCenteredPage(forCount count: Int) -> Int {
+        guard count > 0 else { return 0 }
+        return count / 2
     }
     
     private func cellWidth(for collectionWidth: CGFloat) -> CGFloat {
@@ -141,7 +155,7 @@ extension TopCaroselTableViewCell: UICollectionViewDataSource, UICollectionViewD
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeCollectionViewCell.reuseIdentifier, for: indexPath) as? HomeCollectionViewCell else {
             return UICollectionViewCell()
         }
-        cell.configure(with: items[indexPath.item], showPlayOverlay: true)
+        cell.configure(withImageURL: items[indexPath.item].thumbnailURL, showPlayOverlay: true)
         return cell
     }
     

@@ -11,10 +11,11 @@ import SDWebImage
 class SeriesViewController: UIViewController {
     
     var categoryId = 0
-    var categoryTitle = "Series"
+    var categoryTitle = ""
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var topBanner: UIImageView!
+    @IBOutlet weak var titleLbl: UILabel!
     
     private var seriesItems: [SeriesItem] = []
     var topBannerImage = ""
@@ -22,7 +23,7 @@ class SeriesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = categoryTitle
+        applyTitle()
         setupTableView()
         fetchSeries()
         languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
@@ -36,12 +37,20 @@ class SeriesViewController: UIViewController {
         }
     }
 
+    private func applyTitle() {
+        let display = categoryTitle.isEmpty ? AppL10n.t(.storiesDefaultTitle) : categoryTitle
+        title = display
+        titleLbl?.text = display
+    }
+
     private func refreshLocalizedCategoryTitleAndReload() {
+        // Keep the title that was passed for this node (often a subcategory name).
+        // Only replace when top-level category lookup succeeds for this id.
         LanguageManager.shared.fetchLocalizedCategoryTitle(categoryId: categoryId) { [weak self] name in
             guard let self else { return }
             if let name, !name.isEmpty {
                 self.categoryTitle = name
-                self.title = name
+                self.applyTitle()
             }
             self.fetchSeries()
         }
@@ -130,6 +139,7 @@ extension SeriesViewController: UITableViewDataSource, UITableViewDelegate {
         if let storiesVC = storyboard?.instantiateViewController(withIdentifier: "StoriesViewController") as? StoriesViewController {
             storiesVC.seriesId = selectedSeries.id
             storiesVC.seriesTitle = selectedTitle
+            storiesVC.topBannerImage = selectedSeries.img ?? ""
             navigationController?.pushViewController(storiesVC, animated: true)
         }
     }

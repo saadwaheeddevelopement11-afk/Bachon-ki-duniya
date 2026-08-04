@@ -24,7 +24,7 @@ final class ContinueWatchingTableViewCell: UITableViewCell {
         cv.showsHorizontalScrollIndicator = false
         return cv
     }()
-
+    
     private var records: [ContinueWatchingRecord] = []
     var onSelectRecord: ((ContinueWatchingRecord) -> Void)?
 

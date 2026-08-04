@@ -5,6 +5,8 @@
 //  Created by macbook pro on 30/03/2026.
 //
 
+import Foundation
+
 // MARK: - Category Models
 struct CategoryResponse: Codable {
     let status: String
@@ -145,6 +147,7 @@ struct StoryEpisode: Codable {
     let durationSecs: Int?
     let thumbnailURL: String?
     let videoURL: String?
+    let htmlURL: String?
     let videoStatus: String?
     let isPremium: Bool
     let title: String
@@ -156,8 +159,17 @@ struct StoryEpisode: Codable {
         case durationSecs = "duration_secs"
         case thumbnailURL = "thumbnail_url"
         case videoURL = "video_url"
+        case htmlURL = "html_url"
         case videoStatus = "video_status"
         case isPremium = "is_premium"
+    }
+
+    /// HTML game when `html_url` is set; otherwise treat as video when `video_url` is present.
+    var isHTMLGame: Bool {
+        guard let htmlURL, !htmlURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return false
+        }
+        return true
     }
 }
 
@@ -176,6 +188,16 @@ struct SearchEpisode: Decodable {
     let videoURL: String?
     let videoStatus: String?
     let isPremium: Bool?
+    /// Language of this search row (`lang_code` from API).
+    let langCode: String?
+    /// English language name (`lang_name`), e.g. "Sindhi".
+    let langName: String?
+    /// Native script language name (`native_name`).
+    let nativeName: String?
+    let direction: String?
+    /// Episode title for this language row.
+    let title: String?
+    let description: String?
     var translations: [Translation]
     
     enum CodingKeys: String, CodingKey {
@@ -204,30 +226,50 @@ struct SearchEpisode: Decodable {
         videoURL = try container.decodeIfPresent(String.self, forKey: .videoURL)
         videoStatus = try container.decodeIfPresent(String.self, forKey: .videoStatus)
         isPremium = try container.decodeIfPresent(Bool.self, forKey: .isPremium)
+        langCode = try container.decodeIfPresent(String.self, forKey: .langCode)
+        langName = try container.decodeIfPresent(String.self, forKey: .langName)
+        nativeName = try container.decodeIfPresent(String.self, forKey: .nativeName)
+        direction = try container.decodeIfPresent(String.self, forKey: .direction)
+        title = try container.decodeIfPresent(String.self, forKey: .title)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
         
         if let decodedTranslations = try container.decodeIfPresent([Translation].self, forKey: .translations) {
             translations = decodedTranslations
-        } else if
-            let langCode = try container.decodeIfPresent(String.self, forKey: .langCode),
-            let langName = try container.decodeIfPresent(String.self, forKey: .langName),
-            let nativeName = try container.decodeIfPresent(String.self, forKey: .nativeName),
-            let direction = try container.decodeIfPresent(String.self, forKey: .direction)
-        {
-            let title = (try container.decodeIfPresent(String.self, forKey: .title)) ?? ""
-            let description = (try container.decodeIfPresent(String.self, forKey: .description)) ?? ""
+        } else if let langCode, let langName, let nativeName, let direction {
             translations = [
                 Translation(
                     langCode: langCode,
                     langName: langName,
                     nativeName: nativeName,
                     direction: direction,
-                    name: title,
-                    description: description
+                    name: title ?? "",
+                    description: description ?? ""
                 )
             ]
         } else {
             translations = []
         }
+    }
+    
+    /// Prefer English language name for the badge; fall back to native / code.
+    var displayLanguageName: String {
+        if let langName, !langName.isEmpty { return langName }
+        if let nativeName, !nativeName.isEmpty { return nativeName }
+        return langCode?.uppercased() ?? ""
+    }
+    
+    var displayTitle: String {
+        if let title, !title.isEmpty { return title }
+        return getTranslation(for: LanguageManager.shared.currentLanguageCode)?.name
+            ?? getTranslation(for: "en")?.name
+            ?? ""
+    }
+    
+    var displayDescription: String {
+        if let description, !description.isEmpty { return description }
+        return getTranslation(for: LanguageManager.shared.currentLanguageCode)?.description
+            ?? getTranslation(for: "en")?.description
+            ?? ""
     }
     
     func getTranslation(for languageCode: String) -> Translation? {
@@ -295,6 +337,41 @@ struct HomeItem {
     let order: Int
     let hasSubcategories: Bool
     let directSeriesId: Int?
+}
+
+// MARK: - Home slider videos
+
+struct HomeSliderVideosResponse: Decodable {
+    let status: String
+    let code: String
+    let total: Int?
+    let data: [HomeSliderVideo]
+}
+
+struct HomeSliderVideo: Decodable {
+    let id: Int
+    let episodeNumber: Int?
+    let durationSecs: Int?
+    let thumbnailURL: String?
+    let videoURL: String?
+    let htmlURL: String?
+    let videoStatus: String?
+    let langCode: String?
+    let title: String?
+    let description: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, description
+        case episodeNumber = "episode_number"
+        case durationSecs = "duration_secs"
+        case thumbnailURL = "thumbnail_url"
+        case videoURL = "video_url"
+        case htmlURL = "html_url"
+        case videoStatus = "video_status"
+        case langCode = "lang_code"
+    }
+
+    var displayTitle: String { title ?? "" }
 }
 
 // Add an enum for category types

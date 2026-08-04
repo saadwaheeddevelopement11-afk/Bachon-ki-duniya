@@ -12,8 +12,11 @@ class HomeViewController: UIViewController {
 
     // MARK: - Properties
     private var homeItems: [HomeItem] = []
+    private var sliderVideos: [HomeSliderVideo] = []
+    private var cachedCategories: [Category] = []
     private var continueWatchingRecords: [ContinueWatchingRecord] = []
     private var tableSections: [HomeCategoryTableSection] = []
+    private let quickAccessItems = QuickAccessCatalog.items
     private var isLoading = false
     private let listingBackgroundPool: [String] = (1...9).map { "bg\($0)" }
 
@@ -23,22 +26,32 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var contentTableView: UITableView!
     @IBOutlet weak var homeGreetingLabel: UILabel!
     @IBOutlet weak var homeSubtitleLabel: UILabel!
+    @IBOutlet weak var homeProfileImageView: UIImageView!
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
+        setupHomeProfileAvatar()
         applyHomeHeaderCopy()
         setupNavigationBar()
         setupLanguageObserver()
+        rebuildTableSections()
         fetchCategories()
+        fetchHomeSliderVideos()
         reloadContinueWatching()
         setupContinueWatchingObserver()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        reloadHomeProfileAvatar()
         reloadContinueWatching()
+        ParentalStatusStore.refreshInBackground { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.contentTableView.reloadData()
+            }
+        }
         MsisdnCapturePresenter.presentIfNeeded(from: self)
     }
 
@@ -95,6 +108,60 @@ class HomeViewController: UIViewController {
         }
     }
 
+    private func setupHomeProfileAvatar() {
+        homeProfileImageView?.contentMode = .scaleAspectFill
+        homeProfileImageView?.clipsToBounds = true
+        homeProfileImageView?.isUserInteractionEnabled = true
+
+        // Prefer the circular container for a larger hit area.
+        let targetView = homeProfileImageView?.superview ?? homeProfileImageView
+        targetView?.isUserInteractionEnabled = true
+        targetView?.addGestureRecognizer(
+            UITapGestureRecognizer(target: self, action: #selector(homeProfileAvatarTapped))
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(homeProfileDidChange),
+            name: .userProfileDidChange,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(parentalStatusDidChange),
+            name: .parentalStatusDidChange,
+            object: nil
+        )
+        reloadHomeProfileAvatar()
+    }
+
+    @objc private func homeProfileDidChange() {
+        reloadHomeProfileAvatar()
+    }
+
+    @objc private func parentalStatusDidChange() {
+        contentTableView.reloadData()
+    }
+
+    private func reloadHomeProfileAvatar() {
+        if let saved = ProfileAvatarStore.load() {
+            homeProfileImageView?.sd_cancelCurrentImageLoad()
+            homeProfileImageView?.image = saved
+            return
+        }
+        if let url = UserProfileStore.current?.imageURL {
+            let placeholder = UIImage(named: "profileImage")
+            homeProfileImageView?.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground])
+            return
+        }
+        homeProfileImageView?.sd_cancelCurrentImageLoad()
+        homeProfileImageView?.image = UIImage(named: "profileImage")
+    }
+
+    @objc private func homeProfileAvatarTapped() {
+        // Tab order: 0 Home, 1 Search, 2 Library, 3 Profile
+        tabBarController?.selectedIndex = 3
+    }
+
     private func setupNavigationBar() {
         let languageButton = UIBarButtonItem(
             title: AppL10n.t(.homeLanguagesButton),
@@ -126,8 +193,11 @@ class HomeViewController: UIViewController {
 
     @objc private func languageChanged() {
         fetchCategories()
+        fetchHomeSliderVideos()
         applyHomeHeaderCopy()
         setupNavigationBar()
+        rebuildTableSections()
+        contentTableView.reloadData()
     }
 
     @objc private func languageButtonTapped() {
@@ -150,9 +220,29 @@ class HomeViewController: UIViewController {
 
                 switch result {
                 case .success(let categories):
+                    self?.cachedCategories = categories
                     self?.processCategories(categories)
                 case .failure(let error):
                     self?.showError(error)
+                }
+            }
+        }
+    }
+
+    private func fetchHomeSliderVideos() {
+        let currentLanguage = LanguageManager.shared.currentLanguageCode
+        APIManager.shared.fetchHomeSliderVideos(languageCode: currentLanguage, limit: 5) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let videos):
+                    self?.sliderVideos = videos
+                    self?.rebuildTableSections()
+                    self?.contentTableView.reloadData()
+                case .failure(let error):
+                    print("Home slider error: \(error)")
+                    self?.sliderVideos = []
+                    self?.rebuildTableSections()
+                    self?.contentTableView.reloadData()
                 }
             }
         }
@@ -192,10 +282,26 @@ class HomeViewController: UIViewController {
         }
 
         processedItems.sort(by: { $0.order < $1.order })
-        homeItems = processedItems
+        homeItems = pinKidsShowsToSecondPosition(processedItems)
         rebuildTableSections()
         contentTableView.reloadData()
         animateContentEntrance()
+    }
+
+    /// Keep API order, but always show Kids Shows as the second category (index 1).
+    private func pinKidsShowsToSecondPosition(_ items: [HomeItem]) -> [HomeItem] {
+        guard items.count > 1 else { return items }
+        let kidsShowsIds = Set(CategoryType.kidsShows.idRange)
+        guard let fromIndex = items.firstIndex(where: { kidsShowsIds.contains($0.id) }),
+              fromIndex != 1 else {
+            return items
+        }
+
+        var reordered = items
+        let kidsShows = reordered.remove(at: fromIndex)
+        let insertIndex = min(1, reordered.count)
+        reordered.insert(kidsShows, at: insertIndex)
+        return reordered
     }
 
     /// Fixed order sequence: bg1...bg9, then repeats from bg1.
@@ -213,39 +319,15 @@ class HomeViewController: UIViewController {
 
         var sections: [HomeCategoryTableSection] = []
 
-        guard !homeItems.isEmpty else {
-            if !continueWatchingRecords.isEmpty {
-                sections.append(
-                    HomeCategoryTableSection(
-                        title: continueWatchingTitle,
-                        continueWatching: continueWatchingRecords,
-                        layout: .continueWatching
-                    )
-                )
-            }
-            tableSections = sections
-            return
-        }
-
-        // Row 0: top carousel
-        sections.append(
-            HomeCategoryTableSection(
-                title: "",
-                items: homeItems,
-                layout: .topCarousel
-            )
-        )
-
-        // Row 1: quick access
+        // Quick access is always available (hardcoded), even before categories load.
         sections.append(
             HomeCategoryTableSection(
                 title: quickAccessTitle,
-                items: homeItems,
+                quickAccess: quickAccessItems,
                 layout: .horizontalQuickAccess
             )
         )
 
-        // Row 2: continue watching (between quick access and categories)
         if !continueWatchingRecords.isEmpty {
             sections.append(
                 HomeCategoryTableSection(
@@ -256,14 +338,32 @@ class HomeViewController: UIViewController {
             )
         }
 
-        // Row 3: categories grid
-        sections.append(
-            HomeCategoryTableSection(
-                title: allCategoriesTitle,
-                items: homeItems,
-                layout: .verticalGrid
+        guard !homeItems.isEmpty || !sliderVideos.isEmpty else {
+            tableSections = sections
+            return
+        }
+
+        // Top carousel uses `/home-slider-videos` (play on tap).
+        if !sliderVideos.isEmpty {
+            sections.insert(
+                HomeCategoryTableSection(
+                    title: "",
+                    sliderVideos: sliderVideos,
+                    layout: .topCarousel
+                ),
+                at: 0
             )
-        )
+        }
+
+        if !homeItems.isEmpty {
+            sections.append(
+                HomeCategoryTableSection(
+                    title: allCategoriesTitle,
+                    items: homeItems,
+                    layout: .verticalGrid
+                )
+            )
+        }
 
         tableSections = sections
     }
@@ -271,6 +371,106 @@ class HomeViewController: UIViewController {
     private func playContinueWatching(_ record: ContinueWatchingRecord) {
         guard let context = VideoPlaybackContext.from(record: record) else { return }
         VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+    }
+
+    private func playSliderVideo(_ video: HomeSliderVideo) {
+        if let html = video.htmlURL, !html.isEmpty, video.videoURL == nil || video.videoURL?.isEmpty == true {
+            let gameVC = HTMLGameViewController()
+            gameVC.gameTitleText = video.displayTitle
+            gameVC.htmlURLString = html
+            gameVC.modalPresentationStyle = .fullScreen
+            present(gameVC, animated: true)
+            return
+        }
+        guard let context = VideoPlaybackContext.from(slider: video) else { return }
+        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+    }
+
+    // MARK: - Quick Access (Android parity)
+    private func handleQuickAccessTap(_ item: QuickAccessItem) {
+        if QuickAccessCatalog.categoryDetailIds.contains(item.id) {
+            gotoCategoryDetails(categoryId: item.id, fallbackTitle: item.title)
+            return
+        }
+
+        if QuickAccessCatalog.storiesSubcategoryIds.contains(item.id) {
+            gotoStories(subcategoryId: item.id, title: item.title)
+            return
+        }
+
+        gotoCategoryDetails(categoryId: item.id, fallbackTitle: item.title)
+    }
+
+    /// Android `gotoCategoryDetails` — open category list / subcategories screen.
+    private func gotoCategoryDetails(categoryId: Int, fallbackTitle: String) {
+        if let category = cachedCategories.first(where: { $0.id == categoryId }) {
+            let lang = LanguageManager.shared.currentLanguageCode
+            let title = category.getTranslation(for: lang)?.name
+                ?? category.getTranslation(for: "en")?.name
+                ?? fallbackTitle
+            let item = HomeItem(
+                id: category.id,
+                imageUrl: category.img ?? "",
+                title: title,
+                description: category.getTranslation(for: lang)?.description
+                    ?? category.getTranslation(for: "en")?.description
+                    ?? "",
+                backgroundImageName: "bg1",
+                color: category.color,
+                order: category.order,
+                hasSubcategories: category.hasSubcategories,
+                directSeriesId: category.directSeriesId
+            )
+            navigateToAppropriateViewController(item: item)
+            return
+        }
+
+        // Categories not loaded yet — still open with known id.
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
+            vc.categoryId = categoryId
+            vc.categoryTitle = fallbackTitle
+            vc.hasSubcategories = true
+            performPlayfulPush(vc)
+        }
+    }
+
+    /// Open series list or skip to episodes when `direct_series_id` is set.
+    private func gotoStories(subcategoryId: Int, title: String) {
+        ParentalPINGate.unlockCategoryIfNeeded(categoryId: subcategoryId, from: self) { [weak self] in
+            self?.openStories(subcategoryId: subcategoryId, title: title)
+        }
+    }
+
+    private func openStories(subcategoryId: Int, title: String) {
+        if let subcategory = findSubcategory(id: subcategoryId) {
+            let lang = LanguageManager.shared.currentLanguageCode
+            let screenTitle = subcategory.getTranslation(for: lang)?.name
+                ?? subcategory.getTranslation(for: "en")?.name
+                ?? title
+            navigateToLeafContent(
+                categoryId: subcategory.id,
+                directSeriesId: subcategory.directSeriesId,
+                title: screenTitle,
+                bannerImage: subcategory.img ?? ""
+            )
+            return
+        }
+
+        navigateToLeafContent(
+            categoryId: subcategoryId,
+            directSeriesId: nil,
+            title: title,
+            bannerImage: ""
+        )
+    }
+
+    private func findSubcategory(id: Int) -> Subcategory? {
+        for category in cachedCategories {
+            if let match = category.subcategories?.first(where: { $0.id == id }) {
+                return match
+            }
+        }
+        return nil
     }
 
     private func showError(_ error: Error) {
@@ -347,6 +547,12 @@ class HomeViewController: UIViewController {
 
     // MARK: - Navigation
     private func navigateToAppropriateViewController(item: HomeItem) {
+        ParentalPINGate.unlockCategoryIfNeeded(categoryId: item.id, from: self) { [weak self] in
+            self?.performCategoryNavigation(item: item)
+        }
+    }
+
+    private func performCategoryNavigation(item: HomeItem) {
         switch item.title {
         case CategoryType.kidsStories.rawValue:
             navigateToKidsStories(with: item)
@@ -373,7 +579,12 @@ class HomeViewController: UIViewController {
 
     private func navigateToKidsStories(with item: HomeItem) {
         if !item.hasSubcategories {
-            navigateDirectlyToSeries(withId: item.directSeriesId ?? item.id, title: item.title, bannerImage: item.imageUrl)
+            navigateToLeafContent(
+                categoryId: item.id,
+                directSeriesId: item.directSeriesId,
+                title: item.title,
+                bannerImage: item.imageUrl
+            )
             return
         }
         if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
@@ -386,7 +597,12 @@ class HomeViewController: UIViewController {
 
     private func navigateToIslamicKnowledge(with item: HomeItem) {
         if !item.hasSubcategories {
-            navigateDirectlyToSeries(withId: item.directSeriesId ?? item.id, title: item.title, bannerImage: item.imageUrl)
+            navigateToLeafContent(
+                categoryId: item.id,
+                directSeriesId: item.directSeriesId,
+                title: item.title,
+                bannerImage: item.imageUrl
+            )
             return
         }
         if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
@@ -399,7 +615,12 @@ class HomeViewController: UIViewController {
 
     private func navigateToGeneralKnowledge(with item: HomeItem) {
         if !item.hasSubcategories {
-            navigateDirectlyToSeries(withId: item.directSeriesId ?? item.id, title: item.title, bannerImage: item.imageUrl)
+            navigateToLeafContent(
+                categoryId: item.id,
+                directSeriesId: item.directSeriesId,
+                title: item.title,
+                bannerImage: item.imageUrl
+            )
             return
         }
         if let vc = storyboard?.instantiateViewController(withIdentifier: "KidsStoriesViewController") as? KidsStoriesViewController {
@@ -410,9 +631,25 @@ class HomeViewController: UIViewController {
         }
     }
 
-    private func navigateDirectlyToSeries(withId id: Int, title: String, bannerImage: String) {
+    /// Leaf node: `direct_series_id` → episodes screen; otherwise series list for `categoryId`.
+    private func navigateToLeafContent(
+        categoryId: Int,
+        directSeriesId: Int?,
+        title: String,
+        bannerImage: String
+    ) {
+        if let seriesId = directSeriesId {
+            if let storiesVC = storyboard?.instantiateViewController(withIdentifier: "StoriesViewController") as? StoriesViewController {
+                storiesVC.seriesId = seriesId
+                storiesVC.seriesTitle = title
+                storiesVC.topBannerImage = bannerImage
+                performPlayfulPush(storiesVC)
+            }
+            return
+        }
+
         if let seriesVC = storyboard?.instantiateViewController(withIdentifier: "SeriesViewController") as? SeriesViewController {
-            seriesVC.categoryId = id
+            seriesVC.categoryId = categoryId
             seriesVC.categoryTitle = title
             seriesVC.topBannerImage = bannerImage
             performPlayfulPush(seriesVC)
@@ -452,17 +689,23 @@ class HomeViewController: UIViewController {
 private struct HomeCategoryTableSection {
     let title: String
     let items: [HomeItem]
+    let sliderVideos: [HomeSliderVideo]
+    let quickAccess: [QuickAccessItem]
     let continueWatching: [ContinueWatchingRecord]
     let layout: HomeTableSectionLayout
 
     init(
         title: String,
         items: [HomeItem] = [],
+        sliderVideos: [HomeSliderVideo] = [],
+        quickAccess: [QuickAccessItem] = [],
         continueWatching: [ContinueWatchingRecord] = [],
         layout: HomeTableSectionLayout
     ) {
         self.title = title
         self.items = items
+        self.sliderVideos = sliderVideos
+        self.quickAccess = quickAccess
         self.continueWatching = continueWatching
         self.layout = layout
     }
@@ -490,8 +733,8 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
             guard let cell = tableView.dequeueReusableCell(withIdentifier: "TopCaroselTableViewCell", for: indexPath) as? TopCaroselTableViewCell else {
                 return UITableViewCell()
             }
-            cell.configure(items: model.items, isRTL: LanguageManager.shared.isRTL()) { [weak self] item in
-                self?.navigateToAppropriateViewController(item: item)
+            cell.configure(videos: model.sliderVideos, isRTL: LanguageManager.shared.isRTL()) { [weak self] video in
+                self?.playSliderVideo(video)
             }
             return cell
 
@@ -512,7 +755,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
             }
             return cell
 
-        case .horizontalQuickAccess, .verticalGrid:
+        case .horizontalQuickAccess:
             guard let cell = tableView.dequeueReusableCell(
                 withIdentifier: HomeTableViewCell.reuseIdentifier,
                 for: indexPath
@@ -520,11 +763,29 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
                 return UITableViewCell()
             }
             let innerWidth = tableView.bounds.width > 1 ? tableView.bounds.width : (view.bounds.width - 24)
-            let rowLayout: HomeCategoryRowLayout = (model.layout == .horizontalQuickAccess) ? .horizontalQuickAccess : .verticalGrid
+            cell.configureQuickAccess(
+                title: model.title,
+                items: model.quickAccess,
+                contentWidth: innerWidth,
+                isRTL: LanguageManager.shared.isRTL()
+            )
+            cell.onSelectQuickAccess = { [weak self] item in
+                self?.handleQuickAccessTap(item)
+            }
+            return cell
+
+        case .verticalGrid:
+            guard let cell = tableView.dequeueReusableCell(
+                withIdentifier: HomeTableViewCell.reuseIdentifier,
+                for: indexPath
+            ) as? HomeTableViewCell else {
+                return UITableViewCell()
+            }
+            let innerWidth = tableView.bounds.width > 1 ? tableView.bounds.width : (view.bounds.width - 24)
             cell.configure(
                 title: model.title,
                 items: model.items,
-                layoutKind: rowLayout,
+                layoutKind: .verticalGrid,
                 contentWidth: innerWidth,
                 isRTL: LanguageManager.shared.isRTL()
             )
@@ -540,8 +801,8 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
         
         if model.layout == .topCarousel,
            let carouselCell = cell as? TopCaroselTableViewCell {
-            carouselCell.configure(items: model.items, isRTL: LanguageManager.shared.isRTL()) { [weak self] item in
-                self?.navigateToAppropriateViewController(item: item)
+            carouselCell.configure(videos: model.sliderVideos, isRTL: LanguageManager.shared.isRTL()) { [weak self] video in
+                self?.playSliderVideo(video)
             }
             return
         }
@@ -561,11 +822,24 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
 
         guard let homeCell = cell as? HomeTableViewCell else { return }
         let innerWidth = tableView.bounds.width > 1 ? tableView.bounds.width : (view.bounds.width - 24)
-        let rowLayout: HomeCategoryRowLayout = (model.layout == .horizontalQuickAccess) ? .horizontalQuickAccess : .verticalGrid
+
+        if model.layout == .horizontalQuickAccess {
+            homeCell.configureQuickAccess(
+                title: model.title,
+                items: model.quickAccess,
+                contentWidth: innerWidth,
+                isRTL: LanguageManager.shared.isRTL()
+            )
+            homeCell.onSelectQuickAccess = { [weak self] item in
+                self?.handleQuickAccessTap(item)
+            }
+            return
+        }
+
         homeCell.configure(
             title: model.title,
             items: model.items,
-            layoutKind: rowLayout,
+            layoutKind: .verticalGrid,
             contentWidth: innerWidth,
             isRTL: LanguageManager.shared.isRTL()
         )
