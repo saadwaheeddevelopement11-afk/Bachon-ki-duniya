@@ -13,6 +13,7 @@ class KidsStoriesTableViewCell: UITableViewCell {
     @IBOutlet weak var titleLbl: UILabel!
     @IBOutlet weak var textLbl: UILabel!
     @IBOutlet weak var languageLbl: UILabel!
+    @IBOutlet weak var bookmarkBtn: UIButton!
     
     static let reuseIdentifier = "KidsStoriesTableViewCell"
     

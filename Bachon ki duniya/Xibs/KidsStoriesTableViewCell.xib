@@ -101,15 +101,43 @@
                                     </view>
                                 </subviews>
                             </stackView>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="FZf-2K-YwI">
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="FZf-2K-YwI">
                                 <rect key="frame" x="84.666666666666657" y="0.0" width="50" height="74.333333333333329"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="addIcon" translatesAutoresizingMaskIntoConstraints="NO" id="Zzx-Md-8xY">
-                                        <rect key="frame" x="0.0" y="0.0" width="50" height="27.333333333333332"/>
-                                    </imageView>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="playButton" translatesAutoresizingMaskIntoConstraints="NO" id="dGj-8T-xkU">
-                                        <rect key="frame" x="0.0" y="35.333333333333329" width="50" height="39"/>
-                                    </imageView>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BDF-8d-CgC">
+                                        <rect key="frame" x="0.0" y="0.0" width="50" height="33.333333333333336"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="klZ-95-xE9">
+                                                <rect key="frame" x="0.0" y="0.0" width="50" height="33.333333333333336"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                            </button>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="addIcon" translatesAutoresizingMaskIntoConstraints="NO" id="Zzx-Md-8xY">
+                                                <rect key="frame" x="15.333333333333313" y="6.3333333333333375" width="19.333333333333329" height="20.666666666666671"/>
+                                            </imageView>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstItem="Zzx-Md-8xY" firstAttribute="centerY" secondItem="BDF-8d-CgC" secondAttribute="centerY" id="4c6-rr-sjC"/>
+                                            <constraint firstItem="klZ-95-xE9" firstAttribute="leading" secondItem="BDF-8d-CgC" secondAttribute="leading" id="B8F-9l-xPk"/>
+                                            <constraint firstAttribute="trailing" secondItem="klZ-95-xE9" secondAttribute="trailing" id="JJd-o4-YLp"/>
+                                            <constraint firstItem="Zzx-Md-8xY" firstAttribute="centerX" secondItem="BDF-8d-CgC" secondAttribute="centerX" id="MBR-in-52F"/>
+                                            <constraint firstItem="klZ-95-xE9" firstAttribute="top" secondItem="BDF-8d-CgC" secondAttribute="top" id="SrM-Sm-tCp"/>
+                                            <constraint firstAttribute="bottom" secondItem="klZ-95-xE9" secondAttribute="bottom" id="kom-iK-Ofu"/>
+                                        </constraints>
+                                    </view>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bNQ-Jm-Yz0">
+                                        <rect key="frame" x="0.0" y="41.333333333333343" width="50" height="33"/>
+                                        <subviews>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="playButton" translatesAutoresizingMaskIntoConstraints="NO" id="dGj-8T-xkU">
+                                                <rect key="frame" x="7.6666666666666856" y="-3.0000000000000071" width="35" height="39"/>
+                                            </imageView>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstItem="dGj-8T-xkU" firstAttribute="centerY" secondItem="bNQ-Jm-Yz0" secondAttribute="centerY" id="Yl2-eq-4M2"/>
+                                            <constraint firstItem="dGj-8T-xkU" firstAttribute="centerX" secondItem="bNQ-Jm-Yz0" secondAttribute="centerX" id="qql-tF-QLs"/>
+                                        </constraints>
+                                    </view>
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="Itw-dA-lCN"/>

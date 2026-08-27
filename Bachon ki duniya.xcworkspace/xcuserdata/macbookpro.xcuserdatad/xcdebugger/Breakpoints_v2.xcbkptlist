@@ -16,7 +16,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "328"
             endingLineNumber = "328"
-            landmarkName = "gotoCategoryDetails(categoryId:fallbackTitle:)"
+            landmarkName = "rebuildTableSections()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -32,8 +32,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "383"
             endingLineNumber = "383"
-            landmarkName = "HomeViewController"
-            landmarkType = "3">
+            landmarkName = "playSliderVideo(_:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -48,7 +48,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "401"
             endingLineNumber = "401"
-            landmarkName = "startPlayfulLoadingAnimation()"
+            landmarkName = "handleQuickAccessTap(_:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -64,7 +64,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "515"
             endingLineNumber = "515"
-            landmarkName = "navigateToGeneralKnowledge(with:)"
+            landmarkName = "stopPlayfulLoadingAnimation()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -80,8 +80,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "582"
             endingLineNumber = "582"
-            landmarkName = "HomeCategoryTableSection"
-            landmarkType = "14">
+            landmarkName = "navigateToKidsStories(with:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -96,8 +96,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "599"
             endingLineNumber = "599"
-            landmarkName = "HomeTableSectionLayout"
-            landmarkType = "13">
+            landmarkName = "navigateToIslamicKnowledge(with:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

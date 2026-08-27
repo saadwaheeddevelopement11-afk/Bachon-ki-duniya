@@ -7,7 +7,8 @@ import UIKit
 import WebKit
 
 /// Full-screen HTML game: compact header with back + title, WebKit fills the rest.
-/// Scales the HTML document so the full game UI (including center buttons) fits on screen.
+/// Fetches remote HTML, patches in level buttons + layout fixes, then loads via loadHTMLString
+/// so WKWebView renders the full game UI (CDN serves `content-disposition: attachment`).
 final class HTMLGameViewController: UIViewController {
 
     var gameTitleText: String = ""
@@ -23,20 +24,19 @@ final class HTMLGameViewController: UIViewController {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
-        // Guard localStorage before game scripts run (some WebViews block it and break renderGrid).
+        if #available(iOS 14.0, *) {
+            config.defaultWebpagePreferences.allowsContentJavaScript = true
+        } else {
+            config.preferences.javaScriptEnabled = true
+        }
+
         let bootstrap = WKUserScript(
             source: HTMLGameViewController.bootstrapJavaScript,
             injectionTime: .atDocumentStart,
             forMainFrameOnly: true
         )
         config.userContentController.addUserScript(bootstrap)
-        // Run fit script as soon as the document is ready, then again after load.
-        let script = WKUserScript(
-            source: HTMLGameViewController.fitToViewportJavaScript,
-            injectionTime: .atDocumentEnd,
-            forMainFrameOnly: true
-        )
-        config.userContentController.addUserScript(script)
+
         webView = WKWebView(frame: .zero, configuration: config)
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .fullScreen
@@ -53,14 +53,6 @@ final class HTMLGameViewController: UIViewController {
         setupHeader()
         setupWebView()
         loadGame()
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        // Re-fit when the web view size is known / changes (after the page has loaded).
-        if webView.bounds.height > 0, !webView.isLoading {
-            applyFitToViewport()
-        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -116,10 +108,8 @@ final class HTMLGameViewController: UIViewController {
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.scrollView.contentInset = .zero
         webView.scrollView.scrollIndicatorInsets = .zero
-        webView.scrollView.alwaysBounceVertical = false
-        webView.scrollView.bounces = false
-        webView.scrollView.minimumZoomScale = 1
-        webView.scrollView.maximumZoomScale = 1
+        webView.scrollView.isScrollEnabled = true
+        webView.scrollView.alwaysBounceVertical = true
 
         spinner.translatesAutoresizingMaskIntoConstraints = false
         spinner.hidesWhenStopped = true
@@ -144,20 +134,197 @@ final class HTMLGameViewController: UIViewController {
             presentLoadError(message: "Invalid game URL.")
             return
         }
+
         spinner.startAnimating()
-        webView.load(URLRequest(url: url))
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if let error {
+                    self.spinner.stopAnimating()
+                    self.presentLoadError(message: error.localizedDescription)
+                    return
+                }
+                guard let data, let html = String(data: data, encoding: .utf8) else {
+                    self.spinner.stopAnimating()
+                    self.presentLoadError(message: "Could not read game content.")
+                    return
+                }
+
+                let patched = Self.patchGameHTML(html)
+                let baseURL = url.deletingLastPathComponent()
+                self.webView.loadHTMLString(patched, baseURL: baseURL)
+            }
+        }.resume()
     }
 
-    private func applyFitToViewport() {
-        webView.evaluateJavaScript(Self.fitToViewportJavaScript, completionHandler: nil)
+    /// Patches CDN HTML so level buttons exist in markup and the card is not clipped.
+    private static func patchGameHTML(_ html: String) -> String {
+        var patched = html
+
+        let headFix = """
+        <style id="bkd-game-fix">
+        html, body {
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          overflow: auto !important;
+          height: auto !important;
+          min-height: 100% !important;
+          -webkit-text-size-adjust: 100% !important;
+        }
+        body {
+          display: block !important;
+          padding: 16px 0 32px !important;
+          box-sizing: border-box !important;
+        }
+        .container {
+          width: 90% !important;
+          max-width: 520px !important;
+          margin: 0 auto !important;
+          height: auto !important;
+          overflow: visible !important;
+        }
+        .card-box {
+          overflow: visible !important;
+          height: auto !important;
+        }
+        .screen.active {
+          display: block !important;
+          overflow: visible !important;
+        }
+        .level-grid {
+          display: grid !important;
+          grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+          gap: 14px !important;
+          margin: 16px 0 10px !important;
+          min-height: 168px !important;
+          overflow: visible !important;
+        }
+        .level-btn {
+          min-height: 72px !important;
+          cursor: pointer !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+        </style>
+        """
+
+        if let headClose = patched.range(of: "</head>", options: .caseInsensitive) {
+            patched.insert(contentsOf: headFix, at: headClose.lowerBound)
+        }
+
+        let staticGrid = """
+        <div class="level-grid" id="levelGrid">
+          <div class="level-btn" data-level="0"><div class="lvl-num">1</div><div class="lvl-label">Tiny Sums</div><div class="lvl-time">⏱ 45s</div></div>
+          <div class="level-btn locked" data-level="1"><div class="lvl-num">🔒</div><div class="lvl-label">Take Away</div><div class="lvl-time">⏱ 50s</div></div>
+          <div class="level-btn locked" data-level="2"><div class="lvl-num">🔒</div><div class="lvl-label">Times Fun</div><div class="lvl-time">⏱ 60s</div></div>
+          <div class="level-btn locked" data-level="3"><div class="lvl-num">🔒</div><div class="lvl-label">Big Multiply</div><div class="lvl-time">⏱ 70s</div></div>
+          <div class="level-btn locked" data-level="4"><div class="lvl-num">🔒</div><div class="lvl-label">Mix It Up</div><div class="lvl-time">⏱ 75s</div></div>
+          <div class="level-btn locked" data-level="5"><div class="lvl-num">🔒</div><div class="lvl-label">Division Quest</div><div class="lvl-time">⏱ 80s</div></div>
+        </div>
+        """
+
+        if patched.contains("id=\"levelGrid\"") {
+            patched = patched.replacingOccurrences(
+                of: "<div class=\"level-grid\" id=\"levelGrid\"></div>",
+                with: staticGrid
+            )
+            patched = patched.replacingOccurrences(
+                of: "<div class=\"level-grid\" id=\"levelGrid\"/>",
+                with: staticGrid
+            )
+        }
+
+        let wireScript = """
+        <script id="bkd-wire-levels">
+        (function() {
+          function populateFallback() {
+            var grid = document.getElementById('levelGrid');
+            if (!grid || grid.children.length > 0 || typeof LEVELS === 'undefined') return;
+            LEVELS.forEach(function(lv, i) {
+              var ok = i === 0;
+              var el = document.createElement('div');
+              el.className = 'level-btn' + (ok ? '' : ' locked');
+              el.setAttribute('data-level', String(i));
+              el.innerHTML = '<div class="lvl-num">' + (ok ? String(i + 1) : '🔒') + '</div>'
+                + '<div class="lvl-label">' + lv.name + '</div>'
+                + '<div class="lvl-time">⏱ ' + lv.time + 's</div>';
+              if (ok) el.onclick = function() { if (typeof startLevel === 'function') startLevel(i); };
+              grid.appendChild(el);
+            });
+          }
+
+          function wireLevels() {
+            if (typeof renderGrid === 'function' && typeof LEVELS !== 'undefined') {
+              try { renderGrid(); } catch (e) { populateFallback(); }
+            } else {
+              populateFallback();
+            }
+
+            var grid = document.getElementById('levelGrid');
+            if (!grid) return;
+
+            grid.querySelectorAll('.level-btn[data-level]').forEach(function(el) {
+              if (el.classList.contains('locked')) return;
+              var idx = parseInt(el.getAttribute('data-level'), 10);
+              el.onclick = function() {
+                if (typeof startLevel === 'function') startLevel(idx);
+              };
+            });
+          }
+
+          document.addEventListener('DOMContentLoaded', wireLevels);
+          window.addEventListener('load', function() {
+            wireLevels();
+            setTimeout(wireLevels, 150);
+            setTimeout(wireLevels, 500);
+          });
+        })();
+        </script>
+        """
+
+        if let bodyClose = patched.range(of: "</body>", options: .caseInsensitive) {
+            patched.insert(contentsOf: wireScript, at: bodyClose.lowerBound)
+        }
+
+        // Don't let a failing inline script wipe the static buttons we injected.
+        patched = patched.replacingOccurrences(
+            of: "const g=document.getElementById('levelGrid');g.innerHTML='';",
+            with: "const g=document.getElementById('levelGrid');if(!g)return;g.innerHTML='';"
+        )
+        patched = patched.replacingOccurrences(
+            of: "renderGrid();",
+            with: "try { if (typeof LEVELS !== 'undefined') renderGrid(); } catch (e) {}"
+        )
+
+        return patched
     }
 
-    /// Ensures game scripts can use localStorage (needed for level buttons on some WebViews).
+    private static let ensureLevelGridJavaScript = """
+    (function() {
+      var grid = document.getElementById('levelGrid');
+      if (!grid || grid.children.length >= 6) return;
+      if (typeof renderGrid === 'function' && typeof LEVELS !== 'undefined') {
+        try { renderGrid(); } catch (e) {}
+      }
+      if (grid.children.length > 0 || typeof LEVELS === 'undefined') return;
+      LEVELS.forEach(function(lv, i) {
+        var ok = i === 0;
+        var el = document.createElement('div');
+        el.className = 'level-btn' + (ok ? '' : ' locked');
+        el.setAttribute('data-level', String(i));
+        el.innerHTML = '<div class="lvl-num">' + (ok ? String(i + 1) : '🔒') + '</div>'
+          + '<div class="lvl-label">' + lv.name + '</div>'
+          + '<div class="lvl-time">⏱ ' + lv.time + 's</div>';
+        if (ok) el.onclick = function() { if (typeof startLevel === 'function') startLevel(i); };
+        grid.appendChild(el);
+      });
+    })();
+    """
+
     private static let bootstrapJavaScript = """
     (function() {
-      try {
-        localStorage.getItem('__bkd_probe');
-      } catch (e) {
+      try { localStorage.getItem('__bkd_probe'); }
+      catch (e) {
         var mem = {};
         Object.defineProperty(window, 'localStorage', {
           configurable: true,
@@ -169,141 +336,6 @@ final class HTMLGameViewController: UIViewController {
             key: function(i) { return Object.keys(mem)[i] || null; },
             get length() { return Object.keys(mem).length; }
           }
-        });
-      }
-    })();
-    """
-
-    /// Scales `.container` (or body content) so the entire game card fits in the WebView.
-    /// Uses CSS `zoom` (WebKit) so layout size matches visual size and content is not clipped.
-    private static let fitToViewportJavaScript = """
-    (function() {
-      if (window.__bkdFitInstalled) {
-        window.__bkdFitNow && window.__bkdFitNow();
-        return;
-      }
-      window.__bkdFitInstalled = true;
-
-      function ensureStyle() {
-        if (document.getElementById('bkd-fit-style')) return;
-        var css = document.createElement('style');
-        css.id = 'bkd-fit-style';
-        css.textContent = [
-          'html, body {',
-          '  height: 100% !important;',
-          '  min-height: 100% !important;',
-          '  width: 100% !important;',
-          '  margin: 0 !important;',
-          '  padding: 0 !important;',
-          '  overflow: hidden !important;',
-          '}',
-          'body {',
-          '  display: flex !important;',
-          '  align-items: center !important;',
-          '  justify-content: center !important;',
-          '  min-height: 100% !important;',
-          '}',
-          '.container, .bkd-fit-target {',
-          '  transform: none !important;',
-          '  flex-shrink: 0 !important;',
-          '}',
-          '.card-box { padding: 22px 18px !important; }',
-          '.emoji-big { font-size: 48px !important; margin-bottom: 8px !important; }',
-          'h1 { font-size: 1.6rem !important; margin-bottom: 4px !important; }',
-          '.sub { margin-bottom: 14px !important; font-size: 0.9rem !important; }',
-          '.level-grid {',
-          '  display: grid !important;',
-          '  grid-template-columns: repeat(3, 1fr) !important;',
-          '  gap: 10px !important;',
-          '  margin-bottom: 8px !important;',
-          '  min-height: 0 !important;',
-          '}',
-          '.level-btn {',
-          '  display: block !important;',
-          '  padding: 12px 6px !important;',
-          '  min-height: 56px !important;',
-          '}'
-        ].join('\\n');
-        document.head.appendChild(css);
-      }
-
-      function measureTarget() {
-        return document.querySelector('.container')
-          || document.querySelector('.card-box')
-          || document.body.firstElementChild;
-      }
-
-      function fitNow() {
-        ensureStyle();
-
-        // Level buttons are injected by the game script; re-render if the grid is still empty.
-        var levelGrid = document.getElementById('levelGrid');
-        if (levelGrid && !levelGrid.children.length && typeof renderGrid === 'function') {
-          try { renderGrid(); } catch (e) {}
-        }
-
-        var target = measureTarget();
-        if (!target) return;
-
-        target.classList.add('bkd-fit-target');
-        target.style.transform = 'none';
-        target.style.zoom = '1';
-
-        // Force layout so dynamically inserted level buttons are included.
-        void target.offsetHeight;
-
-        var contentH = Math.max(target.scrollHeight, target.offsetHeight, 1);
-        var contentW = Math.max(target.scrollWidth, target.offsetWidth, 1);
-        var availH = Math.max(window.innerHeight, 1);
-        var availW = Math.max(window.innerWidth, 1);
-
-        var scale = Math.min(availW / contentW, availH / contentH) * 0.95;
-        scale = Math.max(0.35, Math.min(scale, 1));
-
-        // `zoom` scales layout box too (unlike transform), preventing clipped buttons.
-        target.style.zoom = String(scale);
-
-        // Fallback for engines without zoom support.
-        if (!target.style.zoom || target.style.zoom === 'normal') {
-          target.style.transformOrigin = 'center center';
-          target.style.transform = 'scale(' + scale + ')';
-          target.style.marginTop = ((contentH * (1 - scale)) / -2) + 'px';
-          target.style.marginBottom = ((contentH * (1 - scale)) / -2) + 'px';
-        } else {
-          target.style.transform = 'none';
-          target.style.marginTop = '0';
-          target.style.marginBottom = '0';
-        }
-      }
-
-      window.__bkdFitNow = fitNow;
-      fitNow();
-      setTimeout(fitNow, 50);
-      setTimeout(fitNow, 200);
-      setTimeout(fitNow, 500);
-      setTimeout(fitNow, 1000);
-      window.addEventListener('resize', fitNow);
-      window.addEventListener('orientationchange', fitNow);
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(fitNow).catch(function(){});
-      }
-      if (document.body) {
-        new MutationObserver(function() { setTimeout(fitNow, 30); })
-          .observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['class', 'style']
-          });
-      } else {
-        document.addEventListener('DOMContentLoaded', function() {
-          new MutationObserver(function() { setTimeout(fitNow, 30); })
-            .observe(document.body, {
-              childList: true,
-              subtree: true,
-              attributes: true,
-              attributeFilter: ['class', 'style']
-            });
         });
       }
     })();
@@ -337,16 +369,14 @@ final class HTMLGameViewController: UIViewController {
 extension HTMLGameViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         spinner.stopAnimating()
-        applyFitToViewport()
-        // Fonts / dynamic level buttons may land slightly later.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
-            self?.applyFitToViewport()
+
+        if #available(iOS 14.0, *) {
+            webView.pageZoom = 1.0
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { [weak self] in
-            self?.applyFitToViewport()
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            self?.applyFitToViewport()
+
+        webView.evaluateJavaScript(Self.ensureLevelGridJavaScript)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            self?.webView.evaluateJavaScript(Self.ensureLevelGridJavaScript)
         }
     }
 
