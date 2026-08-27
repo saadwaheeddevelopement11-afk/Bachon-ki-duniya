@@ -41,6 +41,7 @@ class HomeViewController: UIViewController {
         fetchHomeSliderVideos()
         reloadContinueWatching()
         setupContinueWatchingObserver()
+        BookmarkStore.syncFromServer()
     }
 
     override func viewWillAppear(_ animated: Bool) {

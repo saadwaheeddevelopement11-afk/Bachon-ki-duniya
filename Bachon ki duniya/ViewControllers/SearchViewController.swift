@@ -64,6 +64,12 @@ class SearchViewController: UIViewController {
             self?.applySearchFieldDirection()
             self?.reloadSearchResultsForCurrentLanguage()
         }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(bookmarksDidChange),
+            name: .bookmarksDidChange,
+            object: nil
+        )
     }
 
     override func viewDidLayoutSubviews() {
@@ -78,6 +84,11 @@ class SearchViewController: UIViewController {
         if let languageObserver {
             NotificationCenter.default.removeObserver(languageObserver)
         }
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func bookmarksDidChange() {
+        resultsTableView.reloadData()
     }
 
     @IBAction func languageSelectionBtn(_ sender: UIButton) {
@@ -279,6 +290,10 @@ class SearchViewController: UIViewController {
         cell.textLbl.text = item.displayDescription
         cell.titleLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         cell.textLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
+        cell.configureBookmark(isBookmarked: BookmarkStore.isBookmarked(item.id))
+        cell.onBookmarkTapped = { [weak self] in
+            self?.toggleBookmark(for: item)
+        }
 
         let language = item.displayLanguageName
         cell.languageLbl?.text = language
@@ -292,6 +307,27 @@ class SearchViewController: UIViewController {
         }
 
         cell.mainImageView.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
+    }
+
+    private func toggleBookmark(for item: SearchEpisode) {
+        BookmarkStore.toggle(
+            episodeId: item.id,
+            title: item.displayTitle,
+            description: item.displayDescription,
+            thumbnailURL: item.thumbnailURL,
+            videoURL: item.videoURL
+        ) { [weak self] result in
+            if case .failure(let error) = result {
+                let alert = UIAlertController(
+                    title: AppL10n.t(.errorTitle),
+                    message: error.localizedDescription,
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: AppL10n.t(.ok), style: .default))
+                self?.present(alert, animated: true)
+            }
+            self?.resultsTableView.reloadData()
+        }
     }
 
     private func playFeatured(_ video: HomeSliderVideo) {

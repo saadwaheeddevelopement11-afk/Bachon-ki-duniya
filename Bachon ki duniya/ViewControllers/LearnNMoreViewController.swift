@@ -211,6 +211,10 @@ class LearnNMoreViewController: UIViewController {
         cell.textLbl.text = item.displayDescription
         cell.titleLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         cell.textLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
+        cell.configureBookmark(isBookmarked: BookmarkStore.isBookmarked(item.id))
+        cell.onBookmarkTapped = { [weak self] in
+            self?.toggleBookmark(for: item)
+        }
 
         let language = item.displayLanguageName
         cell.languageLbl?.text = language
@@ -227,6 +231,27 @@ class LearnNMoreViewController: UIViewController {
             placeholderImage: placeholder,
             options: [.retryFailed, .continueInBackground, .highPriority]
         )
+    }
+
+    private func toggleBookmark(for item: SearchEpisode) {
+        BookmarkStore.toggle(
+            episodeId: item.id,
+            title: item.displayTitle,
+            description: item.displayDescription,
+            thumbnailURL: item.thumbnailURL,
+            videoURL: item.videoURL
+        ) { [weak self] result in
+            if case .failure(let error) = result {
+                let alert = UIAlertController(
+                    title: AppL10n.t(.errorTitle),
+                    message: error.localizedDescription,
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: AppL10n.t(.ok), style: .default))
+                self?.present(alert, animated: true)
+            }
+            self?.tableView.reloadData()
+        }
     }
 }
 

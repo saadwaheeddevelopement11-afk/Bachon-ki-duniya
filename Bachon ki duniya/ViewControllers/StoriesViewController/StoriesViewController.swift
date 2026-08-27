@@ -33,12 +33,23 @@ class StoriesViewController: UIViewController {
         languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
             self?.fetchEpisodes()
         }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(bookmarksDidChange),
+            name: .bookmarksDidChange,
+            object: nil
+        )
     }
 
     deinit {
         if let languageObserver {
             NotificationCenter.default.removeObserver(languageObserver)
         }
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func bookmarksDidChange() {
+        tableView.reloadData()
     }
 
     private func applyTitle() {
@@ -102,14 +113,39 @@ class StoriesViewController: UIViewController {
         cell.textLbl.text = episode.description
         cell.titleLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
         cell.textLbl.textAlignment = LanguageManager.shared.isRTL() ? .right : .left
-        
+        cell.configureBookmark(isBookmarked: BookmarkStore.isBookmarked(episode.id))
+        cell.onBookmarkTapped = { [weak self] in
+            self?.toggleBookmark(for: episode)
+        }
+
         let placeholder = UIImage(named: "placeholder")
         guard let imageUrl = episode.thumbnailURL, !imageUrl.isEmpty, let url = URL(string: imageUrl) else {
             cell.mainImageView.image = placeholder
             return
         }
-        
+
         cell.mainImageView.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground, .highPriority])
+    }
+
+    private func toggleBookmark(for episode: StoryEpisode) {
+        BookmarkStore.toggle(
+            episodeId: episode.id,
+            title: episode.title,
+            description: episode.description,
+            thumbnailURL: episode.thumbnailURL,
+            videoURL: episode.videoURL
+        ) { [weak self] result in
+            if case .failure(let error) = result {
+                let alert = UIAlertController(
+                    title: AppL10n.t(.errorTitle),
+                    message: error.localizedDescription,
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: AppL10n.t(.ok), style: .default))
+                self?.present(alert, animated: true)
+            }
+            self?.tableView.reloadData()
+        }
     }
     
     @IBAction func backBtn(_ sender: UIButton) {

@@ -175,6 +175,7 @@
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
+                <outlet property="bookmarkBtn" destination="klZ-95-xE9" id="bk-out-btn"/>
                 <outlet property="languageLbl" destination="EpJ-ho-jbc" id="3um-wG-sim"/>
                 <outlet property="mainImageView" destination="fry-25-YqW" id="9ax-27-bw4"/>
                 <outlet property="textLbl" destination="sNr-E0-dyf" id="fph-uz-Jrt"/>

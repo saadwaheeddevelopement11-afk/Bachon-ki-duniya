@@ -79,6 +79,18 @@ struct VideoPlaybackContext {
         )
     }
 
+    static func from(bookmark: BookmarkEpisode) -> VideoPlaybackContext? {
+        guard let url = bookmark.videoURL, !url.isEmpty else { return nil }
+        let durationMs = WatchTimeMilliseconds.fromAPISeconds(bookmark.durationSecs)
+        return VideoPlaybackContext(
+            videoId: bookmark.id,
+            title: bookmark.displayTitle,
+            thumbnailURL: bookmark.thumbnailURL,
+            durationMs: durationMs,
+            videoURL: url
+        )
+    }
+
     static func from(slider: HomeSliderVideo) -> VideoPlaybackContext? {
         guard let url = slider.videoURL, !url.isEmpty else { return nil }
         let durationMs = WatchTimeMilliseconds.fromAPISeconds(slider.durationSecs)

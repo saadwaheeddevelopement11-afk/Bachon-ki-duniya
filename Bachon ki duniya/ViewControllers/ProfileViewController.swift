@@ -23,6 +23,8 @@ class ProfileViewController: UIViewController {
     private var screenTimeObserver: NSObjectProtocol?
     private var profileObserver: NSObjectProtocol?
     private var screenTimeRefreshTimer: Timer?
+    private weak var bookmarksRowLabel: UILabel?
+    private var didInstallBookmarksRow = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +32,7 @@ class ProfileViewController: UIViewController {
         reloadProfileImage()
         applyLocalizedProfileChrome()
         wireExtraTaps()
+        installBookmarksRowIfNeeded()
         languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
             self?.applyLocalizedProfileChrome()
         }
@@ -40,6 +43,7 @@ class ProfileViewController: UIViewController {
             self?.updateProfileNameLabel()
             self?.reloadProfileImage()
         }
+        BookmarkStore.syncFromServer()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -245,6 +249,7 @@ class ProfileViewController: UIViewController {
         parentalControlsLabel.text = AppL10n.t(.profileParentalControls)
         notificationsLabel.text = AppL10n.t(.profileNotifications)
         profileSelectLanguageRowLabel.text = AppL10n.t(.profileSelectLanguage)
+        bookmarksRowLabel?.text = AppL10n.t(.profileBookmarks)
         faqsLabel.text = AppL10n.t(.profileFAQs)
         termsOfServiceLabel.text = AppL10n.t(.profileTermsOfService)
         updateSelectedLanguageLabel()
@@ -258,10 +263,10 @@ class ProfileViewController: UIViewController {
 
         let rtl = LanguageManager.shared.isRTL()
         let align: NSTextAlignment = rtl ? .right : .natural
-        [yourReportTitleLabel, totalWatchTimeTitleLabel, totalWatchTimeValueLabel,
+         [yourReportTitleLabel, totalWatchTimeTitleLabel, totalWatchTimeValueLabel,
          mostWatchedCategoryTitleLabel, mostWatchedCategoryValueLabel,
          parentalControlsLabel, notificationsLabel, profileSelectLanguageRowLabel,
-         faqsLabel, termsOfServiceLabel, selectedLanguageLbl, profileNameLabel].forEach { $0?.textAlignment = align }
+         bookmarksRowLabel, faqsLabel, termsOfServiceLabel, selectedLanguageLbl, profileNameLabel].forEach { $0?.textAlignment = align }
         // Name pill stays centered in its container.
         profileNameLabel?.textAlignment = .center
     }
@@ -293,6 +298,7 @@ class ProfileViewController: UIViewController {
             UserDefaults.standard.set(false, forKey: AppDefaultsKeys.isLoggedIn)
             isLoggedIn = false
             UserSession.clearMsisdn()
+            BookmarkStore.clear()
             AppRouter.setRoot(.login, animated: true)
         })
         present(alert, animated: true)
@@ -302,6 +308,79 @@ class ProfileViewController: UIViewController {
         if let vc = storyboard?.instantiateViewController(withIdentifier: "LanguageSelectionViewController") as? LanguageSelectionViewController {
             present(vc, animated: true)
         }
+    }
+
+    @objc private func openBookmarks() {
+        pushFromProfile(BookmarksListViewController())
+    }
+
+    /// Inserts a Bookmarks row under Select Language in the notifications/settings card.
+    private func installBookmarksRowIfNeeded() {
+        guard !didInstallBookmarksRow,
+              let languageLabel = profileSelectLanguageRowLabel,
+              let languageRow = languageLabel.superview?.superview?.superview,
+              let stack = languageRow.superview as? UIStackView else { return }
+        didInstallBookmarksRow = true
+
+        let row = UIView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.backgroundColor = .clear
+
+        let icon = UIImageView(image: UIImage(named: "Bookmark") ?? UIImage(systemName: "bookmark"))
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.contentMode = .scaleAspectFit
+        icon.tintColor = .label
+
+        let title = UILabel()
+        title.translatesAutoresizingMaskIntoConstraints = false
+        title.text = AppL10n.t(.profileBookmarks)
+        title.font = UIFont(name: "Poppins-Medium", size: 15) ?? .systemFont(ofSize: 15, weight: .medium)
+        title.textColor = languageLabel.textColor
+        bookmarksRowLabel = title
+
+        let arrow = UIImageView(image: UIImage(named: "arrowIcon") ?? UIImage(systemName: "chevron.right"))
+        arrow.translatesAutoresizingMaskIntoConstraints = false
+        arrow.contentMode = .scaleAspectFit
+
+        row.addSubview(icon)
+        row.addSubview(title)
+        row.addSubview(arrow)
+
+        NSLayoutConstraint.activate([
+            row.heightAnchor.constraint(equalToConstant: 60),
+            icon.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 12),
+            icon.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            icon.widthAnchor.constraint(equalToConstant: 20),
+            icon.heightAnchor.constraint(equalToConstant: 20),
+            title.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 10),
+            title.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            arrow.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -12),
+            arrow.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            arrow.widthAnchor.constraint(equalToConstant: 12),
+            arrow.heightAnchor.constraint(equalToConstant: 12),
+            title.trailingAnchor.constraint(lessThanOrEqualTo: arrow.leadingAnchor, constant: -8)
+        ])
+
+        if let idx = stack.arrangedSubviews.firstIndex(of: languageRow) {
+            stack.insertArrangedSubview(row, at: idx + 1)
+        } else {
+            stack.addArrangedSubview(row)
+        }
+
+        // Grow the settings card so the new row fits (was sized for 2×60).
+        if let card = stack.superview {
+            let heightConstraints = card.constraints.filter {
+                $0.firstAttribute == .height && $0.firstItem as? UIView === card
+            }
+            if let existing = heightConstraints.first {
+                existing.constant = 210
+            } else {
+                card.heightAnchor.constraint(equalToConstant: 210).isActive = true
+            }
+        }
+
+        row.isUserInteractionEnabled = true
+        row.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openBookmarks)))
     }
 
     @IBAction func totalWatchTimeBtn(_ sender: UIButton) {

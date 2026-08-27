@@ -470,6 +470,81 @@ class APIManager {
             }
         }.resume()
     }
+
+    // MARK: - Bookmarks
+
+    func addBookmark(
+        msisdn: String,
+        episodeId: Int,
+        completion: @escaping (Result<BookmarkMutationResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let msisdnValue = Int64(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        postParentalJSON(
+            path: "/bookmarks/add",
+            body: ["msisdn": msisdnValue, "episode_id": episodeId],
+            completion: completion
+        )
+    }
+
+    func removeBookmark(
+        msisdn: String,
+        episodeId: Int,
+        completion: @escaping (Result<BookmarkMutationResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard let msisdnValue = Int64(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        postParentalJSON(
+            path: "/bookmarks/remove",
+            body: ["msisdn": msisdnValue, "episode_id": episodeId],
+            completion: completion
+        )
+    }
+
+    func fetchBookmarks(
+        msisdn: String,
+        languageCode: String,
+        completion: @escaping (Result<BookmarksListResponse, Error>) -> Void
+    ) {
+        let digits = UserSession.normalizePhoneDigits(msisdn)
+        guard UserSession.isValidPakistanMSISDN(digits) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid MSISDN"])))
+            return
+        }
+        let lang = languageCode.trimmingCharacters(in: .whitespacesAndNewlines)
+        let endpoint = "/bookmarks/\(digits)?lang=\(lang.isEmpty ? "en" : lang)"
+        guard let url = URL(string: baseURL + endpoint) else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error {
+                completion(.failure(error))
+                return
+            }
+            guard let data else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                return
+            }
+            do {
+                let decoded = try JSONDecoder().decode(BookmarksListResponse.self, from: data)
+                completion(.success(decoded))
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
 }
 
 // MARK: - OTP Models

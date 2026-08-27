@@ -47,6 +47,8 @@ enum AppStringKey: String, CaseIterable {
     case profileParentalControls
     case profileNotifications
     case profileSelectLanguage
+    case profileBookmarks
+    case bookmarksEmpty
     case profileFAQs
     case profileTermsOfService
     case profileSampleCategoryName
@@ -199,6 +201,8 @@ enum AppLocalizedStrings {
             .profileParentalControls: "Parental Controls",
             .profileNotifications: "Notifications",
             .profileSelectLanguage: "Select Language",
+            .profileBookmarks: "Bookmarks",
+            .bookmarksEmpty: "No bookmarks yet. Tap the bookmark icon on a story to save it here.",
             .profileFAQs: "FAQs",
             .profileTermsOfService: "Terms Of Service",
             .profileSampleCategoryName: "Kids Stories",
@@ -317,6 +321,8 @@ enum AppLocalizedStrings {
             .profileParentalControls: "والدین کا کنٹرول",
             .profileNotifications: "اطلاعات",
             .profileSelectLanguage: "زبان منتخب کریں",
+            .profileBookmarks: "بک مارکس",
+            .bookmarksEmpty: "ابھی کوئی بک مارک نہیں۔ کہانی پر بک مارک آئیکن دبا کر یہاں محفوظ کریں۔",
             .profileFAQs: "اکثر پوچھے گئے سوالات",
             .profileTermsOfService: "سروس کی شرائط",
             .profileSampleCategoryName: "بچوں کی کہانیاں",
@@ -402,6 +408,8 @@ enum AppLocalizedStrings {
             .profileParentalControls: "والدين جو ڪنٽرول",
             .profileNotifications: "اطلاعات",
             .profileSelectLanguage: "ٻولي چونڊيو",
+            .profileBookmarks: "بڪ مارڪس",
+            .bookmarksEmpty: "اڃا ڪو بڪ مارڪ ناهي. ڪهاڻي تي بڪ مارڪ آئيڪن دٻائي هتي محفوظ ڪريو.",
             .profileFAQs: "اڪثر پڇيا ويا سوال",
             .profileTermsOfService: "سروس جون شرطون",
             .profileSampleCategoryName: "ٻارن جون ڪهاڻيون",
@@ -487,6 +495,8 @@ enum AppLocalizedStrings {
             .profileParentalControls: "الرقابة الأبوية",
             .profileNotifications: "الإشعارات",
             .profileSelectLanguage: "اختر اللغة",
+            .profileBookmarks: "الإشارات المرجعية",
+            .bookmarksEmpty: "لا توجد إشارات بعد. اضغط أيقونة الإشارة على قصة لحفظها هنا.",
             .profileFAQs: "الأسئلة الشائعة",
             .profileTermsOfService: "شروط الخدمة",
             .profileSampleCategoryName: "قصص الأطفال",
