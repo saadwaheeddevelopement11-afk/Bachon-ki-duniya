@@ -1,0 +1,19 @@
+CMPAK upload — remaining portal steps (cannot be done from this Mac without Admin)
+
+DONE in the Xcode project
+- Bundle ID: com.cmpak.kidoApp (Debug + Release)
+- Team: JVHLZ8B94A (CMPAK) project-wide + target
+- Automatic signing
+- Pods deployment target fixed (iOS 15+) so Release archive works
+- Release archive SUCCEEDED locally (build/CmpakArchive.xcarchive)
+- ExportOptions-AppStore.plist ready for team JVHLZ8B94A
+- Admin request text: CMPAK-Admin-Request.txt
+
+BLOCKED until CMPAK grants Admin (or creates App ID + ASC app for you)
+1) developer.apple.com (CMPAK) → Identifiers → + → App ID = com.cmpak.kidoApp
+2) appstoreconnect.apple.com (CMPAK) → My Apps → + → New App → select com.cmpak.kidoApp
+3) Then run:  bash AppStore/archive-and-upload.sh
+   Or in Xcode: Window → Organizer → Distribute App → App Store Connect
+
+Export error seen today (expected until step 2):
+  App record with bundle identifier "com.cmpak.kidoApp" not found on App Store Connect.

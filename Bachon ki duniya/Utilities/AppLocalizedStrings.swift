@@ -48,6 +48,8 @@ enum AppStringKey: String, CaseIterable {
     case profileNotifications
     case profileSelectLanguage
     case profileBookmarks
+    case profileSubscriptions
+    case profileSubscriptionsUnavailable
     case bookmarksEmpty
     case profileFAQs
     case profileTermsOfService
@@ -202,6 +204,8 @@ enum AppLocalizedStrings {
             .profileNotifications: "Notifications",
             .profileSelectLanguage: "Select Language",
             .profileBookmarks: "Bookmarks",
+            .profileSubscriptions: "Subscriptions",
+            .profileSubscriptionsUnavailable: "Subscriptions will be available soon.",
             .bookmarksEmpty: "No bookmarks yet. Tap the bookmark icon on a story to save it here.",
             .profileFAQs: "FAQs",
             .profileTermsOfService: "Terms Of Service",
@@ -322,6 +326,8 @@ enum AppLocalizedStrings {
             .profileNotifications: "اطلاعات",
             .profileSelectLanguage: "زبان منتخب کریں",
             .profileBookmarks: "بک مارکس",
+            .profileSubscriptions: "سبسکرپشنز",
+            .profileSubscriptionsUnavailable: "سبسکرپشنز جلد دستیاب ہوں گی۔",
             .bookmarksEmpty: "ابھی کوئی بک مارک نہیں۔ کہانی پر بک مارک آئیکن دبا کر یہاں محفوظ کریں۔",
             .profileFAQs: "اکثر پوچھے گئے سوالات",
             .profileTermsOfService: "سروس کی شرائط",
@@ -409,6 +415,8 @@ enum AppLocalizedStrings {
             .profileNotifications: "اطلاعات",
             .profileSelectLanguage: "ٻولي چونڊيو",
             .profileBookmarks: "بڪ مارڪس",
+            .profileSubscriptions: "سبسڪرپشنز",
+            .profileSubscriptionsUnavailable: "سبسڪرپشنز جلد دستياب ٿينديون.",
             .bookmarksEmpty: "اڃا ڪو بڪ مارڪ ناهي. ڪهاڻي تي بڪ مارڪ آئيڪن دٻائي هتي محفوظ ڪريو.",
             .profileFAQs: "اڪثر پڇيا ويا سوال",
             .profileTermsOfService: "سروس جون شرطون",
@@ -496,6 +504,8 @@ enum AppLocalizedStrings {
             .profileNotifications: "الإشعارات",
             .profileSelectLanguage: "اختر اللغة",
             .profileBookmarks: "الإشارات المرجعية",
+            .profileSubscriptions: "الاشتراكات",
+            .profileSubscriptionsUnavailable: "ستتوفر الاشتراكات قريباً.",
             .bookmarksEmpty: "لا توجد إشارات بعد. اضغط أيقونة الإشارة على قصة لحفظها هنا.",
             .profileFAQs: "الأسئلة الشائعة",
             .profileTermsOfService: "شروط الخدمة",

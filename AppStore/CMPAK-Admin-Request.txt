@@ -1,0 +1,15 @@
+Subject: Need Admin access on CMPAK LIMITED Apple Developer team
+
+Hi,
+
+We accepted the invite to CMPAK LIMITED, but our current role is Developer.
+We can create Certificates, but there is no "+" on Identifiers or Profiles, so we cannot register the App ID.
+We also cannot see existing CMPAK apps in App Store Connect until Admin is granted or apps are assigned to us.
+
+Please change our role to Admin (Users and Access), or as Account Holder/Admin:
+1) Register App ID Bundle ID exactly: com.cmpak.kidoApp
+2) Assign us App Manager (or Admin) so we can create the App Store Connect listing and upload builds
+
+Note: com.ideation.kidoApp is already registered on Ideation's Apple team and cannot be reused on CMPAK.
+
+Thanks

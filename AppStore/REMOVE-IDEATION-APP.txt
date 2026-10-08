@@ -1,0 +1,20 @@
+REMOVE IDEATION APP (your company App Store Connect)
+=====================================================
+Required role on Ideation: Account Holder or Admin
+(App Manager cannot remove apps.)
+
+1. Open https://appstoreconnect.apple.com and sign in with IDEATION Apple ID
+2. Confirm team is Ideation (NOT CMPAK LIMITED)
+3. Open the app created under com.ideation.kidoApp
+4. If status is Waiting for Review / In Review:
+   - Remove that version from review first
+5. Pricing and Availability:
+   - Remove from sale in ALL countries/regions (even if never released)
+6. General → App Information → Additional Information → Remove App → confirm
+
+Notes:
+- You lose the Ideation app name after removal
+- Bundle ID com.ideation.kidoApp stays owned by Ideation (cannot move to CMPAK)
+- Do NOT delete anything on CMPAK
+
+Official: https://developer.apple.com/help/app-store-connect/create-an-app-record/remove-an-app

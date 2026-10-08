@@ -50,6 +50,7 @@ final class HTMLGameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "appBackground") ?? .systemBackground
+        AppAnalytics.logOpenGame(title: gameTitleText, url: htmlURLString)
         setupHeader()
         setupWebView()
         loadGame()

@@ -1,6 +1,8 @@
 import PhotosUI
 import UIKit
 import SDWebImage
+import SafariServices
+import FirebaseCrashlytics
 
 class ProfileViewController: UIViewController {
 
@@ -24,15 +26,18 @@ class ProfileViewController: UIViewController {
     private var profileObserver: NSObjectProtocol?
     private var screenTimeRefreshTimer: Timer?
     private weak var bookmarksRowLabel: UILabel?
+    private weak var subscriptionsRowLabel: UILabel?
     private var didInstallBookmarksRow = false
+    private var didInstallSubscriptionsRow = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupProfileImageEditing()
-        reloadProfileImage()
+//        reloadProfileImage()
         applyLocalizedProfileChrome()
         wireExtraTaps()
         installBookmarksRowIfNeeded()
+        installSubscriptionsRowIfNeeded()
         languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
             self?.applyLocalizedProfileChrome()
         }
@@ -40,8 +45,8 @@ class ProfileViewController: UIViewController {
             self?.updateScreenTimeSummary()
         }
         profileObserver = NotificationCenter.default.addObserver(forName: .userProfileDidChange, object: nil, queue: .main) { [weak self] _ in
-            self?.updateProfileNameLabel()
-            self?.reloadProfileImage()
+//            self?.updateProfileNameLabel()
+//            self?.reloadProfileImage()
         }
         BookmarkStore.syncFromServer()
     }
@@ -49,8 +54,8 @@ class ProfileViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         updateSelectedLanguageLabel()
-        updateProfileNameLabel()
-        reloadProfileImage()
+//        updateProfileNameLabel()
+//        reloadProfileImage()
         updateScreenTimeSummary()
         updateContinueWatchingSummary()
         startScreenTimeRefreshTimer()
@@ -121,20 +126,20 @@ class ProfileViewController: UIViewController {
         profileEditBadgeView?.superview?.isUserInteractionEnabled = true
     }
 
-    private func reloadProfileImage() {
-        if let saved = ProfileAvatarStore.load() {
-            profileImageView?.sd_cancelCurrentImageLoad()
-            profileImageView?.image = saved
-            return
-        }
-        if let url = UserProfileStore.current?.imageURL {
-            let placeholder = UIImage(named: "profileImage")
-            profileImageView?.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground])
-            return
-        }
-        profileImageView?.sd_cancelCurrentImageLoad()
-        profileImageView?.image = UIImage(named: "profileImage")
-    }
+//    private func reloadProfileImage() {
+//        if let saved = ProfileAvatarStore.load() {
+//            profileImageView?.sd_cancelCurrentImageLoad()
+//            profileImageView?.image = saved
+//            return
+//        }
+//        if let url = UserProfileStore.current?.imageURL {
+//            let placeholder = UIImage(named: "profileImage")
+//            profileImageView?.sd_setImage(with: url, placeholderImage: placeholder, options: [.retryFailed, .continueInBackground])
+//            return
+//        }
+//        profileImageView?.sd_cancelCurrentImageLoad()
+//        profileImageView?.image = UIImage(named: "profileImage")
+//    }
 
     @objc private func editProfileImageTapped() {
         let sheet = UIAlertController(
@@ -153,7 +158,7 @@ class ProfileViewController: UIViewController {
         if ProfileAvatarStore.load() != nil {
             sheet.addAction(UIAlertAction(title: AppL10n.t(.profileRemovePhoto), style: .destructive) { [weak self] _ in
                 ProfileAvatarStore.clear()
-                self?.reloadProfileImage()
+//                self?.reloadProfileImage()
             })
         }
         sheet.addAction(UIAlertAction(title: AppL10n.t(.cancel), style: .cancel))
@@ -205,10 +210,10 @@ class ProfileViewController: UIViewController {
         }
     }
 
-    private func updateProfileNameLabel() {
-        let text = UserSession.profileDisplayText
-        profileNameLabel?.text = text.isEmpty ? "—" : text
-    }
+//    private func updateProfileNameLabel() {
+//        let text = UserSession.profileDisplayText
+//        profileNameLabel?.text = text.isEmpty ? "—" : text
+//    }
 
     private func updateScreenTimeSummary() {
         // Same app foreground / screen-time total shown on the Screen Time screen.
@@ -250,10 +255,11 @@ class ProfileViewController: UIViewController {
         notificationsLabel.text = AppL10n.t(.profileNotifications)
         profileSelectLanguageRowLabel.text = AppL10n.t(.profileSelectLanguage)
         bookmarksRowLabel?.text = AppL10n.t(.profileBookmarks)
+        subscriptionsRowLabel?.text = AppL10n.t(.profileSubscriptions)
         faqsLabel.text = AppL10n.t(.profileFAQs)
         termsOfServiceLabel.text = AppL10n.t(.profileTermsOfService)
         updateSelectedLanguageLabel()
-        updateProfileNameLabel()
+//        updateProfileNameLabel()
         updateScreenTimeSummary()
         updateContinueWatchingSummary()
 
@@ -266,7 +272,7 @@ class ProfileViewController: UIViewController {
          [yourReportTitleLabel, totalWatchTimeTitleLabel, totalWatchTimeValueLabel,
          mostWatchedCategoryTitleLabel, mostWatchedCategoryValueLabel,
          parentalControlsLabel, notificationsLabel, profileSelectLanguageRowLabel,
-         bookmarksRowLabel, faqsLabel, termsOfServiceLabel, selectedLanguageLbl, profileNameLabel].forEach { $0?.textAlignment = align }
+         bookmarksRowLabel, subscriptionsRowLabel, faqsLabel, termsOfServiceLabel, selectedLanguageLbl, profileNameLabel].forEach { $0?.textAlignment = align }
         // Name pill stays centered in its container.
         profileNameLabel?.textAlignment = .center
     }
@@ -295,6 +301,9 @@ class ProfileViewController: UIViewController {
         )
         alert.addAction(UIAlertAction(title: AppL10n.t(.cancel), style: .cancel))
         alert.addAction(UIAlertAction(title: AppL10n.t(.profileLogoutAction), style: .destructive) { _ in
+            AppAnalytics.logLogout()
+            AppAnalytics.clearUser()
+            Crashlytics.crashlytics().setUserID("")
             UserDefaults.standard.set(false, forKey: AppDefaultsKeys.isLoggedIn)
             isLoggedIn = false
             UserSession.clearMsisdn()
@@ -367,20 +376,106 @@ class ProfileViewController: UIViewController {
             stack.addArrangedSubview(row)
         }
 
-        // Grow the settings card so the new row fits (was sized for 2×60).
-        if let card = stack.superview {
-            let heightConstraints = card.constraints.filter {
-                $0.firstAttribute == .height && $0.firstItem as? UIView === card
-            }
-            if let existing = heightConstraints.first {
-                existing.constant = 210
-            } else {
-                card.heightAnchor.constraint(equalToConstant: 210).isActive = true
-            }
-        }
+        // Grow the settings card so the new row fits (language + bookmarks; subscriptions adds more later).
+        growSettingsCard(stack: stack, height: 210)
 
         row.isUserInteractionEnabled = true
         row.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openBookmarks)))
+    }
+
+    /// Inserts a Subscriptions row under Bookmarks (or under Select Language if bookmarks missing).
+    private func installSubscriptionsRowIfNeeded() {
+        guard !didInstallSubscriptionsRow,
+              let languageLabel = profileSelectLanguageRowLabel,
+              let languageRow = languageLabel.superview?.superview?.superview,
+              let stack = languageRow.superview as? UIStackView else { return }
+        didInstallSubscriptionsRow = true
+
+        let row = UIView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.backgroundColor = .clear
+
+        let icon = UIImageView(image: UIImage(systemName: "creditcard") ?? UIImage(systemName: "cart"))
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.contentMode = .scaleAspectFit
+        icon.tintColor = .label
+
+        let title = UILabel()
+        title.translatesAutoresizingMaskIntoConstraints = false
+        title.text = AppL10n.t(.profileSubscriptions)
+        title.font = UIFont(name: "Poppins-Medium", size: 15) ?? .systemFont(ofSize: 15, weight: .medium)
+        title.textColor = languageLabel.textColor
+        subscriptionsRowLabel = title
+
+        let arrow = UIImageView(image: UIImage(named: "arrowIcon") ?? UIImage(systemName: "chevron.right"))
+        arrow.translatesAutoresizingMaskIntoConstraints = false
+        arrow.contentMode = .scaleAspectFit
+
+        row.addSubview(icon)
+        row.addSubview(title)
+        row.addSubview(arrow)
+
+        NSLayoutConstraint.activate([
+            row.heightAnchor.constraint(equalToConstant: 60),
+            icon.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 12),
+            icon.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            icon.widthAnchor.constraint(equalToConstant: 20),
+            icon.heightAnchor.constraint(equalToConstant: 20),
+            title.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 10),
+            title.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            arrow.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -12),
+            arrow.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            arrow.widthAnchor.constraint(equalToConstant: 12),
+            arrow.heightAnchor.constraint(equalToConstant: 12),
+            title.trailingAnchor.constraint(lessThanOrEqualTo: arrow.leadingAnchor, constant: -8)
+        ])
+
+        // Prefer after bookmarks row; otherwise after language.
+        let insertAfter: UIView
+        if let bookmarksTitle = bookmarksRowLabel,
+           let bookmarksRow = bookmarksTitle.superview {
+            insertAfter = bookmarksRow
+        } else {
+            insertAfter = languageRow
+        }
+        if let idx = stack.arrangedSubviews.firstIndex(of: insertAfter) {
+            stack.insertArrangedSubview(row, at: idx + 1)
+        } else {
+            stack.addArrangedSubview(row)
+        }
+
+        growSettingsCard(stack: stack, height: 270)
+
+        row.isUserInteractionEnabled = true
+        row.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openSubscriptions)))
+    }
+
+    private func growSettingsCard(stack: UIStackView, height: CGFloat) {
+        guard let card = stack.superview else { return }
+        let heightConstraints = card.constraints.filter {
+            $0.firstAttribute == .height && $0.firstItem as? UIView === card
+        }
+        if let existing = heightConstraints.first {
+            existing.constant = max(existing.constant, height)
+        } else {
+            card.heightAnchor.constraint(equalToConstant: height).isActive = true
+        }
+    }
+
+    @objc private func openSubscriptions() {
+        AppAnalytics.log("open_subscriptions")
+        guard let url = SubscriptionsConfig.subscriptionURL() else {
+            let alert = UIAlertController(
+                title: AppL10n.t(.profileSubscriptions),
+                message: AppL10n.t(.profileSubscriptionsUnavailable),
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: AppL10n.t(.ok), style: .default))
+            present(alert, animated: true)
+            return
+        }
+        let safari = SFSafariViewController(url: url)
+        present(safari, animated: true)
     }
 
     @IBAction func totalWatchTimeBtn(_ sender: UIButton) {

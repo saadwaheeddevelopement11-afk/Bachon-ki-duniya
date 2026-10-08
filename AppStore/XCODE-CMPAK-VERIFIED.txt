@@ -1,0 +1,10 @@
+# App Store Connect verification (local project)
+
+Verified 2026-10-07 in Bachon ki duniya.xcodeproj/project.pbxproj:
+
+- Debug/Release PRODUCT_BUNDLE_IDENTIFIER = com.cmpak.kidoApp
+- Debug/Release DEVELOPMENT_TEAM = JVHLZ8B94A (CMPAK)
+- Project-level DEVELOPMENT_TEAM = JVHLZ8B94A
+- CODE_SIGN_STYLE = Automatic
+
+Do NOT switch back to com.ideation.kidoApp or Ideation team SUZKYT37C3.

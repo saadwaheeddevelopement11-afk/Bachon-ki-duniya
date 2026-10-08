@@ -266,11 +266,14 @@ class SearchViewController: UIViewController {
     }
 
     private func performSearch(query: String) {
-        APIManager.shared.searchEpisodes(query: query) { [weak self] result in
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        AppAnalytics.logSearch(term: trimmed)
+        APIManager.shared.searchEpisodes(query: trimmed) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self else { return }
                 let current = self.searchTextfield.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                guard current == query else { return }
+                guard current == trimmed else { return }
                 self.updateContentMode(isSearching: true)
                 switch result {
                 case .success(let items):

@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3E73ED39761329414C06DD4486C5058E"
-               BuildableName = "Wormholy.framework"
+               BuildableName = "Wormholy"
                BlueprintName = "Wormholy"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

@@ -23,6 +23,14 @@ enum VideoPlaybackPresenter {
         guard !trimmed.isEmpty, let url = resolvedURL(from: trimmed) else {
             return
         }
+        if let context {
+            AppAnalytics.logPlayVideo(
+                id: String(context.videoId),
+                title: context.title.isEmpty ? "video" : context.title
+            )
+        } else {
+            AppAnalytics.log("play_video", parameters: ["source": "url"])
+        }
         showLoader(on: presenter.view)
 
         do {

@@ -1,0 +1,25 @@
+CMPAK APP STORE SUBMISSION CHECKLIST
+====================================
+Team: CMPAK LIMITED | Bundle ID: com.cmpak.kidoApp
+Your role: App Manager (can select build + submit)
+
+Xcode (already set in project)
+- PRODUCT_BUNDLE_IDENTIFIER = com.cmpak.kidoApp
+- DEVELOPMENT_TEAM = JVHLZ8B94A
+- CODE_SIGN_STYLE = Automatic
+
+In App Store Connect (CMPAK team)
+1. Apps → open Kido (com.cmpak.kidoApp)
+2. Distribution → iOS version (create 1.0 if needed)
+3. Fill required metadata:
+   - Screenshots (use AppStoreScreenshots/*-1290x2796.png)
+   - Description / keywords / promotional text
+   - Privacy Policy URL (required)
+   - Support URL / category / age rating / etc.
+4. Build section → (+) → select build uploaded via App Store Connect
+   - If greyed out: re-upload with "App Store Connect" (not TestFlight Internal Only)
+   - Answer export compliance if Missing Compliance
+5. Save → Add for Review → Submit to App Review
+
+Re-upload if needed:
+  bash AppStore/archive-and-upload.sh

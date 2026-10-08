@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseCrashlytics
 
 class ConfirmOTPViewController: UIViewController {
 
@@ -176,6 +177,9 @@ private extension ConfirmOTPViewController {
         UserSession.saveMsisdn(digits: phone)
         UserDefaults.standard.set(true, forKey: AppDefaultsKeys.isLoggedIn)
         isLoggedIn = true
+        AppAnalytics.configureUserProperties(msisdn: phone)
+        AppAnalytics.logLogin(method: "otp")
+        Crashlytics.crashlytics().setUserID(phone)
         UserProfileSync.refreshInBackground()
         AppRouter.setRoot(.main)
     }

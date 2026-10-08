@@ -1,0 +1,67 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/macbookpro/Library/Developer/Xcode/DerivedData/Bachon_ki_duniya-cddzcimaymzffzesckbsihpsfoqk/Build/Intermediates.noindex/ArchiveIntermediates/Bachon ki duniya/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardCore.framework/IQKeyboardCore'
+relocations:
+  - { offset: 0x51E49, size: 0x8, addend: 0x0, symName: _IQKeyboardCoreVersionString, symObjAddr: 0x0, symBinAddr: 0x6490, symSize: 0x0 }
+  - { offset: 0x51E80, size: 0x8, addend: 0x0, symName: _IQKeyboardCoreVersionNumber, symObjAddr: 0x30, symBinAddr: 0x64C0, symSize: 0x0 }
+  - { offset: 0x51EBE, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeO8rawValueACSgSi_tcfC', symObjAddr: 0x0, symBinAddr: 0x4000, symSize: 0x10 }
+  - { offset: 0x51F48, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionV4basexSgvpfi', symObjAddr: 0xFC, symBinAddr: 0x40FC, symSize: 0x8 }
+  - { offset: 0x51F60, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeOSHAASQWb', symObjAddr: 0x104, symBinAddr: 0x4104, symSize: 0x4 }
+  - { offset: 0x51F74, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeOACSQAAWl', symObjAddr: 0x108, symBinAddr: 0x4108, symSize: 0x40 }
+  - { offset: 0x51F88, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeOMa', symObjAddr: 0x148, symBinAddr: 0x4148, symSize: 0x10 }
+  - { offset: 0x51FC2, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeOSQAASQ2eeoiySbx_xtFZTW', symObjAddr: 0x14, symBinAddr: 0x4014, symSize: 0x14 }
+  - { offset: 0x520A3, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeO8rawValueACSgSi_tcfC', symObjAddr: 0x0, symBinAddr: 0x4000, symSize: 0x10 }
+  - { offset: 0x520C2, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeO8rawValueSivg', symObjAddr: 0x10, symBinAddr: 0x4010, symSize: 0x4 }
+  - { offset: 0x52111, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeOSHAASH9hashValueSivgTW', symObjAddr: 0x28, symBinAddr: 0x4028, symSize: 0x44 }
+  - { offset: 0x521A3, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeOSHAASH4hash4intoys6HasherVz_tFTW', symObjAddr: 0x6C, symBinAddr: 0x406C, symSize: 0x28 }
+  - { offset: 0x521E1, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeOSHAASH13_rawHashValue4seedS2i_tFTW', symObjAddr: 0x94, symBinAddr: 0x4094, symSize: 0x40 }
+  - { offset: 0x5226B, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeOSYAASY8rawValuexSg03RawF0Qz_tcfCTW', symObjAddr: 0xD4, symBinAddr: 0x40D4, symSize: 0x1C }
+  - { offset: 0x52294, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore12IQEnableModeOSYAASY8rawValue03RawF0QzvgTW', symObjAddr: 0xF0, symBinAddr: 0x40F0, symSize: 0xC }
+  - { offset: 0x52378, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionV4basexSgvpRlzClACyxGTK', symObjAddr: 0x0, symBinAddr: 0x4158, symSize: 0x7C }
+  - { offset: 0x52390, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionV4basexSgvpRlzClACyxGTK', symObjAddr: 0x0, symBinAddr: 0x4158, symSize: 0x7C }
+  - { offset: 0x52504, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVMa', symObjAddr: 0xF8, symBinAddr: 0x4250, symSize: 0xC }
+  - { offset: 0x5253D, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVMi', symObjAddr: 0x20C, symBinAddr: 0x4360, symSize: 0x8 }
+  - { offset: 0x52551, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVwCP', symObjAddr: 0x214, symBinAddr: 0x4368, symSize: 0x2C }
+  - { offset: 0x52565, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVwxx', symObjAddr: 0x240, symBinAddr: 0x4394, symSize: 0x4 }
+  - { offset: 0x52579, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVwcp', symObjAddr: 0x244, symBinAddr: 0x4398, symSize: 0x4 }
+  - { offset: 0x5258D, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVwca', symObjAddr: 0x248, symBinAddr: 0x439C, symSize: 0x4 }
+  - { offset: 0x525A1, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVwtk', symObjAddr: 0x24C, symBinAddr: 0x43A0, symSize: 0x4 }
+  - { offset: 0x525B5, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVwta', symObjAddr: 0x250, symBinAddr: 0x43A4, symSize: 0x4 }
+  - { offset: 0x525C9, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVwet', symObjAddr: 0x254, symBinAddr: 0x43A8, symSize: 0x20 }
+  - { offset: 0x525DD, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVwst', symObjAddr: 0x274, symBinAddr: 0x43C8, symSize: 0x28 }
+  - { offset: 0x525F1, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVySo6UIViewCGWOh', symObjAddr: 0x29C, symBinAddr: 0x43F0, symSize: 0x48 }
+  - { offset: 0x52605, size: 0x8, addend: 0x0, symName: ___swift_instantiateConcreteTypeFromMangledNameV2, symObjAddr: 0x2E4, symBinAddr: 0x4438, symSize: 0x50 }
+  - { offset: 0x52619, size: 0x8, addend: 0x0, symName: ___swift_instantiateGenericMetadata, symObjAddr: 0x334, symBinAddr: 0x4488, symSize: 0x2C }
+  - { offset: 0x52648, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionV4basexSgvg', symObjAddr: 0x7C, symBinAddr: 0x41D4, symSize: 0x8 }
+  - { offset: 0x526CE, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A8ExtendedPAASo6UIViewCRbzrlE2iqAA0A9ExtensionVyxGvg', symObjAddr: 0x84, symBinAddr: 0x41DC, symSize: 0x40 }
+  - { offset: 0x52728, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A8ExtendedPAASo6UIViewCRbzrlE2iqAA0A9ExtensionVyxGvs', symObjAddr: 0xC4, symBinAddr: 0x421C, symSize: 0x34 }
+  - { offset: 0x5274B, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A8ExtendedPAASo6UIViewCRbzrlE2iqAA0A9ExtensionVyxGvM', symObjAddr: 0x104, symBinAddr: 0x425C, symSize: 0x34 }
+  - { offset: 0x5275F, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A8ExtendedPAASo6UIViewCRbzrlE2iqAA0A9ExtensionVyxGvM.resume.0', symObjAddr: 0x138, symBinAddr: 0x4290, symSize: 0x38 }
+  - { offset: 0x527CA, size: 0x8, addend: 0x0, symName: '_$sSo6UIViewC14IQKeyboardCore0B8ExtendedA2cDP2iqAC0B9ExtensionVy4BaseQzGvgTW', symObjAddr: 0x170, symBinAddr: 0x42C8, symSize: 0x2C }
+  - { offset: 0x5281E, size: 0x8, addend: 0x0, symName: '_$sSo6UIViewC14IQKeyboardCore0B8ExtendedA2cDP2iqAC0B9ExtensionVy4BaseQzGvsTW', symObjAddr: 0x19C, symBinAddr: 0x42F4, symSize: 0x4 }
+  - { offset: 0x52839, size: 0x8, addend: 0x0, symName: '_$sSo6UIViewC14IQKeyboardCore0B8ExtendedA2cDP2iqAC0B9ExtensionVy4BaseQzGvMTW', symObjAddr: 0x1A0, symBinAddr: 0x42F8, symSize: 0x3C }
+  - { offset: 0x52943, size: 0x8, addend: 0x0, symName: '_$sSo11UITextFieldC14IQKeyboardCoreE26iqIsFindInteractionEnabledSbvgTo', symObjAddr: 0x0, symBinAddr: 0x44B4, symSize: 0x8 }
+  - { offset: 0x52B34, size: 0x8, addend: 0x0, symName: '_$sSo11UITextFieldC14IQKeyboardCoreE26iqIsFindInteractionEnabledSbvgTo', symObjAddr: 0x0, symBinAddr: 0x44B4, symSize: 0x8 }
+  - { offset: 0x52B6D, size: 0x8, addend: 0x0, symName: '_$sSo11UITextFieldC14IQKeyboardCoreE26iqIsFindInteractionEnabledSbvg', symObjAddr: 0x8, symBinAddr: 0x44BC, symSize: 0x8 }
+  - { offset: 0x52BA7, size: 0x8, addend: 0x0, symName: '_$sSo11UITextFieldC14IQKeyboardCoreE11iqIsEnabledSbvgTo', symObjAddr: 0x18, symBinAddr: 0x44C4, symSize: 0x4 }
+  - { offset: 0x52BBF, size: 0x8, addend: 0x0, symName: '_$sSo11UITextFieldC14IQKeyboardCoreE11iqIsEnabledSbvgTo', symObjAddr: 0x18, symBinAddr: 0x44C4, symSize: 0x4 }
+  - { offset: 0x52BDA, size: 0x8, addend: 0x0, symName: '_$sSo11UITextFieldC14IQKeyboardCoreE11iqIsEnabledSbvg', symObjAddr: 0x1C, symBinAddr: 0x44C8, symSize: 0x18 }
+  - { offset: 0x52C12, size: 0x8, addend: 0x0, symName: '_$sSo10UITextViewC14IQKeyboardCoreE26iqIsFindInteractionEnabledSbvgTo', symObjAddr: 0x34, symBinAddr: 0x44E0, symSize: 0x4 }
+  - { offset: 0x52C2A, size: 0x8, addend: 0x0, symName: '_$sSo10UITextViewC14IQKeyboardCoreE26iqIsFindInteractionEnabledSbvgTo', symObjAddr: 0x34, symBinAddr: 0x44E0, symSize: 0x4 }
+  - { offset: 0x52C45, size: 0x8, addend: 0x0, symName: '_$sSo10UITextViewC14IQKeyboardCoreE26iqIsFindInteractionEnabledSbvg', symObjAddr: 0x38, symBinAddr: 0x44E4, symSize: 0x18 }
+  - { offset: 0x52C78, size: 0x8, addend: 0x0, symName: '_$sSo10UITextViewC14IQKeyboardCoreE17iqFindInteractionSo06UIFindG0CSgvgTo', symObjAddr: 0x50, symBinAddr: 0x44FC, symSize: 0x1C }
+  - { offset: 0x52CAD, size: 0x8, addend: 0x0, symName: '_$sSo10UITextViewC14IQKeyboardCoreE17iqFindInteractionSo06UIFindG0CSgvg', symObjAddr: 0x6C, symBinAddr: 0x4518, symSize: 0x1C }
+  - { offset: 0x52CE0, size: 0x8, addend: 0x0, symName: '_$sSo10UITextViewC14IQKeyboardCoreE11iqIsEnabledSbvgTo', symObjAddr: 0x88, symBinAddr: 0x4534, symSize: 0x4 }
+  - { offset: 0x52CF8, size: 0x8, addend: 0x0, symName: '_$sSo10UITextViewC14IQKeyboardCoreE11iqIsEnabledSbvgTo', symObjAddr: 0x88, symBinAddr: 0x4534, symSize: 0x4 }
+  - { offset: 0x52D13, size: 0x8, addend: 0x0, symName: '_$sSo10UITextViewC14IQKeyboardCoreE11iqIsEnabledSbvg', symObjAddr: 0x8C, symBinAddr: 0x4538, symSize: 0x18 }
+  - { offset: 0x52D32, size: 0x8, addend: 0x0, symName: '_$sSo11UISearchBarC14IQKeyboardCoreE26iqIsFindInteractionEnabledSbvgTo', symObjAddr: 0xA4, symBinAddr: 0x4550, symSize: 0x8 }
+  - { offset: 0x52D8B, size: 0x8, addend: 0x0, symName: '_$sSo11UISearchBarC14IQKeyboardCoreE11iqIsEnabledSbvgTo', symObjAddr: 0xC4, symBinAddr: 0x4560, symSize: 0x88 }
+  - { offset: 0x52DCD, size: 0x8, addend: 0x0, symName: '_$sSo11UISearchBarC14IQKeyboardCoreE11iqIsEnabledSbvg', symObjAddr: 0x14C, symBinAddr: 0x45E8, symSize: 0x64 }
+  - { offset: 0x52E9E, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVAASo6UIViewCRbzrlE24viewContainingControllerSo0dG0CSgyF', symObjAddr: 0x0, symBinAddr: 0x4654, symSize: 0x78 }
+  - { offset: 0x52F3B, size: 0x8, addend: 0x0, symName: '_$sSo6UIViewCMa', symObjAddr: 0x298, symBinAddr: 0x48E4, symSize: 0x44 }
+  - { offset: 0x53016, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVAASo6UIViewCRbzrlE24viewContainingControllerSo0dG0CSgyF', symObjAddr: 0x0, symBinAddr: 0x4654, symSize: 0x78 }
+  - { offset: 0x5307B, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVAASo6UIViewCRbzrlE11superviewOf4type9belowViewqd__Sgqd__m_AESgtAERbd__lF', symObjAddr: 0x80, symBinAddr: 0x46CC, symSize: 0x218 }
+  - { offset: 0x53124, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVAASo6UIViewCRbzrlE18textFieldSearchBarSo08UISearchH0CSgyF', symObjAddr: 0x2DC, symBinAddr: 0x4928, symSize: 0xB8 }
+  - { offset: 0x5317D, size: 0x8, addend: 0x0, symName: '_$s14IQKeyboardCore0A9ExtensionVAASo6UIViewCRbzrlE20isAlertViewTextFieldSbyF', symObjAddr: 0x394, symBinAddr: 0x49E0, symSize: 0x80 }
+  - { offset: 0x532C5, size: 0x8, addend: 0x0, symName: '_$sSo6UIViewC14IQKeyboardCoreE20superviewOfClassType_9belowViewABSgABm_AFtFTo', symObjAddr: 0x434, symBinAddr: 0x4A60, symSize: 0x8 }
+...
