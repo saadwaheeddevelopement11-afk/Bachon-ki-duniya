@@ -27,8 +27,10 @@ class ProfileViewController: UIViewController {
     private var screenTimeRefreshTimer: Timer?
     private weak var bookmarksRowLabel: UILabel?
     private weak var subscriptionsRowLabel: UILabel?
+    private weak var privacyPolicyRowLabel: UILabel?
     private var didInstallBookmarksRow = false
     private var didInstallSubscriptionsRow = false
+    private var didInstallPrivacyPolicyRow = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +40,7 @@ class ProfileViewController: UIViewController {
         wireExtraTaps()
         installBookmarksRowIfNeeded()
         installSubscriptionsRowIfNeeded()
+        installPrivacyPolicyRowIfNeeded()
         languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
             self?.applyLocalizedProfileChrome()
         }
@@ -84,6 +87,16 @@ class ProfileViewController: UIViewController {
         if let row = parentalControlsLabel?.superview?.superview?.superview?.superview {
             row.isUserInteractionEnabled = true
             row.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openParentalControls)))
+        }
+
+        // FAQs / Terms rows (storyboard: label → content view → horizontal row stack).
+        if let faqsRow = faqsLabel?.superview?.superview {
+            faqsRow.isUserInteractionEnabled = true
+            faqsRow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openFAQs)))
+        }
+        if let termsRow = termsOfServiceLabel?.superview?.superview {
+            termsRow.isUserInteractionEnabled = true
+            termsRow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openTermsAndConditions)))
         }
 
         // "See All" chip next to Your Report → parental report screen.
@@ -258,6 +271,7 @@ class ProfileViewController: UIViewController {
         subscriptionsRowLabel?.text = AppL10n.t(.profileSubscriptions)
         faqsLabel.text = AppL10n.t(.profileFAQs)
         termsOfServiceLabel.text = AppL10n.t(.profileTermsOfService)
+        privacyPolicyRowLabel?.text = AppL10n.t(.profilePrivacyPolicy)
         updateSelectedLanguageLabel()
 //        updateProfileNameLabel()
         updateScreenTimeSummary()
@@ -272,7 +286,8 @@ class ProfileViewController: UIViewController {
          [yourReportTitleLabel, totalWatchTimeTitleLabel, totalWatchTimeValueLabel,
          mostWatchedCategoryTitleLabel, mostWatchedCategoryValueLabel,
          parentalControlsLabel, notificationsLabel, profileSelectLanguageRowLabel,
-         bookmarksRowLabel, subscriptionsRowLabel, faqsLabel, termsOfServiceLabel, selectedLanguageLbl, profileNameLabel].forEach { $0?.textAlignment = align }
+         bookmarksRowLabel, subscriptionsRowLabel, faqsLabel, termsOfServiceLabel,
+         privacyPolicyRowLabel, selectedLanguageLbl, profileNameLabel].forEach { $0?.textAlignment = align }
         // Name pill stays centered in its container.
         profileNameLabel?.textAlignment = .center
     }
@@ -474,8 +489,98 @@ class ProfileViewController: UIViewController {
             present(alert, animated: true)
             return
         }
+        openLegalURL(url)
+    }
+
+    @objc private func openFAQs() {
+        AppAnalytics.log("open_faqs")
+        openLegalURL(LegalLinks.faqs)
+    }
+
+    @objc private func openTermsAndConditions() {
+        AppAnalytics.log("open_terms")
+        openLegalURL(LegalLinks.terms)
+    }
+
+    @objc private func openPrivacyPolicy() {
+        AppAnalytics.log("open_privacy")
+        openLegalURL(LegalLinks.privacy)
+    }
+
+    private func openLegalURL(_ url: URL) {
         let safari = SFSafariViewController(url: url)
         present(safari, animated: true)
+    }
+
+    /// Inserts Privacy Policy under Terms & Conditions in the FAQs card.
+    private func installPrivacyPolicyRowIfNeeded() {
+        guard !didInstallPrivacyPolicyRow,
+              let termsLabel = termsOfServiceLabel,
+              let termsRow = termsLabel.superview?.superview,
+              let stack = termsRow.superview as? UIStackView else { return }
+        didInstallPrivacyPolicyRow = true
+
+        let row = UIStackView()
+        row.axis = .horizontal
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.backgroundColor = .clear
+
+        let leading = UIView()
+        leading.translatesAutoresizingMaskIntoConstraints = false
+        leading.backgroundColor = .clear
+
+        let icon = UIImageView(image: UIImage(named: "termsOfService") ?? UIImage(systemName: "hand.raised"))
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.contentMode = .scaleAspectFit
+
+        let title = UILabel()
+        title.translatesAutoresizingMaskIntoConstraints = false
+        title.text = AppL10n.t(.profilePrivacyPolicy)
+        title.font = UIFont(name: "Poppins-Medium", size: 15) ?? .systemFont(ofSize: 15, weight: .medium)
+        title.textColor = termsLabel.textColor
+        privacyPolicyRowLabel = title
+
+        leading.addSubview(icon)
+        leading.addSubview(title)
+
+        let trailing = UIView()
+        trailing.translatesAutoresizingMaskIntoConstraints = false
+        trailing.backgroundColor = .clear
+
+        let arrow = UIImageView(image: UIImage(named: "arrowIcon") ?? UIImage(systemName: "chevron.right"))
+        arrow.translatesAutoresizingMaskIntoConstraints = false
+        arrow.contentMode = .scaleAspectFit
+        trailing.addSubview(arrow)
+
+        row.addArrangedSubview(leading)
+        row.addArrangedSubview(trailing)
+
+        NSLayoutConstraint.activate([
+            row.heightAnchor.constraint(equalToConstant: 60),
+            icon.leadingAnchor.constraint(equalTo: leading.leadingAnchor, constant: 12),
+            icon.centerYAnchor.constraint(equalTo: leading.centerYAnchor),
+            icon.widthAnchor.constraint(equalToConstant: 20),
+            icon.heightAnchor.constraint(equalToConstant: 20),
+            title.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 10),
+            title.centerYAnchor.constraint(equalTo: leading.centerYAnchor),
+            title.trailingAnchor.constraint(lessThanOrEqualTo: leading.trailingAnchor, constant: -8),
+            arrow.trailingAnchor.constraint(equalTo: trailing.trailingAnchor, constant: -12),
+            arrow.centerYAnchor.constraint(equalTo: trailing.centerYAnchor),
+            arrow.widthAnchor.constraint(equalToConstant: 12),
+            arrow.heightAnchor.constraint(equalToConstant: 12),
+            trailing.widthAnchor.constraint(greaterThanOrEqualToConstant: 40)
+        ])
+
+        if let idx = stack.arrangedSubviews.firstIndex(of: termsRow) {
+            stack.insertArrangedSubview(row, at: idx + 1)
+        } else {
+            stack.addArrangedSubview(row)
+        }
+
+        growSettingsCard(stack: stack, height: 210)
+
+        row.isUserInteractionEnabled = true
+        row.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openPrivacyPolicy)))
     }
 
     @IBAction func totalWatchTimeBtn(_ sender: UIButton) {

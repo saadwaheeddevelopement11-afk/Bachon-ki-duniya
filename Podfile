@@ -2,7 +2,9 @@ platform :ios, '15.0'
 
 target 'Bachon ki duniya' do
   use_frameworks!
-  pod 'Wormholy', :configurations => ['Debug']
+  # Debug-only network inspector (shake device, or two-finger double-tap).
+  # Pin 1.7.x — Wormholy 2.x needs iOS 16 and was installing without Sources/link flags.
+  pod 'Wormholy', '~> 1.7.0', :configurations => ['Debug']
   pod 'IQKeyboardManagerSwift'
   pod 'Alamofire'
   pod 'SDWebImage'

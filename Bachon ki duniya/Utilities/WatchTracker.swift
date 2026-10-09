@@ -4,7 +4,7 @@ import Foundation
 /// Payload times are **milliseconds** (`duration`, `position`, `watch_time`).
 enum WatchTracker {
 
-    private static let endpoint = "https://kidskahani.ideationtec.live/watch/track"
+    private static let endpoint = "https://apis.kido.com.pk/watch/track"
 
     struct Payload: Encodable {
         let msisdn: Int64

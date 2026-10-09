@@ -10,7 +10,7 @@ import UIKit
 // MARK: - API Manager
 class APIManager {
     static let shared = APIManager()
-    private let baseURL = "https://kidskahani.ideationtec.live"
+    private let baseURL =  "https://apis.kido.com.pk"//"https://kidskahani.ideationtec.live"
     
     private init() {}
     
@@ -587,7 +587,7 @@ extension APIManager {
         subcategoryId: Int? = nil,
         completion: @escaping (Result<[Subcategory], Error>) -> Void
     ) {
-        guard var components = URLComponents(string: "https://kidskahani.ideationtec.live/subcategories/\(categoryId)") else {
+        guard var components = URLComponents(string: "https://apis.kido.com.pk/subcategories/\(categoryId)") else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
             return
         }
@@ -635,7 +635,7 @@ extension APIManager {
     func fetchEpisodes(categoryId: Int, languageCode: String, completion: @escaping (Result<[Episode], Error>) -> Void) {
         // Adjust the endpoint based on your actual API
         // Option 1: If episodes endpoint exists
-        let urlString = "https://kidskahani.ideationtec.live/categories/\(categoryId)/episodes?lang=\(languageCode)"
+        let urlString = "https://apis.kido.com.pk/categories/\(categoryId)/episodes?lang=\(languageCode)"
         
         // Option 2: If using content endpoint
         // let urlString = "https://kidskahani.ideationtec.live/content/\(categoryId)?lang=\(languageCode)"
@@ -672,7 +672,7 @@ extension APIManager {
     
     // Fetch episodes for a specific subcategory
     func fetchEpisodes(subcategoryId: Int, languageCode: String, completion: @escaping (Result<[Episode], Error>) -> Void) {
-        let urlString = "https://kidskahani.ideationtec.live/subcategories/\(subcategoryId)/episodes?lang=\(languageCode)"
+        let urlString = "https://apis.kido.com.pk/subcategories/\(subcategoryId)/episodes?lang=\(languageCode)"
         
         guard let url = URL(string: urlString) else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
@@ -706,7 +706,7 @@ extension APIManager {
     
     // Fetch series for a selected subcategory/category id
     func fetchSeries(categoryId: Int, languageCode: String, completion: @escaping (Result<[SeriesItem], Error>) -> Void) {
-        let urlString = "https://kidskahani.ideationtec.live/series?category_id=\(categoryId)&lang=\(languageCode)"
+        let urlString = "https://apis.kido.com.pk/series?category_id=\(categoryId)&lang=\(languageCode)"
         
         guard let url = URL(string: urlString) else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
@@ -744,7 +744,7 @@ extension APIManager {
     
     // Fetch episodes for a selected series/content id
     func fetchEpisodes(seriesId: Int, languageCode: String, completion: @escaping (Result<[StoryEpisode], Error>) -> Void) {
-        let urlString = "https://kidskahani.ideationtec.live/episodes/\(seriesId)?lang=\(languageCode)"
+        let urlString = "https://apis.kido.com.pk/episodes/\(seriesId)?lang=\(languageCode)"
         
         guard let url = URL(string: urlString) else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
@@ -808,7 +808,7 @@ extension APIManager {
             return
         }
         
-        let urlString = "https://kidskahani.ideationtec.live/search?q=\(encodedQuery)"
+        let urlString = "https://apis.kido.com.pk/search?q=\(encodedQuery)"
         
         guard let url = URL(string: urlString) else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
@@ -841,7 +841,7 @@ extension APIManager {
     }
 
     func fetchLatestEpisodes(languageCode: String, completion: @escaping (Result<[LatestEpisodeCategory], Error>) -> Void) {
-        let urlString = "https://kidskahani.ideationtec.live/latest-episodes?lang=\(languageCode)"
+        let urlString = "https://apis.kido.com.pk/latest-episodes?lang=\(languageCode)"
 
         guard let url = URL(string: urlString) else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
@@ -1142,19 +1142,39 @@ class LanguageManager {
         }
     }
     
+    /// Roman Urdu copy is LTR; do not mirror the UI when Urdu is selected.
+    private func usesLTRLayout(forLanguageCode code: String) -> Bool {
+        let raw = code.lowercased()
+        return raw.hasPrefix("ur") || raw == "urd"
+    }
+    
+    private func storedLayoutDirection(for language: Language) -> String {
+        if usesLTRLayout(forLanguageCode: language.languageCode) {
+            return "LTR"
+        }
+        return language.direction
+    }
+    
     func saveLanguage(_ language: Language) {
         currentLanguageCode = language.languageCode
         currentLanguageName = language.name
-        currentLanguageDirection = language.direction
+        currentLanguageDirection = storedLayoutDirection(for: language)
         applyLayoutDirectionToApplication()
     }
     
     func isRTL() -> Bool {
-        return currentLanguageDirection == "RTL"
+        if usesLTRLayout(forLanguageCode: currentLanguageCode) {
+            return false
+        }
+        return currentLanguageDirection?.uppercased() == "RTL"
     }
     
     /// Applies LTR/RTL to the appearance proxy, key windows, and the entire view hierarchy so existing screens flip reliably (not only newly created views).
     func applyLayoutDirectionToApplication() {
+        if usesLTRLayout(forLanguageCode: currentLanguageCode),
+           currentLanguageDirection?.uppercased() != "LTR" {
+            currentLanguageDirection = "LTR"
+        }
         let attr: UISemanticContentAttribute = isRTL() ? .forceRightToLeft : .forceLeftToRight
         UIView.appearance().semanticContentAttribute = attr
         

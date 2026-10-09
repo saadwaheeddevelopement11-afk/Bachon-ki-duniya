@@ -26,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ParentalStatusStore.refreshInBackground()
 
         PushNotificationManager.shared.configure(application: application)
+        WormholyDebug.activate()
 
         AppAnalytics.log("app_open")
         return true

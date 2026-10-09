@@ -167,9 +167,7 @@ PODS:
   - SDWebImage (5.20.0):
     - SDWebImage/Core (= 5.20.0)
   - SDWebImage/Core (5.20.0)
-  - Wormholy (2.0.0):
-    - Wormholy/WormholyObjC (= 2.0.0)
-    - Wormholy/WormholySwift (= 2.0.0)
+  - Wormholy (1.7.0)
 
 DEPENDENCIES:
   - Alamofire
@@ -178,7 +176,7 @@ DEPENDENCIES:
   - FirebaseMessaging
   - IQKeyboardManagerSwift
   - SDWebImage
-  - Wormholy
+  - Wormholy (~> 1.7.0)
 
 SPEC REPOS:
   trunk:
@@ -237,8 +235,8 @@ SPEC CHECKSUMS:
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
   PromisesSwift: 217dea0fd5d2ad65222a109c48698add13cc1c5b
   SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
-  Wormholy: 1023574b407e3d1852a2ab13db625ba97dc1361b
+  Wormholy: ab1c8c2f02f58587a0941deb0088555ffbf039a1
 
-PODFILE CHECKSUM: c4655178bef172e7734389763cf80077f84bc0d5
+PODFILE CHECKSUM: 66495d1646c4c0c13b6ebc4581195d0c5e25c309
 
 COCOAPODS: 1.16.2
