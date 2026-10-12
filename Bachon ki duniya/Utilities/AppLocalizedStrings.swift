@@ -51,6 +51,10 @@ enum AppStringKey: String, CaseIterable {
     case profileBookmarks
     case profileSubscriptions
     case profileSubscriptionsUnavailable
+    case profileDeleteAccount
+    case profileDeleteAccountConfirmTitle
+    case profileDeleteAccountConfirmMessage
+    case profileDeleteAccountUnavailable
     case bookmarksEmpty
     case profileFAQs
     case profileTermsOfService
@@ -207,7 +211,11 @@ enum AppLocalizedStrings {
             .profileSelectLanguage: "Select Language",
             .profileBookmarks: "Bookmarks",
             .profileSubscriptions: "Subscriptions",
-            .profileSubscriptionsUnavailable: "Subscriptions will be available soon.",
+            .profileSubscriptionsUnavailable: "Unable to open subscriptions. Please sign in again with your phone number.",
+            .profileDeleteAccount: "Delete Account",
+            .profileDeleteAccountConfirmTitle: "Delete account?",
+            .profileDeleteAccountConfirmMessage: "You will be taken to a secure web page to confirm deleting your account.",
+            .profileDeleteAccountUnavailable: "Unable to open delete account. Please sign in again with your phone number.",
             .bookmarksEmpty: "No bookmarks yet. Tap the bookmark icon on a story to save it here.",
             .profileFAQs: "FAQs",
             .profileTermsOfService: "Terms & Conditions",
@@ -330,7 +338,11 @@ enum AppLocalizedStrings {
             .profileSelectLanguage: "Zaban muntakhib karein",
             .profileBookmarks: "Bookmarks",
             .profileSubscriptions: "Subscriptions",
-            .profileSubscriptionsUnavailable: "Subscriptions jald dastyab hongi.",
+            .profileSubscriptionsUnavailable: "Subscriptions open nahi ho saki. Barah-e-karam phone number se dobara sign in karein.",
+            .profileDeleteAccount: "Account delete karein",
+            .profileDeleteAccountConfirmTitle: "Account delete karein?",
+            .profileDeleteAccountConfirmMessage: "Account delete confirm karne ke liye aap ko secure web page par le jaya jayega.",
+            .profileDeleteAccountUnavailable: "Delete account open nahi ho saka. Barah-e-karam phone number se dobara sign in karein.",
             .bookmarksEmpty: "Abhi koi bookmark nahi. Kahani par bookmark icon daba kar yahan mehfooz karein.",
             .profileFAQs: "FAQs",
             .profileTermsOfService: "Terms & Conditions",

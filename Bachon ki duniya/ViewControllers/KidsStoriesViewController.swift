@@ -105,12 +105,19 @@ class KidsStoriesViewController: UIViewController {
         // Set estimated heights for dynamic cells
         tableView.estimatedRowHeight = 120
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.installPullToRefresh(target: self, action: #selector(handlePullToRefresh))
+    }
+
+    @objc private func handlePullToRefresh() {
+        fetchData(showLoadingChrome: false)
     }
     
-    private func fetchData() {
+    private func fetchData(showLoadingChrome: Bool = true) {
         isLoading = true
-        startPlayfulLoadingAnimation()
-        tableView.alpha = 0.7
+        if showLoadingChrome {
+            startPlayfulLoadingAnimation()
+            tableView.alpha = 0.7
+        }
         
         if hasSubcategories {
             fetchSubcategories()
@@ -144,6 +151,7 @@ class KidsStoriesViewController: UIViewController {
                         self?.isLoading = false
                         self?.stopPlayfulLoadingAnimation()
                         self?.animateContentEntrance()
+                        self?.tableView.endPullToRefresh()
                     }
                     
                 case .failure(let error):
@@ -179,6 +187,7 @@ class KidsStoriesViewController: UIViewController {
                         self?.showError(error)
                     }
                 }
+                self?.tableView.endPullToRefresh()
             }
         }
     }
@@ -244,14 +253,8 @@ class KidsStoriesViewController: UIViewController {
     }
     
     private func performPlayfulPush(_ viewController: UIViewController) {
-        guard let navigationController else { return }
-        let transition = CATransition()
-        transition.duration = 0.38
-        transition.type = .push
-        transition.subtype = .fromRight
-        transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        navigationController.view.layer.add(transition, forKey: kCATransition)
-        navigationController.pushViewController(viewController, animated: false)
+        // System animated push keeps swipe-back working on every stack level.
+        navigationController?.pushPreservingSwipeBack(viewController)
     }
 }
 

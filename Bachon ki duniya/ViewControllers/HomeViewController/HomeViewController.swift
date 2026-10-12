@@ -18,6 +18,7 @@ class HomeViewController: UIViewController {
     private var tableSections: [HomeCategoryTableSection] = []
     private let quickAccessItems = QuickAccessCatalog.items
     private var isLoading = false
+    private var pullRefreshRemaining = 0
     private let listingBackgroundPool: [String] = (1...9).map { "bg\($0)" }
 
     private let loadingAnimationKey = "kids.loading.wiggle"
@@ -72,6 +73,7 @@ class HomeViewController: UIViewController {
         if #available(iOS 15.0, *) {
             contentTableView.sectionHeaderTopPadding = 0
         }
+        contentTableView.installPullToRefresh(target: self, action: #selector(handlePullToRefresh))
 
         contentTableView.register(
             UINib(nibName: "HomeTableViewCell", bundle: nil),
@@ -87,6 +89,22 @@ class HomeViewController: UIViewController {
         )
     }
 
+    @objc private func handlePullToRefresh() {
+        pullRefreshRemaining = 3
+        fetchCategories(showLoadingChrome: false)
+        fetchHomeSliderVideos()
+        reloadContinueWatching(countsTowardPullRefresh: true)
+        BookmarkStore.syncFromServer()
+    }
+
+    private func finishPullRefreshStep() {
+        guard contentTableView.refreshControl?.isRefreshing == true else { return }
+        pullRefreshRemaining -= 1
+        if pullRefreshRemaining <= 0 {
+            contentTableView.endPullToRefresh()
+        }
+    }
+
     private func setupContinueWatchingObserver() {
         NotificationCenter.default.addObserver(
             self,
@@ -100,12 +118,15 @@ class HomeViewController: UIViewController {
         reloadContinueWatching()
     }
 
-    private func reloadContinueWatching() {
+    private func reloadContinueWatching(countsTowardPullRefresh: Bool = false) {
         ContinueWatchingStore.fetchForHome { [weak self] records in
             guard let self else { return }
             self.continueWatchingRecords = records
             self.rebuildTableSections()
             self.contentTableView.reloadData()
+            if countsTowardPullRefresh {
+                self.finishPullRefreshStep()
+            }
         }
     }
 
@@ -208,16 +229,20 @@ class HomeViewController: UIViewController {
     }
 
     // MARK: - API Calls
-    private func fetchCategories() {
+    private func fetchCategories(showLoadingChrome: Bool = true) {
         let currentLanguage = LanguageManager.shared.currentLanguageCode
         isLoading = true
-        startPlayfulLoadingAnimation()
-        contentTableView.alpha = 0.7
+        if showLoadingChrome {
+            startPlayfulLoadingAnimation()
+            contentTableView.alpha = 0.7
+        }
 
         APIManager.shared.fetchCategories(languageCode: currentLanguage) { [weak self] result in
             DispatchQueue.main.async {
                 self?.isLoading = false
-                self?.stopPlayfulLoadingAnimation()
+                if showLoadingChrome {
+                    self?.stopPlayfulLoadingAnimation()
+                }
 
                 switch result {
                 case .success(let categories):
@@ -226,6 +251,7 @@ class HomeViewController: UIViewController {
                 case .failure(let error):
                     self?.showError(error)
                 }
+                self?.finishPullRefreshStep()
             }
         }
     }
@@ -245,6 +271,7 @@ class HomeViewController: UIViewController {
                     self?.rebuildTableSections()
                     self?.contentTableView.reloadData()
                 }
+                self?.finishPullRefreshStep()
             }
         }
     }
@@ -536,14 +563,9 @@ class HomeViewController: UIViewController {
     }
 
     private func performPlayfulPush(_ viewController: UIViewController) {
-        guard let navigationController else { return }
-        let transition = CATransition()
-        transition.duration = 0.38
-        transition.type = .push
-        transition.subtype = .fromRight
-        transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        navigationController.view.layer.add(transition, forKey: kCATransition)
-        navigationController.pushViewController(viewController, animated: false)
+        // Use the system animated push so interactive swipe-back works
+        // (CATransition + animated:false breaks pop from the first category screen).
+        navigationController?.pushPreservingSwipeBack(viewController)
     }
 
     // MARK: - Navigation

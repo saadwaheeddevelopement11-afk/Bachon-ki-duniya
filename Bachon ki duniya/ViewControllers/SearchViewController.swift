@@ -193,6 +193,7 @@ class SearchViewController: UIViewController {
         resultsTableView.contentInsetAdjustmentBehavior = .automatic
         resultsTableView.showsVerticalScrollIndicator = false
         resultsTableView.tableFooterView = UIView()
+        resultsTableView.installPullToRefresh(target: self, action: #selector(handleSearchPullToRefresh))
         let nib = UINib(nibName: "KidsStoriesTableViewCell", bundle: nil)
         resultsTableView.register(nib, forCellReuseIdentifier: KidsStoriesTableViewCell.reuseIdentifier)
     }
@@ -209,6 +210,7 @@ class SearchViewController: UIViewController {
             forCellWithReuseIdentifier: SearchFeaturedVideoCell.reuseId
         )
         featuredCollectionView.contentInset = UIEdgeInsets(top: 4, left: 0, bottom: 24, right: 0)
+        featuredCollectionView.installPullToRefresh(target: self, action: #selector(handleFeaturedPullToRefresh))
         view.addSubview(featuredCollectionView)
 
         NSLayoutConstraint.activate([
@@ -222,6 +224,21 @@ class SearchViewController: UIViewController {
     private func updateContentMode(isSearching: Bool) {
         resultsTableView.isHidden = !isSearching
         featuredCollectionView.isHidden = isSearching
+    }
+
+    @objc private func handleFeaturedPullToRefresh() {
+        loadFeaturedVideos()
+    }
+
+    @objc private func handleSearchPullToRefresh() {
+        let query = searchTextfield.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if query.isEmpty {
+            resultsTableView.endPullToRefresh()
+            updateContentMode(isSearching: false)
+            loadFeaturedVideos()
+        } else {
+            performSearch(query: query)
+        }
     }
 
     private func loadFeaturedVideos() {
@@ -239,6 +256,7 @@ class SearchViewController: UIViewController {
                     self.featuredVideos = []
                 }
                 self.featuredCollectionView.reloadData()
+                self.featuredCollectionView.endPullToRefresh()
             }
         }
     }
@@ -267,13 +285,19 @@ class SearchViewController: UIViewController {
 
     private func performSearch(query: String) {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty else {
+            resultsTableView.endPullToRefresh()
+            return
+        }
         AppAnalytics.logSearch(term: trimmed)
         APIManager.shared.searchEpisodes(query: trimmed) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self else { return }
                 let current = self.searchTextfield.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                guard current == trimmed else { return }
+                guard current == trimmed else {
+                    self.resultsTableView.endPullToRefresh()
+                    return
+                }
                 self.updateContentMode(isSearching: true)
                 switch result {
                 case .success(let items):
@@ -284,6 +308,7 @@ class SearchViewController: UIViewController {
                     self.results = []
                     self.resultsTableView.reloadData()
                 }
+                self.resultsTableView.endPullToRefresh()
             }
         }
     }

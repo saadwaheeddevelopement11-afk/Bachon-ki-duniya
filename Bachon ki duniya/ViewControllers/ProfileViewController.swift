@@ -27,9 +27,11 @@ class ProfileViewController: UIViewController {
     private var screenTimeRefreshTimer: Timer?
     private weak var bookmarksRowLabel: UILabel?
     private weak var subscriptionsRowLabel: UILabel?
+    private weak var deleteAccountRowLabel: UILabel?
     private weak var privacyPolicyRowLabel: UILabel?
     private var didInstallBookmarksRow = false
     private var didInstallSubscriptionsRow = false
+    private var didInstallDeleteAccountRow = false
     private var didInstallPrivacyPolicyRow = false
 
     override func viewDidLoad() {
@@ -40,6 +42,7 @@ class ProfileViewController: UIViewController {
         wireExtraTaps()
         installBookmarksRowIfNeeded()
         installSubscriptionsRowIfNeeded()
+        installDeleteAccountRowIfNeeded()
         installPrivacyPolicyRowIfNeeded()
         languageObserver = NotificationCenter.default.addObserver(forName: .languageDidChange, object: nil, queue: .main) { [weak self] _ in
             self?.applyLocalizedProfileChrome()
@@ -269,6 +272,7 @@ class ProfileViewController: UIViewController {
         profileSelectLanguageRowLabel.text = AppL10n.t(.profileSelectLanguage)
         bookmarksRowLabel?.text = AppL10n.t(.profileBookmarks)
         subscriptionsRowLabel?.text = AppL10n.t(.profileSubscriptions)
+        deleteAccountRowLabel?.text = AppL10n.t(.profileDeleteAccount)
         faqsLabel.text = AppL10n.t(.profileFAQs)
         termsOfServiceLabel.text = AppL10n.t(.profileTermsOfService)
         privacyPolicyRowLabel?.text = AppL10n.t(.profilePrivacyPolicy)
@@ -286,7 +290,7 @@ class ProfileViewController: UIViewController {
          [yourReportTitleLabel, totalWatchTimeTitleLabel, totalWatchTimeValueLabel,
          mostWatchedCategoryTitleLabel, mostWatchedCategoryValueLabel,
          parentalControlsLabel, notificationsLabel, profileSelectLanguageRowLabel,
-         bookmarksRowLabel, subscriptionsRowLabel, faqsLabel, termsOfServiceLabel,
+         bookmarksRowLabel, subscriptionsRowLabel, deleteAccountRowLabel, faqsLabel, termsOfServiceLabel,
          privacyPolicyRowLabel, selectedLanguageLbl, profileNameLabel].forEach { $0?.textAlignment = align }
         // Name pill stays centered in its container.
         profileNameLabel?.textAlignment = .center
@@ -297,7 +301,7 @@ class ProfileViewController: UIViewController {
         if let nav = navigationController {
             nav.pushViewController(viewController, animated: true)
         } else {
-            let nav = UINavigationController(rootViewController: viewController)
+            let nav = SwipeBackNavigationController(rootViewController: viewController)
             nav.isNavigationBarHidden = true
             nav.modalPresentationStyle = .fullScreen
             present(nav, animated: true)
@@ -465,6 +469,73 @@ class ProfileViewController: UIViewController {
         row.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openSubscriptions)))
     }
 
+    /// Inserts Delete Account under Subscriptions in the settings card.
+    private func installDeleteAccountRowIfNeeded() {
+        guard !didInstallDeleteAccountRow,
+              let languageLabel = profileSelectLanguageRowLabel,
+              let languageRow = languageLabel.superview?.superview?.superview,
+              let stack = languageRow.superview as? UIStackView else { return }
+        didInstallDeleteAccountRow = true
+
+        let row = UIView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.backgroundColor = .clear
+
+        let icon = UIImageView(image: UIImage(systemName: "trash"))
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.contentMode = .scaleAspectFit
+        icon.tintColor = .systemRed
+
+        let title = UILabel()
+        title.translatesAutoresizingMaskIntoConstraints = false
+        title.text = AppL10n.t(.profileDeleteAccount)
+        title.font = UIFont(name: "Poppins-Medium", size: 15) ?? .systemFont(ofSize: 15, weight: .medium)
+        title.textColor = .systemRed
+        deleteAccountRowLabel = title
+
+        let arrow = UIImageView(image: UIImage(named: "arrowIcon") ?? UIImage(systemName: "chevron.right"))
+        arrow.translatesAutoresizingMaskIntoConstraints = false
+        arrow.contentMode = .scaleAspectFit
+
+        row.addSubview(icon)
+        row.addSubview(title)
+        row.addSubview(arrow)
+
+        NSLayoutConstraint.activate([
+            row.heightAnchor.constraint(equalToConstant: 60),
+            icon.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 12),
+            icon.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            icon.widthAnchor.constraint(equalToConstant: 20),
+            icon.heightAnchor.constraint(equalToConstant: 20),
+            title.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 10),
+            title.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            arrow.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -12),
+            arrow.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            arrow.widthAnchor.constraint(equalToConstant: 12),
+            arrow.heightAnchor.constraint(equalToConstant: 12),
+            title.trailingAnchor.constraint(lessThanOrEqualTo: arrow.leadingAnchor, constant: -8)
+        ])
+
+        let insertAfter: UIView
+        if let subscriptionsTitle = subscriptionsRowLabel, let subscriptionsRow = subscriptionsTitle.superview {
+            insertAfter = subscriptionsRow
+        } else if let bookmarksTitle = bookmarksRowLabel, let bookmarksRow = bookmarksTitle.superview {
+            insertAfter = bookmarksRow
+        } else {
+            insertAfter = languageRow
+        }
+        if let idx = stack.arrangedSubviews.firstIndex(of: insertAfter) {
+            stack.insertArrangedSubview(row, at: idx + 1)
+        } else {
+            stack.addArrangedSubview(row)
+        }
+
+        growSettingsCard(stack: stack, height: 330)
+
+        row.isUserInteractionEnabled = true
+        row.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(openDeleteAccount)))
+    }
+
     private func growSettingsCard(stack: UIStackView, height: CGFloat) {
         guard let card = stack.superview else { return }
         let heightConstraints = card.constraints.filter {
@@ -480,6 +551,7 @@ class ProfileViewController: UIViewController {
     @objc private func openSubscriptions() {
         AppAnalytics.log("open_subscriptions")
         guard let url = SubscriptionsConfig.subscriptionURL() else {
+            print("[Subscriptions] URL build failed — MSISDN missing or encrypt error. msisdn=\(UserSession.msisdnDigits ?? "nil")")
             let alert = UIAlertController(
                 title: AppL10n.t(.profileSubscriptions),
                 message: AppL10n.t(.profileSubscriptionsUnavailable),
@@ -489,7 +561,32 @@ class ProfileViewController: UIViewController {
             present(alert, animated: true)
             return
         }
+        print("[Subscriptions] URL: \(url.absoluteString)")
         openLegalURL(url)
+    }
+
+    @objc private func openDeleteAccount() {
+        let alert = UIAlertController(
+            title: AppL10n.t(.profileDeleteAccountConfirmTitle),
+            message: AppL10n.t(.profileDeleteAccountConfirmMessage),
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: AppL10n.t(.cancel), style: .cancel))
+        alert.addAction(UIAlertAction(title: AppL10n.t(.profileDeleteAccount), style: .destructive) { [weak self] _ in
+            AppAnalytics.log("open_delete_account")
+            guard let url = SubscriptionsConfig.deleteAccountURL() else {
+                let fail = UIAlertController(
+                    title: AppL10n.t(.profileDeleteAccount),
+                    message: AppL10n.t(.profileDeleteAccountUnavailable),
+                    preferredStyle: .alert
+                )
+                fail.addAction(UIAlertAction(title: AppL10n.t(.ok), style: .default))
+                self?.present(fail, animated: true)
+                return
+            }
+            self?.openLegalURL(url)
+        })
+        present(alert, animated: true)
     }
 
     @objc private func openFAQs() {

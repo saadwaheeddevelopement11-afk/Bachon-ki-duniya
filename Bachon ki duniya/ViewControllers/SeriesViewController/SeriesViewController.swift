@@ -65,9 +65,14 @@ class SeriesViewController: UIViewController {
         tableView.dataSource = self
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
+        tableView.installPullToRefresh(target: self, action: #selector(handlePullToRefresh))
         
         let nib = UINib(nibName: "KidsStoriesTableViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: KidsStoriesTableViewCell.reuseIdentifier)
+    }
+
+    @objc private func handlePullToRefresh() {
+        fetchSeries()
     }
     
     private func fetchSeries() {
@@ -81,6 +86,7 @@ class SeriesViewController: UIViewController {
                 case .failure(let error):
                     print("Error fetching series: \(error)")
                 }
+                self?.tableView.endPullToRefresh()
             }
         }
     }

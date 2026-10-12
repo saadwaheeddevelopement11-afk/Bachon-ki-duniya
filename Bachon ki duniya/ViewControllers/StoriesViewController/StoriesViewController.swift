@@ -72,9 +72,14 @@ class StoriesViewController: UIViewController {
         tableView.tableFooterView = UIView()
         tableView.separatorStyle = .none
         tableView.contentInsetAdjustmentBehavior = .automatic
+        tableView.installPullToRefresh(target: self, action: #selector(handlePullToRefresh))
         
         let nib = UINib(nibName: "KidsStoriesTableViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: KidsStoriesTableViewCell.reuseIdentifier)
+    }
+
+    @objc private func handlePullToRefresh() {
+        fetchEpisodes()
     }
     
     private func fetchEpisodes() {
@@ -91,6 +96,7 @@ class StoriesViewController: UIViewController {
                 case .failure(let error):
                     print("Error fetching episodes for series: \(error)")
                 }
+                self?.tableView.endPullToRefresh()
             }
         }
     }

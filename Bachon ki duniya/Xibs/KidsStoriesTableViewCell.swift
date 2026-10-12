@@ -47,16 +47,15 @@ class KidsStoriesTableViewCell: UITableViewCell {
             .forEach { $0.isHidden = true }
 
         let color = isBookmarked
-            ? UIColor(red: 0.83, green: 0.18, blue: 0.18, alpha: 1)
-            : UIColor(red: 0.45, green: 0.45, blue: 0.45, alpha: 1)
+            ? UIColor(red: 0.95, green: 0.55, blue: 0.12, alpha: 1) // warm orange accent
+            : UIColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 1)
         bookmarkBtn?.tintColor = color
 
-        if isBookmarked, let asset = UIImage(named: "Bookmark") {
-            bookmarkBtn?.setImage(asset.withRenderingMode(.alwaysTemplate), for: .normal)
-        } else {
-            let name = isBookmarked ? "bookmark.fill" : "bookmark"
-            bookmarkBtn?.setImage(UIImage(systemName: name), for: .normal)
-        }
+        let symbolName = isBookmarked ? "bookmark.fill" : "bookmark"
+        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+        let image = UIImage(systemName: symbolName, withConfiguration: config)?
+            .withRenderingMode(.alwaysTemplate)
+        bookmarkBtn?.setImage(image, for: .normal)
     }
 
     @objc private func bookmarkButtonTapped() {

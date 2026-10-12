@@ -5,34 +5,48 @@
 
 import Foundation
 
-/// Web subscriptions page opened from Profile.
-/// Set `baseURLString` when backend provides the URL; MSISDN (and optional token) are appended as query items.
+/// Opens KIDO web handoff pages with an encrypted MSISDN token (`e=`).
 enum SubscriptionsConfig {
-    /// Replace with the backend subscriptions URL when available (e.g. "https://example.com/subscribe").
-    static var baseURLString: String = ""
+    static let subscribeBaseURL = "https://kido.com.pk/ios/subscribe"
+    static let deleteAccountBaseURL = "https://kido.com.pk/ios/delete-account"
 
-    /// Query keys the web page can use to identify the user. Align with backend/Android when provided.
-    static let msisdnQueryKey = "msisdn"
-    static let tokenQueryKey = "token"
+    /// Optional plan id when opening subscribe for a specific package.
+    static var planId: String?
 
-    /// Optional auth/session token from backend later. Empty for now.
-    static var userToken: String = ""
+    /// Suggested return deep link after successful subscribe (must match web allowlist).
+    static let subscribeReturnURL = "kido://subscribe-success?status=ok"
+    static let deleteAccountReturnURL = "kido://delete-account-done?status=ok"
 
-    static func subscriptionURL() -> URL? {
-        let trimmed = baseURLString.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, var components = URLComponents(string: trimmed) else { return nil }
+    static func subscriptionURL(planId: String? = nil) -> URL? {
+        handoffURL(
+            base: subscribeBaseURL,
+            planId: planId ?? self.planId,
+            returnURL: subscribeReturnURL
+        )
+    }
 
-        var items = components.queryItems ?? []
-        if let msisdn = UserSession.msisdnDigits, !msisdn.isEmpty {
-            items.removeAll { $0.name == msisdnQueryKey }
-            items.append(URLQueryItem(name: msisdnQueryKey, value: msisdn))
+    static func deleteAccountURL() -> URL? {
+        handoffURL(
+            base: deleteAccountBaseURL,
+            planId: nil,
+            returnURL: deleteAccountReturnURL
+        )
+    }
+
+    private static func handoffURL(base: String, planId: String?, returnURL: String?) -> URL? {
+        guard let token = MSISDNTokenEncryptor.encryptCurrentUser() else { return nil }
+        guard var components = URLComponents(string: base) else { return nil }
+
+        var items: [URLQueryItem] = [
+            URLQueryItem(name: "e", value: token)
+        ]
+        if let planId, !planId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            items.append(URLQueryItem(name: "plan", value: planId))
         }
-        let token = userToken.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !token.isEmpty {
-            items.removeAll { $0.name == tokenQueryKey }
-            items.append(URLQueryItem(name: tokenQueryKey, value: token))
+        if let returnURL, !returnURL.isEmpty {
+            items.append(URLQueryItem(name: "return", value: returnURL))
         }
-        components.queryItems = items.isEmpty ? nil : items
+        components.queryItems = items
         return components.url
     }
 }

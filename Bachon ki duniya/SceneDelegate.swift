@@ -26,6 +26,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         AppRouter.setRootViewController(window: window, root: root, animated: false)
         self.window = window
         UserProfileSync.refreshInBackground()
+
+        if let url = connectionOptions.urlContexts.first?.url {
+            handleDeepLink(url)
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -47,5 +51,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidEnterBackground(_ scene: UIScene) {
         AppScreenTimeTracker.shared.endSessionIfNeeded()
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else { return }
+        handleDeepLink(url)
+    }
+
+    private func handleDeepLink(_ url: URL) {
+        guard url.scheme?.lowercased() == "kido" else { return }
+        let host = (url.host ?? "").lowercased()
+        switch host {
+        case "subscribe-success":
+            // Web finished subscribe — refresh profile/entitlements.
+            UserProfileSync.refreshInBackground()
+            ParentalStatusStore.refreshInBackground()
+        case "delete-account-done":
+            UserSession.clearMsisdn()
+            UserDefaults.standard.set(false, forKey: AppDefaultsKeys.isLoggedIn)
+            isLoggedIn = false
+            AppRouter.setRoot(.login, animated: true)
+        default:
+            break
+        }
     }
 }

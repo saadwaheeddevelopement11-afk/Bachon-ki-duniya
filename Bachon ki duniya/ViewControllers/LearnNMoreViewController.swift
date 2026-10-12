@@ -74,6 +74,16 @@ class LearnNMoreViewController: UIViewController {
         tableView.keyboardDismissMode = .onDrag
         tableView.register(UINib(nibName: "LibraryTblViewCell", bundle: nil), forCellReuseIdentifier: "LibraryTblViewCell")
         tableView.register(UINib(nibName: "KidsStoriesTableViewCell", bundle: nil), forCellReuseIdentifier: KidsStoriesTableViewCell.reuseIdentifier)
+        tableView.installPullToRefresh(target: self, action: #selector(handlePullToRefresh))
+    }
+
+    @objc private func handlePullToRefresh() {
+        let query = librarySearchField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if query.isEmpty {
+            fetchLatestEpisodes()
+        } else {
+            performLibrarySearch(query: query)
+        }
     }
 
     private func setupSearch() {
@@ -185,6 +195,7 @@ class LearnNMoreViewController: UIViewController {
                     self.searchResults = []
                     self.tableView.reloadData()
                 }
+                self.tableView.endPullToRefresh()
             }
         }
     }
@@ -202,6 +213,7 @@ class LearnNMoreViewController: UIViewController {
                 case .failure(let error):
                     print("Failed to fetch latest episodes: \(error)")
                 }
+                self?.tableView.endPullToRefresh()
             }
         }
     }

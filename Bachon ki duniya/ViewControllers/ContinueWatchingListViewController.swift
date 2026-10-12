@@ -92,6 +92,7 @@ final class ContinueWatchingListViewController: UIViewController {
             ContinueWatchingListCell.self,
             forCellReuseIdentifier: ContinueWatchingListCell.reuseId
         )
+        tableView.installPullToRefresh(target: self, action: #selector(handlePullToRefresh))
 
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
@@ -119,12 +120,17 @@ final class ContinueWatchingListViewController: UIViewController {
         ])
     }
 
+    @objc private func handlePullToRefresh() {
+        reload()
+    }
+
     private func reload() {
         ContinueWatchingStore.fetchForHome(limit: 50) { [weak self] records in
             guard let self else { return }
             self.records = records
             self.emptyLabel.isHidden = !records.isEmpty
             self.tableView.reloadData()
+            self.tableView.endPullToRefresh()
         }
     }
 

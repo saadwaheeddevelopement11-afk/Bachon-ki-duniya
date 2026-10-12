@@ -93,6 +93,7 @@ final class BookmarksListViewController: UIViewController {
         tableView.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 24, right: 0)
         let nib = UINib(nibName: "KidsStoriesTableViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: KidsStoriesTableViewCell.reuseIdentifier)
+        tableView.installPullToRefresh(target: self, action: #selector(handlePullToRefresh))
 
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
@@ -120,13 +121,19 @@ final class BookmarksListViewController: UIViewController {
         ])
     }
 
+    @objc private func handlePullToRefresh() {
+        reload(fromServer: true)
+    }
+
     private func reload(fromServer: Bool = false) {
         if fromServer {
             BookmarkStore.syncFromServer { [weak self] _ in
                 self?.applyLocalItems()
+                self?.tableView.endPullToRefresh()
             }
         } else {
             applyLocalItems()
+            tableView.endPullToRefresh()
         }
     }
 
