@@ -25,9 +25,16 @@ class HomeViewController: UIViewController {
 
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView?
     @IBOutlet weak var contentTableView: UITableView!
+    @IBOutlet weak var topBgView: UIView!
     @IBOutlet weak var homeGreetingLabel: UILabel!
     @IBOutlet weak var homeSubtitleLabel: UILabel!
     @IBOutlet weak var homeProfileImageView: UIImageView!
+
+    /// Full height for `topBgView` (42% of screen), shrinks as the table scrolls.
+    private let topBgHeightMultiplier: CGFloat = 0.42
+    private var topBgHeightConstraint: NSLayoutConstraint?
+    private var topBgBaseHeight: CGFloat = 0
+    private var didSetupTopBgScroll = false
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -57,8 +64,55 @@ class HomeViewController: UIViewController {
         MsisdnCapturePresenter.presentIfNeeded(from: self)
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        setupTopBgScrollIfNeeded()
+        updateTopBgBaseHeightIfNeeded()
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(self)
+    }
+
+    // MARK: - Top background scroll collapse
+
+    /// Swaps the storyboard 42% height multiplier for a constant we can shrink on scroll.
+    private func setupTopBgScrollIfNeeded() {
+        guard !didSetupTopBgScroll, topBgView != nil, view.bounds.height > 0 else { return }
+        didSetupTopBgScroll = true
+
+        topBgView.clipsToBounds = true
+
+        for constraint in view.constraints {
+            let involvesTopBg =
+                (constraint.firstItem as? UIView) === topBgView
+                || (constraint.secondItem as? UIView) === topBgView
+            guard involvesTopBg,
+                  constraint.firstAttribute == .height || constraint.secondAttribute == .height else {
+                continue
+            }
+            constraint.isActive = false
+        }
+
+        let base = view.bounds.height * topBgHeightMultiplier
+        topBgBaseHeight = base
+        let height = topBgView.heightAnchor.constraint(equalToConstant: base)
+        height.isActive = true
+        topBgHeightConstraint = height
+    }
+
+    private func updateTopBgBaseHeightIfNeeded() {
+        guard didSetupTopBgScroll else { return }
+        let base = view.bounds.height * topBgHeightMultiplier
+        guard abs(base - topBgBaseHeight) > 0.5 else { return }
+        topBgBaseHeight = base
+        applyTopBgHeight(for: contentTableView.contentOffset.y)
+    }
+
+    private func applyTopBgHeight(for contentOffsetY: CGFloat) {
+        guard let topBgHeightConstraint else { return }
+        let offset = max(0, contentOffsetY)
+        topBgHeightConstraint.constant = max(0, topBgBaseHeight - offset)
     }
 
     // MARK: - Setup
@@ -397,8 +451,7 @@ class HomeViewController: UIViewController {
     }
 
     private func playContinueWatching(_ record: ContinueWatchingRecord) {
-        guard let context = VideoPlaybackContext.from(record: record) else { return }
-        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+        VideoPlaybackPresenter.play(context: VideoPlaybackContext.from(record: record), from: self)
     }
 
     private func playSliderVideo(_ video: HomeSliderVideo) {
@@ -410,8 +463,7 @@ class HomeViewController: UIViewController {
             present(gameVC, animated: true)
             return
         }
-        guard let context = VideoPlaybackContext.from(slider: video) else { return }
-        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+        VideoPlaybackPresenter.play(context: VideoPlaybackContext.from(slider: video), from: self)
     }
 
     // MARK: - Quick Access (Android parity)
@@ -880,6 +932,11 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
         case .horizontalQuickAccess, .verticalGrid:
             return UITableView.automaticDimension
         }
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView === contentTableView else { return }
+        applyTopBgHeight(for: scrollView.contentOffset.y)
     }
 }
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y6W-OH-hqX">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="25098" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y6W-OH-hqX">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25073"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -58,7 +58,7 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="349" height="80"/>
                                             </imageView>
                                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Enter your phone number" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="D0r-Zs-q8t">
-                                                <rect key="frame" x="22" y="0.0" width="305" height="68"/>
+                                                <rect key="frame" x="30" y="0.0" width="289" height="68"/>
                                                 <color key="textColor" red="0.14509803921568626" green="0.082352941176470587" blue="0.015686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits"/>
@@ -66,13 +66,13 @@
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
-                                            <constraint firstItem="D0r-Zs-q8t" firstAttribute="leading" secondItem="Xbb-qW-fVf" secondAttribute="leading" constant="22" id="GKG-yE-P0a"/>
+                                            <constraint firstItem="D0r-Zs-q8t" firstAttribute="leading" secondItem="Xbb-qW-fVf" secondAttribute="leading" constant="30" id="GKG-yE-P0a"/>
                                             <constraint firstAttribute="height" constant="80" id="HnZ-Up-Omu"/>
                                             <constraint firstAttribute="bottom" secondItem="WRm-7b-3V5" secondAttribute="bottom" id="Nge-1C-w8R"/>
                                             <constraint firstItem="D0r-Zs-q8t" firstAttribute="top" secondItem="Xbb-qW-fVf" secondAttribute="top" id="Q5R-Du-Vi2"/>
                                             <constraint firstItem="WRm-7b-3V5" firstAttribute="top" secondItem="Xbb-qW-fVf" secondAttribute="top" id="ZBK-bc-JCG"/>
                                             <constraint firstItem="WRm-7b-3V5" firstAttribute="leading" secondItem="Xbb-qW-fVf" secondAttribute="leading" id="guD-TT-lTg"/>
-                                            <constraint firstAttribute="trailing" secondItem="D0r-Zs-q8t" secondAttribute="trailing" constant="22" id="q4n-qM-2YJ"/>
+                                            <constraint firstAttribute="trailing" secondItem="D0r-Zs-q8t" secondAttribute="trailing" constant="30" id="q4n-qM-2YJ"/>
                                             <constraint firstAttribute="bottom" secondItem="D0r-Zs-q8t" secondAttribute="bottom" constant="12" id="vHR-R8-GxP"/>
                                             <constraint firstAttribute="trailing" secondItem="WRm-7b-3V5" secondAttribute="trailing" id="whh-yG-Rpu"/>
                                         </constraints>
@@ -88,6 +88,7 @@
                                             </imageView>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="291-UU-wFe">
                                                 <rect key="frame" x="0.0" y="0.0" width="349" height="80"/>
+                                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <connections>
                                                     <action selector="getOTPBtn:" destination="Y6W-OH-hqX" eventType="touchUpInside" id="au4-OY-ihX"/>

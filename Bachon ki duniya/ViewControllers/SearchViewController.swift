@@ -11,6 +11,7 @@ import SDWebImage
 class SearchViewController: UIViewController {
 
     @IBOutlet weak var searchContView: UIView!
+    @IBOutlet weak var topBgView: UIView!
     @IBOutlet weak var searchTextfield: UITextField!
     @IBOutlet weak var searchScreenTitleLabel: UILabel!
     @IBOutlet weak var searchMicPlaceholderField: UITextField!
@@ -29,6 +30,10 @@ class SearchViewController: UIViewController {
     private let featuredLimit = 6
     private let featuredColumns = 2
     private let featuredSpacing: CGFloat = 12
+
+    private var topBgHeightConstraint: NSLayoutConstraint?
+    private var topBgBaseHeight: CGFloat = 230
+    private var didSetupTopBgScroll = false
 
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         let layout = UICollectionViewFlowLayout()
@@ -74,9 +79,35 @@ class SearchViewController: UIViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        setupTopBgScrollIfNeeded()
         if !featuredCollectionView.isHidden {
             featuredCollectionView.collectionViewLayout.invalidateLayout()
         }
+    }
+
+    // MARK: - Top background scroll collapse
+
+    private func setupTopBgScrollIfNeeded() {
+        guard !didSetupTopBgScroll, topBgView != nil, view.bounds.height > 0 else { return }
+        didSetupTopBgScroll = true
+        topBgView.clipsToBounds = true
+
+        if let existing = topBgView.constraints.first(where: {
+            $0.firstAttribute == .height && ($0.firstItem as? UIView) === topBgView
+        }) {
+            topBgHeightConstraint = existing
+            topBgBaseHeight = existing.constant > 0 ? existing.constant : 230
+        } else {
+            let height = topBgView.heightAnchor.constraint(equalToConstant: topBgBaseHeight)
+            height.isActive = true
+            topBgHeightConstraint = height
+        }
+    }
+
+    private func applyTopBgHeight(for contentOffsetY: CGFloat) {
+        guard let topBgHeightConstraint else { return }
+        let offset = max(0, contentOffsetY)
+        topBgHeightConstraint.constant = max(0, topBgBaseHeight - offset)
     }
 
     deinit {
@@ -224,6 +255,8 @@ class SearchViewController: UIViewController {
     private func updateContentMode(isSearching: Bool) {
         resultsTableView.isHidden = !isSearching
         featuredCollectionView.isHidden = isSearching
+        let offset = isSearching ? resultsTableView.contentOffset.y : featuredCollectionView.contentOffset.y
+        applyTopBgHeight(for: offset)
     }
 
     @objc private func handleFeaturedPullToRefresh() {
@@ -359,8 +392,7 @@ class SearchViewController: UIViewController {
     }
 
     private func playFeatured(_ video: HomeSliderVideo) {
-        guard let context = VideoPlaybackContext.from(slider: video) else { return }
-        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+        VideoPlaybackPresenter.play(context: VideoPlaybackContext.from(slider: video), from: self)
     }
 
     private func featuredItemSize() -> CGSize {
@@ -405,8 +437,12 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let episode = results[indexPath.row]
-        guard let context = VideoPlaybackContext.from(episode: episode) else { return }
-        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+        VideoPlaybackPresenter.play(context: VideoPlaybackContext.from(episode: episode), from: self)
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView === resultsTableView || scrollView === featuredCollectionView else { return }
+        applyTopBgHeight(for: scrollView.contentOffset.y)
     }
 }
 

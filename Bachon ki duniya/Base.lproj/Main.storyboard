@@ -220,6 +220,7 @@
                         <outlet property="searchMicPlaceholderField" destination="iWT-8R-bYI" id="Src-Mc-Pl1"/>
                         <outlet property="searchScreenTitleLabel" destination="vXj-4U-axA" id="Src-Tl-Pl2"/>
                         <outlet property="searchTextfield" destination="ffz-Uw-VN5" id="lrf-wj-hGD"/>
+                        <outlet property="topBgView" destination="n2j-B8-qoV" id="Src-Bg-01t"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Jm5-jH-T9g" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -397,6 +398,7 @@
                         <outlet property="homeGreetingLabel" destination="fqt-Nt-UpG" id="Hme-Gr-01t"/>
                         <outlet property="homeProfileImageView" destination="Ljy-RM-ned" id="Hme-Pf-01t"/>
                         <outlet property="homeSubtitleLabel" destination="BSk-22-wcb" id="Hme-Sb-02t"/>
+                        <outlet property="topBgView" destination="sGy-A7-EKA" id="Hme-Bg-01t"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="RgG-kL-Czr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -680,6 +682,7 @@
                         <outlet property="librarySubtitleLabel" destination="4e1-Bx-EPJ" id="Lib-St-01"/>
                         <outlet property="libraryTitleLabel" destination="ziO-H0-933" id="Lib-Tl-01"/>
                         <outlet property="tableView" destination="uMI-K0-R4t" id="learn-table-outlet"/>
+                        <outlet property="topBgView" destination="MZ3-1k-CVe" id="Lib-Bg-01t"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PCH-5c-B8h" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

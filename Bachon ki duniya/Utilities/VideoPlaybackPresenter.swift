@@ -13,6 +13,16 @@ enum VideoPlaybackPresenter {
     private static let loadingOverlayTag = 919191
     private static let progressSaveIntervalSeconds = 2.0
 
+    /// Plays when context/URL is valid; otherwise instantly checks `/profile` session.
+    @MainActor
+    static func play(context: VideoPlaybackContext?, from presenter: UIViewController) {
+        guard let context else {
+            UserProfileSync.validateSessionAfterBrokenMedia()
+            return
+        }
+        play(urlString: context.videoURL, context: context, from: presenter)
+    }
+
     @MainActor
     static func play(
         urlString: String,
@@ -21,6 +31,7 @@ enum VideoPlaybackPresenter {
     ) {
         let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, let url = resolvedURL(from: trimmed) else {
+            UserProfileSync.validateSessionAfterBrokenMedia()
             return
         }
         if let context {
@@ -47,6 +58,7 @@ enum VideoPlaybackPresenter {
                 let isPlayable = try await asset.load(.isPlayable)
                 guard isPlayable else {
                     hideLoader(from: presenter.view)
+                    UserProfileSync.validateSessionAfterBrokenMedia()
                     return
                 }
 
@@ -171,6 +183,7 @@ enum VideoPlaybackPresenter {
             } catch {
                 print("Video load error: \(error.localizedDescription)")
                 hideLoader(from: presenter.view)
+                UserProfileSync.validateSessionAfterBrokenMedia()
             }
         }
     }

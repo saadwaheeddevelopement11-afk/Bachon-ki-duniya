@@ -143,8 +143,7 @@ final class ContinueWatchingListViewController: UIViewController {
     }
 
     private func play(_ record: ContinueWatchingRecord) {
-        guard let context = VideoPlaybackContext.from(record: record) else { return }
-        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+        VideoPlaybackPresenter.play(context: VideoPlaybackContext.from(record: record), from: self)
     }
 }
 

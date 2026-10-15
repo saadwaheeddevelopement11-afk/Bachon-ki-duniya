@@ -152,8 +152,7 @@ final class BookmarksListViewController: UIViewController {
     }
 
     private func play(_ item: BookmarkEpisode) {
-        guard let context = VideoPlaybackContext.from(bookmark: item) else { return }
-        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+        VideoPlaybackPresenter.play(context: VideoPlaybackContext.from(bookmark: item), from: self)
     }
 
     private func toggleBookmark(_ item: BookmarkEpisode) {

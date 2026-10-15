@@ -165,7 +165,19 @@ private extension ConfirmOTPViewController {
                         self.otpBoxes.focusField()
                         return
                     }
-                    self.completeLogin(phone: phone)
+                    let sessionToken = response.data?.sessionToken
+                    guard let sessionToken, !sessionToken.isEmpty else {
+                        self.presentAlert(
+                            title: "OTP",
+                            message: "Login succeeded but no session_token was returned. Please try again."
+                        )
+                        return
+                    }
+                    self.completeLogin(
+                        phone: phone,
+                        verifyData: response.data,
+                        sessionToken: sessionToken
+                    )
                 case .failure(let error):
                     self.presentAlert(title: "OTP", message: error.localizedDescription)
                 }
@@ -173,13 +185,28 @@ private extension ConfirmOTPViewController {
         }
     }
 
-    func completeLogin(phone: String) {
-        UserSession.saveMsisdn(digits: phone)
+    func completeLogin(phone: String, verifyData: OTPVerifyData?, sessionToken: String) {
+        // Prefer MSISDN from verify payload when present.
+        if let msisdn = verifyData?.msisdn {
+            UserSession.saveMsisdn(digits: String(msisdn))
+        } else {
+            UserSession.saveMsisdn(digits: phone)
+        }
+
+        UserSession.saveSession(
+            token: sessionToken,
+            expiresAt: verifyData?.sessionExpiresAt
+        )
+
+        if let profile = verifyData?.asUserProfile {
+            UserProfileStore.save(profile)
+        }
+
         UserDefaults.standard.set(true, forKey: AppDefaultsKeys.isLoggedIn)
         isLoggedIn = true
-        AppAnalytics.configureUserProperties(msisdn: phone)
+        AppAnalytics.configureUserProperties(msisdn: UserSession.msisdnDigits ?? phone)
         AppAnalytics.logLogin(method: "otp")
-        Crashlytics.crashlytics().setUserID(phone)
+        Crashlytics.crashlytics().setUserID(UserSession.msisdnDigits ?? phone)
         UserProfileSync.refreshInBackground()
         AppRouter.setRoot(.main)
     }

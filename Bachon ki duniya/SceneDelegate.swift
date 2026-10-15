@@ -25,6 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let root = AppRouter.makeRootViewController(for: route)
         AppRouter.setRootViewController(window: window, root: root, animated: false)
         self.window = window
+        // Validate session via /profile (token_validation) on cold launch.
         UserProfileSync.refreshInBackground()
 
         if let url = connectionOptions.urlContexts.first?.url {
@@ -46,6 +47,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneWillEnterForeground(_ scene: UIScene) {
         AppScreenTimeTracker.shared.startSessionIfNeeded()
+        // Re-check session whenever app returns to foreground.
         UserProfileSync.refreshInBackground()
     }
 

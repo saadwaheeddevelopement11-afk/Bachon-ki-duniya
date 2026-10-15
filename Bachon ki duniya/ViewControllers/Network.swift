@@ -13,6 +13,15 @@ class APIManager {
     private let baseURL =  "https://apis.kido.com.pk"//"https://kidskahani.ideationtec.live"
     
     private init() {}
+
+    /// Shared headers for every API call.
+    /// Auth: `Authorization: Bearer <session_token>` from `/otp/verify`.
+    private func applyStandardHeaders(to request: inout URLRequest) {
+        request.setValue("application/json", forHTTPHeaderField: "accept")
+        if let token = UserSession.sessionToken, !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+    }
     
     func fetchCategories(languageCode: String, completion: @escaping (Result<[Category], Error>) -> Void) {
         let endpoint = "/categories?lang=\(languageCode)"
@@ -23,7 +32,7 @@ class APIManager {
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -56,7 +65,7 @@ class APIManager {
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -96,7 +105,7 @@ class APIManager {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
 
         URLSession.shared.dataTask(with: request) { data, _, error in
             if let error {
@@ -117,9 +126,10 @@ class APIManager {
     }
 
     /// `GET /profile/{msisdn}` — e.g. `/profile/923369790892`
+    /// Returns full wrapper so callers can read `token_validation`.
     func fetchProfile(
         msisdn: String,
-        completion: @escaping (Result<UserProfile, Error>) -> Void
+        completion: @escaping (Result<UserProfileAPIResponse, Error>) -> Void
     ) {
         let digits = UserSession.normalizePhoneDigits(msisdn)
         guard UserSession.isValidPakistanMSISDN(digits) else {
@@ -134,7 +144,7 @@ class APIManager {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
 
         URLSession.shared.dataTask(with: request) { data, _, error in
             if let error {
@@ -156,7 +166,7 @@ class APIManager {
                     )))
                     return
                 }
-                completion(.success(wrapped.data))
+                completion(.success(wrapped))
             } catch {
                 completion(.failure(error))
             }
@@ -215,7 +225,7 @@ class APIManager {
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         do {
@@ -256,7 +266,7 @@ class APIManager {
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
 
         URLSession.shared.dataTask(with: request) { data, _, error in
             if let error {
@@ -445,7 +455,7 @@ class APIManager {
         }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
@@ -526,7 +536,7 @@ class APIManager {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
 
         URLSession.shared.dataTask(with: request) { data, _, error in
             if let error {
@@ -566,6 +576,7 @@ struct OTPGenerateData: Decodable {
     }
 }
 
+/// Matches `POST /otp/verify` response from `https://apis.kido.com.pk/otp/verify`.
 struct OTPVerifyResponse: Decodable {
     let status: String
     let code: String
@@ -573,9 +584,43 @@ struct OTPVerifyResponse: Decodable {
     let data: OTPVerifyData?
 }
 
+/// `data` payload from OTP verify — auth uses `session_token` as Bearer token.
 struct OTPVerifyData: Decodable {
-    let phone: String?
-    // Keep flexible — backend may add token/user fields later.
+    let userid: Int?
+    let msisdn: Int64?
+    let isNewUser: Bool?
+    let image: String?
+    let sessionToken: String?
+    let isSubscribed: Int?
+    let sessionExpiresAt: Int64?
+    let planId: Int?
+    let name: String?
+
+    enum CodingKeys: String, CodingKey {
+        case userid, msisdn, image, name
+        case isNewUser = "is_new_user"
+        case sessionToken = "session_token"
+        case isSubscribed = "is_subscribed"
+        case sessionExpiresAt = "session_expires_at"
+        case planId = "plan_id"
+    }
+
+    /// Convert verify payload into the app's cached profile model when possible.
+    var asUserProfile: UserProfile? {
+        guard let userid, let msisdn else { return nil }
+        return UserProfile(
+            userid: userid,
+            msisdn: msisdn,
+            name: name,
+            image: image,
+            planId: planId,
+            isSubscribed: isSubscribed,
+            tokenValidation: true,
+            rechargeDate: nil,
+            extraDate: nil,
+            needsResubscribe: nil
+        )
+    }
 }
 
 extension APIManager {
@@ -604,7 +649,7 @@ extension APIManager {
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -647,7 +692,7 @@ extension APIManager {
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -681,7 +726,7 @@ extension APIManager {
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -715,7 +760,7 @@ extension APIManager {
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -753,7 +798,7 @@ extension APIManager {
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -817,7 +862,7 @@ extension APIManager {
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
         
         URLSession.shared.dataTask(with: request) { data, _, error in
             if let error = error {
@@ -850,7 +895,7 @@ extension APIManager {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("application/json", forHTTPHeaderField: "accept")
+        applyStandardHeaders(to: &request)
 
         URLSession.shared.dataTask(with: request) { data, _, error in
             if let error = error {

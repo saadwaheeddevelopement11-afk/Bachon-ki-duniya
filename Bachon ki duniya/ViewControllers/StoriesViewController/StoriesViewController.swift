@@ -187,8 +187,7 @@ extension StoriesViewController: UITableViewDataSource, UITableViewDelegate {
             return
         }
 
-        guard let context = VideoPlaybackContext.from(episode: episode) else { return }
-        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+        VideoPlaybackPresenter.play(context: VideoPlaybackContext.from(episode: episode), from: self)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

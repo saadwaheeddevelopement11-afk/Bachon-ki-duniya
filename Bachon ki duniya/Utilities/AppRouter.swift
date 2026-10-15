@@ -11,6 +11,10 @@ enum AppDefaultsKeys {
     static let isLoggedIn = "isLoggedIn"
     static let msisdnDigits = "msisdn_digits"
     static let displayName = "user_display_name"
+    /// `session_token` from `/otp/verify` — sent as `Authorization: Bearer <session_token>`.
+    static let authBearerToken = "auth_bearer_token"
+    /// Unix expiry from `/otp/verify` → `session_expires_at`.
+    static let sessionExpiresAt = "session_expires_at"
 }
 
 final class AppRouter {
@@ -22,6 +26,8 @@ final class AppRouter {
         
         if !hasSeen { return .onboarding }
         if loggedIn {
+            // Expired sessions clear `session_token` immediately; treat as logged out.
+            guard UserSession.sessionToken != nil else { return .login }
             // Watch API needs msisdn; send users without it back to login to enter phone.
             return UserSession.hasMsisdn ? .main : .login
         }

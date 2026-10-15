@@ -11,6 +11,7 @@ import SDWebImage
 class LearnNMoreViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var topBgView: UIView!
     @IBOutlet weak var libraryTitleLabel: UILabel!
     @IBOutlet weak var librarySubtitleLabel: UILabel!
     @IBOutlet weak var librarySearchField: UITextField!
@@ -23,6 +24,10 @@ class LearnNMoreViewController: UIViewController {
     private var languageObserver: NSObjectProtocol?
     private let voiceSearch = VoiceSearchHelper()
     private var searchWorkItem: DispatchWorkItem?
+
+    private var topBgHeightConstraint: NSLayoutConstraint?
+    private var topBgBaseHeight: CGFloat = 230
+    private var didSetupTopBgScroll = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,11 +44,41 @@ class LearnNMoreViewController: UIViewController {
         }
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        setupTopBgScrollIfNeeded()
+    }
+
     deinit {
         voiceSearch.stop()
         if let languageObserver {
             NotificationCenter.default.removeObserver(languageObserver)
         }
+    }
+
+    // MARK: - Top background scroll collapse
+
+    private func setupTopBgScrollIfNeeded() {
+        guard !didSetupTopBgScroll, topBgView != nil, view.bounds.height > 0 else { return }
+        didSetupTopBgScroll = true
+        topBgView.clipsToBounds = true
+
+        if let existing = topBgView.constraints.first(where: {
+            $0.firstAttribute == .height && ($0.firstItem as? UIView) === topBgView
+        }) {
+            topBgHeightConstraint = existing
+            topBgBaseHeight = existing.constant > 0 ? existing.constant : 230
+        } else {
+            let height = topBgView.heightAnchor.constraint(equalToConstant: topBgBaseHeight)
+            height.isActive = true
+            topBgHeightConstraint = height
+        }
+    }
+
+    private func applyTopBgHeight(for contentOffsetY: CGFloat) {
+        guard let topBgHeightConstraint else { return }
+        let offset = max(0, contentOffsetY)
+        topBgHeightConstraint.constant = max(0, topBgBaseHeight - offset)
     }
 
     @IBAction func languageSelectionBtn(_ sender: UIButton) {
@@ -314,8 +349,10 @@ extension LearnNMoreViewController: UITableViewDataSource, UITableViewDelegate {
             } else {
                 title = category.categoryName
             }
-            guard let context = VideoPlaybackContext.from(episode: episode, title: title) else { return }
-            VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+            VideoPlaybackPresenter.play(
+                context: VideoPlaybackContext.from(episode: episode, title: title),
+                from: self
+            )
         }
         return cell
     }
@@ -324,11 +361,15 @@ extension LearnNMoreViewController: UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         guard isShowingSearchResults else { return }
         let episode = searchResults[indexPath.row]
-        guard let context = VideoPlaybackContext.from(episode: episode) else { return }
-        VideoPlaybackPresenter.play(urlString: context.videoURL, context: context, from: self)
+        VideoPlaybackPresenter.play(context: VideoPlaybackContext.from(episode: episode), from: self)
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         isShowingSearchResults ? 150 : 150
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView === tableView else { return }
+        applyTopBgHeight(for: scrollView.contentOffset.y)
     }
 }

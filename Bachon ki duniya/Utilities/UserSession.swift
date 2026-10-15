@@ -46,6 +46,58 @@ enum UserSession {
         UserDefaults.standard.set(normalized, forKey: AppDefaultsKeys.msisdnDigits)
     }
 
+    // MARK: - Session token (from `/otp/verify` → `data.session_token`)
+
+    /// Stored `session_token`; sent on APIs as `Authorization: Bearer <token>`.
+    static var sessionToken: String? {
+        let value = UserDefaults.standard.string(forKey: AppDefaultsKeys.authBearerToken)
+        guard let value, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        return value.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Alias used by networking layer.
+    static var bearerToken: String? { sessionToken }
+
+    static var hasSessionToken: Bool { sessionToken != nil }
+
+    static var sessionExpiresAt: Int64? {
+        let value = UserDefaults.standard.object(forKey: AppDefaultsKeys.sessionExpiresAt) as? NSNumber
+        return value?.int64Value
+    }
+
+    static var isSessionExpired: Bool {
+        guard let expiresAt = sessionExpiresAt else { return false }
+        return Date().timeIntervalSince1970 >= TimeInterval(expiresAt)
+    }
+
+    static func saveSession(token: String?, expiresAt: Int64?) {
+        let trimmed = token?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if trimmed.isEmpty {
+            UserDefaults.standard.removeObject(forKey: AppDefaultsKeys.authBearerToken)
+        } else {
+            UserDefaults.standard.set(trimmed, forKey: AppDefaultsKeys.authBearerToken)
+        }
+        if let expiresAt {
+            UserDefaults.standard.set(NSNumber(value: expiresAt), forKey: AppDefaultsKeys.sessionExpiresAt)
+        } else {
+            UserDefaults.standard.removeObject(forKey: AppDefaultsKeys.sessionExpiresAt)
+        }
+    }
+
+    static func clearSessionToken() {
+        UserDefaults.standard.removeObject(forKey: AppDefaultsKeys.authBearerToken)
+        UserDefaults.standard.removeObject(forKey: AppDefaultsKeys.sessionExpiresAt)
+    }
+
+    /// Backward-compatible name used by older call sites.
+    static func saveBearerToken(_ token: String?) {
+        saveSession(token: token, expiresAt: sessionExpiresAt)
+    }
+
+    static func clearBearerToken() {
+        clearSessionToken()
+    }
+
     /// Always returns `92XXXXXXXXXX` (digits only, no `+` / spaces), regardless of input style:
     /// `+92 300…`, `92300…`, `0300…`, `300…`, `0092…`, etc.
     static func normalizePhoneDigits(_ raw: String) -> String {
@@ -95,6 +147,7 @@ enum UserSession {
     static func clearMsisdn() {
         UserDefaults.standard.removeObject(forKey: AppDefaultsKeys.msisdnDigits)
         UserDefaults.standard.removeObject(forKey: AppDefaultsKeys.displayName)
+        clearBearerToken()
         UserProfileStore.clear()
         ParentalStatusStore.clear()
     }
